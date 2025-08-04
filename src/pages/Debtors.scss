@@ -1,32 +1,362 @@
-
-.all-body{
-    margin-left: 8%;
+// Debtors.scss - Updated for consolidated table view with new columns
+.all-body {
+    padding: 20px;
+    background-color: #f5f5f5;
+    min-height: 100vh;
 }
 
 .debtors-container {
-    padding: 2rem;
-    background-color: #f8f9fa;
-}
-
-.debtors-container h2 {
-    margin-bottom: 1rem;
-}
-
-.debtors-table {
-    width: 100%;
-    border-collapse: collapse;
+    max-width: 1600px; // Increased from 1400px for new columns
+    margin: 0 auto;
     background: white;
-    box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    padding: 30px;
+
+    h2 {
+        color: #333;
+        margin-bottom: 30px;
+        text-align: center;
+        font-size: 2rem;
+        font-weight: 600;
+    }
+
+    .loading, .error {
+        text-align: center;
+        padding: 40px;
+        font-size: 1.1rem;
+        color: #666;
+    }
+
+    .error {
+        color: #d32f2f;
+        background-color: #ffebee;
+        border-radius: 4px;
+        border-left: 4px solid #d32f2f;
+    }
+
+    .no-data {
+        text-align: center;
+        color: #666;
+        font-style: italic;
+        padding: 40px;
+        font-size: 1.1rem;
+    }
+
+    .table-container {
+        margin-bottom: 30px;
+        
+        .table-wrapper {
+            overflow-x: auto;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .debtors-table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 1600px; // Increased from 1200px for new columns
+
+            thead {
+                background-color: #1976d2;
+                color: white;
+                position: sticky;
+                top: 0;
+                z-index: 10;
+
+                th {
+                    padding: 12px 8px;
+                    text-align: center;
+                    font-weight: 600;
+                    font-size: 0.85rem;
+                    white-space: nowrap;
+                    border: 1px solid #1565c0;
+                    vertical-align: middle;
+
+                    &[rowspan="2"] {
+                        vertical-align: middle;
+                    }
+                }
+
+                tr:first-child th {
+                    border-bottom: 1px solid #1565c0;
+                }
+
+                tr:last-child th {
+                    border-top: 1px solid #1565c0;
+                }
+            }
+
+            tbody {
+                tr {
+                    transition: background-color 0.2s ease;
+
+                    &:nth-child(even) {
+                        background-color: #f9f9f9;
+                    }
+
+                    &:hover {
+                        background-color: #e3f2fd;
+                    }
+
+                    td {
+                        padding: 10px 8px;
+                        border: 1px solid #e0e0e0;
+                        font-size: 0.85rem;
+                        color: #333;
+                        vertical-align: middle;
+
+                        &.account-code {
+                            font-weight: 600;
+                            color: #1976d2;
+                            background-color: rgba(25, 118, 210, 0.05);
+                        }
+
+                        &.account-name {
+                            font-weight: 500;
+                            max-width: 150px;
+                            word-wrap: break-word;
+                        }
+
+                        &.currency {
+                            text-align: right;
+                            font-family: monospace;
+                            font-weight: 500;
+                        }
+
+                        &.particulars {
+                            max-width: 120px;
+                            word-wrap: break-word;
+                            font-size: 0.8rem;
+                        }
+
+                        &.balance-due {
+                            color: #d32f2f;
+                            font-weight: 600;
+                        }
+
+                        &.balance-paid {
+                            color: #388e3c;
+                            font-weight: 600;
+                        }
+
+                        &.total-outstanding {
+                            font-weight: 700;
+                            font-size: 0.9rem;
+                            background-color: rgba(0, 0, 0, 0.02);
+                        }
+
+                        // New column styles
+                        &.narration {
+                            max-width: 150px;
+                            word-wrap: break-word;
+                            font-size: 0.8rem;
+                            line-height: 1.2;
+                        }
+
+                        &.opening-dept {
+                            max-width: 100px;
+                            word-wrap: break-word;
+                            font-size: 0.8rem;
+                        }
+
+                        &.entry-mode {
+                            text-align: center;
+                            font-size: 0.8rem;
+                            font-weight: 500;
+                        }
+
+                        &.voucher-no {
+                            text-align: center;
+                            font-family: monospace;
+                            font-size: 0.8rem;
+                        }
+
+                        &.bill-ref {
+                            max-width: 100px;
+                            word-wrap: break-word;
+                            font-size: 0.8rem;
+                            font-family: monospace;
+                        }
+
+                        &.records-count {
+                            text-align: center;
+                            
+                            .count-info {
+                                display: flex;
+                                flex-direction: column;
+                                gap: 2px;
+                                
+                                .ledger-count, .invoice-count {
+                                    font-size: 0.75rem;
+                                    padding: 2px 6px;
+                                    border-radius: 3px;
+                                    font-weight: 600;
+                                }
+                                
+                                .ledger-count {
+                                    background-color: #e8f5e8;
+                                    color: #2e7d32;
+                                }
+                                
+                                .invoice-count {
+                                    background-color: #fff3e0;
+                                    color: #f57c00;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // Pagination styles
+    .pagination-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 20px;
+        padding: 20px 0;
+        border-top: 1px solid #e0e0e0;
+
+        .pagination-info {
+            color: #666;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .pagination-controls {
+            display: flex;
+            gap: 5px;
+            align-items: center;
+
+            .pagination-btn {
+                padding: 8px 12px;
+                border: 1px solid #ddd;
+                background: white;
+                color: #333;
+                cursor: pointer;
+                border-radius: 4px;
+                font-size: 0.9rem;
+                font-weight: 500;
+                transition: all 0.2s ease;
+
+                &:hover:not(:disabled) {
+                    background-color: #f5f5f5;
+                    border-color: #1976d2;
+                    color: #1976d2;
+                }
+
+                &.active {
+                    background-color: #1976d2;
+                    color: white;
+                    border-color: #1976d2;
+                }
+
+                &:disabled {
+                    opacity: 0.5;
+                    cursor: not-allowed;
+                    color: #999;
+                }
+
+                &:first-child,
+                &:last-child {
+                    font-weight: 600;
+                }
+            }
+        }
+    }
 }
 
-.debtors-table th,
-.debtors-table td {
-    border: 1px solid #ddd;
-    padding: 10px;
-    text-align: left;
+// Responsive design - Updated for new larger table
+@media (max-width: 1600px) {
+    .debtors-container {
+        max-width: 100%;
+    }
 }
 
-.debtors-table th {
-    background-color: #007bff;
-    color: white;
+@media (max-width: 1400px) {
+    .debtors-container {
+        .table-container .debtors-table {
+            min-width: 1400px;
+        }
+    }
+}
+
+@media (max-width: 1200px) {
+    .debtors-container {
+        padding: 20px;
+        max-width: 100%;
+        
+        .table-container .debtors-table {
+            min-width: 1200px; // Adjusted for new columns
+            
+            thead th,
+            tbody td {
+                padding: 8px 6px;
+                font-size: 0.75rem;
+            }
+        }
+    }
+}
+
+@media (max-width: 768px) {
+    .all-body {
+        padding: 10px;
+    }
+
+    .debtors-container {
+        padding: 15px;
+
+        h2 {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+        }
+
+        .table-container .debtors-table {
+            min-width: 1000px; // Adjusted for mobile
+            
+            thead th,
+            tbody td {
+                padding: 6px 4px;
+                font-size: 0.7rem;
+            }
+        }
+
+        .pagination-container {
+            flex-direction: column;
+            gap: 15px;
+            align-items: center;
+
+            .pagination-info {
+                order: 2;
+            }
+
+            .pagination-controls {
+                order: 1;
+                flex-wrap: wrap;
+                justify-content: center;
+                
+                .pagination-btn {
+                    padding: 6px 10px;
+                    font-size: 0.8rem;
+                }
+            }
+        }
+    }
+}
+
+@media (max-width: 480px) {
+    .pagination-controls {
+        .pagination-btn {
+            padding: 5px 8px !important;
+            font-size: 0.75rem !important;
+            
+            &:first-child,
+            &:last-child {
+                display: none;
+            }
+        }
+    }
 }

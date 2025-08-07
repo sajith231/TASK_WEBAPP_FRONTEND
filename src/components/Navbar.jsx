@@ -1,15 +1,33 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FaBars, FaBox, FaBuilding, FaCog } from 'react-icons/fa';
+import { FaBars, FaBox, FaBuilding, FaCog, FaTimes } from 'react-icons/fa';
 import { FaMoneyBillWave } from 'react-icons/fa';
 import './Navbar.scss';
 
 const Navbar = () => {
     const [isOpen, setIsOpen] = useState(true);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+    const [isMobile, setIsMobile] = useState(false);
     const dropdownRef = useRef(null);
     const navigate = useNavigate();
     const user = JSON.parse(localStorage.getItem('user'));
+
+    // Check if device is mobile
+    useEffect(() => {
+        const checkMobile = () => {
+            setIsMobile(window.innerWidth <= 768);
+            // Keep sidebar open on desktop, closed on mobile by default
+            if (window.innerWidth > 768) {
+                setIsOpen(true);
+            } else {
+                setIsOpen(false);
+            }
+        };
+
+        checkMobile();
+        window.addEventListener('resize', checkMobile);
+        return () => window.removeEventListener('resize', checkMobile);
+    }, []);
 
     // Close dropdown when clicking outside
     useEffect(() => {
@@ -24,7 +42,10 @@ const Navbar = () => {
     }, []);
 
     const toggleSidebar = () => {
-        setIsOpen(!isOpen);
+        // Only allow toggle on mobile devices
+        if (isMobile) {
+            setIsOpen(!isOpen);
+        }
     };
 
     const toggleDropdown = () => {
@@ -126,34 +147,67 @@ const Navbar = () => {
                 </div>
             </div>
 
+            {/* Toggle button that appears when sidebar is collapsed (Mobile only) */}
+            {isMobile && (
+                <button 
+                    className={`sidebar-toggle ${!isOpen ? 'show' : ''}`}
+                    onClick={toggleSidebar}
+                    aria-label="Open sidebar"
+                >
+                    <FaBars />
+                </button>
+            )}
+
             {/* Side Navbar */}
-            <div className={`sidebar ${isOpen ? 'open' : 'collapsed'}`}>
+            <div className={`sidebar ${!isOpen && isMobile ? 'collapsed' : ''}`}>
                 <div className="sidebar-header">
-                    <button className="toggle-btn" onClick={toggleSidebar}>
-                        <FaBars />
-                    </button>
+                    {isMobile && (
+                        <button 
+                            className="toggle-btn" 
+                            onClick={toggleSidebar}
+                            aria-label="Close sidebar"
+                        >
+                            <FaTimes />
+                        </button>
+                    )}
                 </div>
 
                 <ul className="nav-menu">
                     <li onClick={() => handleNavigation('/item-details')}>
                         <FaBox className="icon" />
-                        {isOpen && <span>Item Details</span>}
+                        <span>Item Details</span>
                     </li>
                     <li onClick={() => handleNavigation('/debtors')}>
                         <FaMoneyBillWave className="icon" />
-                        {isOpen && <span>Debtors</span>}
+                        <span>Debtors</span>
                     </li>
-
                     <li onClick={() => handleNavigation('company')}>
                         <FaBuilding className="icon" />
-                        {isOpen && <span>Company Info</span>}
+                        <span>Company Info</span>
                     </li>
                     <li onClick={() => handleNavigation('/settings')}>
                         <FaCog className="icon" />
-                        {isOpen && <span>Settings</span>}
+                        <span>Settings</span>
                     </li>
                 </ul>
             </div>
+
+            {/* Overlay to close sidebar when clicking outside on mobile */}
+            {isOpen && isMobile && (
+                <div 
+                    className="sidebar-overlay"
+                    onClick={() => setIsOpen(false)}
+                    style={{
+                        position: 'fixed',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        backgroundColor: 'rgba(0, 0, 0, 0.3)',
+                        zIndex: 999
+                    }}
+                />
+            )}
         </>
     );
 };

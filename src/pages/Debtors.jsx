@@ -4,8 +4,9 @@ import './Debtors.scss';
 
 const Debtors = () => {
     const [debtorsData, setDebtorsData] = useState([]);
-    const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+    const [searchTerm, setSearchTerm] = useState('');
+    const [loading, setLoading] = useState(false);
     const [pagination, setPagination] = useState({
         current_page: 1,
         total_pages: 1,
@@ -15,22 +16,44 @@ const Debtors = () => {
         has_previous: false
     });
 
+    const [showLedgerModal, setShowLedgerModal] = useState(false);
+    const [showInvoiceModal, setShowInvoiceModal] = useState(false);
+    const [selectedAccount, setSelectedAccount] = useState(null);
+    const [ledgerDetails, setLedgerDetails] = useState([]);
+    const [invoiceDetails, setInvoiceDetails] = useState([]);
+    const [modalLoading, setModalLoading] = useState(false);
+
     useEffect(() => {
-        fetchDebtorsData(1);
+        fetchDebtorsData(1); // Start with page 1
     }, []);
 
-    const fetchDebtorsData = async (page = 1) => {
+    // Fetch data when search term changes (with debounce)
+    useEffect(() => {
+        const timeoutId = setTimeout(() => {
+            fetchDebtorsData(1, searchTerm); // Reset to page 1 when searching
+        }, 500);
+
+        return () => clearTimeout(timeoutId);
+    }, [searchTerm]);
+
+    const fetchDebtorsData = async (page = 1, search = '') => {
         try {
             setLoading(true);
-            const token = localStorage.getItem('token');
+            setError('');
             
+            const token = localStorage.getItem('token');
             if (!token) {
                 setError('No authentication token found');
-                setLoading(false);
                 return;
             }
 
-            const response = await axios.get(`http://127.0.0.1:8000/api/get-debtors-data/?page=${page}&page_size=20`, {
+            // Build query parameters
+            let url = `http://127.0.0.1:8000/api/get-debtors-data/?page=${page}&page_size=20`;
+            if (search.trim()) {
+                url += `&search=${encodeURIComponent(search.trim())}`;
+            }
+
+            const response = await axios.get(url, {
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
@@ -51,9 +74,79 @@ const Debtors = () => {
     };
 
     const handlePageChange = (newPage) => {
-        if (newPage >= 1 && newPage <= pagination.total_pages) {
-            fetchDebtorsData(newPage);
+        if (newPage >= 1 && newPage <= pagination.total_pages && newPage !== pagination.current_page) {
+            fetchDebtorsData(newPage, searchTerm);
         }
+    };
+
+    const handleSearchChange = (e) => {
+        setSearchTerm(e.target.value);
+    };
+
+    const fetchLedgerDetails = async (accountCode) => {
+        try {
+            setModalLoading(true);
+            const token = localStorage.getItem('token');
+            const response = await axios.get(`http://127.0.0.1:8000/api/get-ledger-details/?account_code=${accountCode}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (response.data.success) {
+                setLedgerDetails(response.data.data);
+            } else {
+                setError(response.data.error || 'Failed to fetch ledger details');
+            }
+        } catch (err) {
+            setError(err.response?.data?.error || 'Failed to fetch ledger details');
+        } finally {
+            setModalLoading(false);
+        }
+    };
+
+    const fetchInvoiceDetails = async (accountCode) => {
+        try {
+            setModalLoading(true);
+            const token = localStorage.getItem('token');
+            const response = await axios.get(`http://127.0.0.1:8000/api/get-invoice-details/?account_code=${accountCode}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (response.data.success) {
+                setInvoiceDetails(response.data.data);
+            } else {
+                setError(response.data.error || 'Failed to fetch invoice details');
+            }
+        } catch (err) {
+            setError(err.response?.data?.error || 'Failed to fetch invoice details');
+        } finally {
+            setModalLoading(false);
+        }
+    };
+
+    const handleLedgerEyeClick = (account) => {
+        setSelectedAccount(account);
+        setShowLedgerModal(true);
+        fetchLedgerDetails(account.code);
+    };
+
+    const handleInvoiceEyeClick = (account) => {
+        setSelectedAccount(account);
+        setShowInvoiceModal(true);
+        fetchInvoiceDetails(account.code);
+    };
+
+    const closeModal = () => {
+        setShowLedgerModal(false);
+        setShowInvoiceModal(false);
+        setSelectedAccount(null);
+        setLedgerDetails([]);
+        setInvoiceDetails([]);
     };
 
     const formatDate = (dateString) => {
@@ -67,58 +160,62 @@ const Debtors = () => {
     };
 
     const renderPagination = () => {
-        const { current_page, total_pages, has_previous, has_next } = pagination;
+        const { current_page, total_pages, total_records } = pagination;
+        
+        if (total_pages <= 1) return null;
+
         const maxVisiblePages = 5;
         const startPage = Math.max(1, current_page - Math.floor(maxVisiblePages / 2));
         const endPage = Math.min(total_pages, startPage + maxVisiblePages - 1);
-        
+        const adjustedStartPage = Math.max(1, endPage - maxVisiblePages + 1);
+
         const pages = [];
-        for (let i = startPage; i <= endPage; i++) {
+        for (let i = adjustedStartPage; i <= endPage; i++) {
             pages.push(i);
         }
 
         return (
             <div className="pagination-container">
                 <div className="pagination-info">
-                    Showing page {current_page} of {total_pages} ({pagination.total_records} total records)
+                    Showing page {current_page} of {total_pages} 
+                    {searchTerm ? ` (filtered from ${total_records} total records)` : ` (${total_records} total records)`}
                 </div>
                 <div className="pagination-controls">
                     <button 
-                        className="pagination-btn"
-                        onClick={() => handlePageChange(1)}
-                        disabled={!has_previous}
+                        className="pagination-btn" 
+                        onClick={() => handlePageChange(1)} 
+                        disabled={current_page === 1 || loading}
                     >
                         First
                     </button>
                     <button 
-                        className="pagination-btn"
-                        onClick={() => handlePageChange(current_page - 1)}
-                        disabled={!has_previous}
+                        className="pagination-btn" 
+                        onClick={() => handlePageChange(current_page - 1)} 
+                        disabled={current_page === 1 || loading}
                     >
                         Previous
                     </button>
-                    
                     {pages.map(page => (
                         <button
                             key={page}
                             className={`pagination-btn ${page === current_page ? 'active' : ''}`}
                             onClick={() => handlePageChange(page)}
+                            disabled={loading}
                         >
                             {page}
                         </button>
                     ))}
-                    
                     <button 
-                        className="pagination-btn"
-                        onClick={() => handlePageChange(current_page + 1)}
-                        disabled={!has_next}
+                        className="pagination-btn" 
+                        onClick={() => handlePageChange(current_page + 1)} 
+                        disabled={current_page === total_pages || loading}
                     >
                         Next
                     </button>
                     <button 
-                        className="pagination-btn"
-                        onClick={() => handlePageChange(total_pages)}
-                        disabled={!has_next}
+                        className="pagination-btn" 
+                        onClick={() => handlePageChange(total_pages)} 
+                        disabled={current_page === total_pages || loading}
                     >
                         Last
                     </button>
@@ -127,94 +224,201 @@ const Debtors = () => {
         );
     };
 
-    if (loading) return <div className="loading">Loading debtors data...</div>;
-    if (error) return <div className="error">Error: {error}</div>;
+    const LedgerModal = () => showLedgerModal && (
+        <div className="modal-overlay" onClick={closeModal}>
+            <div className="modal-content ledger-modal" onClick={(e) => e.stopPropagation()}>
+                <div className="modal-header">
+                    <h3>Ledger Details - {selectedAccount?.name}</h3>
+                    <button onClick={closeModal} className="modal-close">&times;</button>
+                </div>
+                <div className="modal-body">
+                    {modalLoading ? (
+                        <div className="modal-loading">Loading ledger details...</div>
+                    ) : ledgerDetails.length === 0 ? (
+                        <div className="no-data">No ledger entries found for this account.</div>
+                    ) : (
+                        <div className="ledger-table-container">
+                            <table className="ledger-details-table">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Particulars</th>
+                                        <th>Voucher No</th>
+                                        <th>Mode</th>
+                                        <th>Debit</th>
+                                        <th>Credit</th>
+                                        <th>Narration</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {ledgerDetails.map((entry, index) => (
+                                        <tr key={index}>
+                                            <td>{formatDate(entry.entry_date)}</td>
+                                            <td className="particulars-cell">{entry.particulars || 'N/A'}</td>
+                                            <td className="voucher-cell">{entry.voucher_no || 'N/A'}</td>
+                                            <td className="mode-cell">{entry.entry_mode || 'N/A'}</td>
+                                            <td className="currency">₹{formatCurrency(entry.debit)}</td>
+                                            <td className="currency">₹{formatCurrency(entry.credit)}</td>
+                                            <td className="narration-cell">{entry.narration || 'N/A'}</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    )}
+                </div>
+            </div>
+        </div>
+    );
+
+    const InvoiceModal = () => showInvoiceModal && (
+        <div className="modal-overlay" onClick={closeModal}>
+            <div className="modal-content invoice-modal" onClick={(e) => e.stopPropagation()}>
+                <div className="modal-header">
+                    <h3>Invoice Details - {selectedAccount?.name}</h3>
+                    <button onClick={closeModal} className="modal-close">&times;</button>
+                </div>
+                <div className="modal-body">
+                    {modalLoading ? (
+                        <div className="modal-loading">Loading invoice details...</div>
+                    ) : invoiceDetails.length === 0 ? (
+                        <div className="no-data">No invoice entries found for this account.</div>
+                    ) : (
+                        <div className="invoice-table-container">
+                            <table className="invoice-details-table">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Reference</th>
+                                        <th>Payment Mode</th>
+                                        <th>Net Total</th>
+                                        <th>Paid</th>
+                                        <th>Balance</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {invoiceDetails.map((invoice, index) => {
+                                        const balance = parseFloat(invoice.nettotal || 0) - parseFloat(invoice.paid || 0);
+                                        return (
+                                            <tr key={index}>
+                                                <td>{formatDate(invoice.invdate)}</td>
+                                                <td className="bill-ref-cell">{invoice.bill_ref || 'N/A'}</td>
+                                                <td className="payment-mode-cell">{invoice.modeofpayment || 'N/A'}</td>
+                                                <td className="currency">₹{formatCurrency(invoice.nettotal)}</td>
+                                                <td className="currency">₹{formatCurrency(invoice.paid)}</td>
+                                                <td className={`currency ${balance > 0 ? 'balance-due' : 'balance-paid'}`}>
+                                                    ₹{formatCurrency(balance)}
+                                                </td>
+                                            </tr>
+                                        );
+                                    })}
+                                </tbody>
+                            </table>
+                        </div>
+                    )}
+                </div>
+            </div>
+        </div>
+    );
 
     return (
-        <div className='all-body'>
+        <div className="all-body">
             <div className="debtors-container">
                 <h2>Debtors Management</h2>
-                
-                {debtorsData.length === 0 ? (
-                    <p className="no-data">No debtor records found.</p>
-                ) : (
+
+                <div className="search-container">
+                    <input
+                        type="text"
+                        placeholder="Search by name..."
+                        value={searchTerm}
+                        onChange={handleSearchChange}
+                        className="search-input"
+                        disabled={loading}
+                    />
+                    {searchTerm && (
+                        <button 
+                            className="clear-search-btn"
+                            onClick={() => setSearchTerm('')}
+                            disabled={loading}
+                        >
+                            Clear
+                        </button>
+                    )}
+                </div>
+
+                {error && <div className="error">{error}</div>}
+                {loading && <div className="loading">Loading...</div>}
+
+                {!loading && debtorsData.length === 0 && !error && (
+                    <p className="no-data">
+                        {searchTerm ? `No records found matching "${searchTerm}".` : "No debtor records found."}
+                    </p>
+                )}
+
+                {!loading && debtorsData.length > 0 && (
                     <>
                         <div className="table-container">
-    <div className="table-wrapper">
-        <table className="debtors-table">
-            <thead>
-                <tr>
-                    <th rowSpan="2">Account Code</th>
-                    <th rowSpan="2">Name</th>
-                    <th rowSpan="2">Place</th>
-                    <th rowSpan="2">Phone</th>
-                    <th colSpan="4">Account Master</th>
-                    <th colSpan="7">Latest Ledger Entry</th>
-                    <th colSpan="4">Latest Invoice</th>
-                    {/* <th rowSpan="2">Total Outstanding</th> */}
-                </tr>
-                <tr>
-                    <th>Opening Balance</th>
-                    <th>Debit</th>
-                    <th>Credit</th>
-                    <th>Opening Dept</th>
-                    <th>Particulars</th>
-                    <th>Entry Date</th>
-                    <th>Entry Mode</th>
-                    <th>Voucher No</th>
-                    <th>Debit</th>
-                    <th>Credit</th>
-                    <th>Narration</th>
-                    <th>Invoice Date</th>
-                    <th>Net Total</th>
-                    <th>Paid</th>
-                    <th>Bill Ref</th>
-                </tr>
-            </thead>
-            <tbody>
-                {debtorsData.map((item, index) => (
-                    <tr key={item.code || index}>
-                        <td className="account-code">{item.code || 'N/A'}</td>
-                        <td className="account-name">{item.name || 'N/A'}</td>
-                        <td>{item.place || 'N/A'}</td>
-                        <td>{item.phone2 || 'N/A'}</td>
-                        
-                        {/* Account Master columns */}
-                        <td className="currency">₹{formatCurrency(item.opening_balance)}</td>
-                        <td className="currency">₹{formatCurrency(item.master_debit)}</td>
-                        <td className="currency">₹{formatCurrency(item.master_credit)}</td>
-                        <td className="opening-dept">{item.openingdepartment || 'N/A'}</td>
-                        
-                        {/* Latest Ledger columns */}
-                        <td className="particulars">{item.latest_particulars || 'N/A'}</td>
-                        <td>{formatDate(item.latest_entry_date)}</td>
-                        <td className="entry-mode">{item.latest_entry_mode || 'N/A'}</td>
-                        <td className="voucher-no">{item.latest_voucher_no || 'N/A'}</td>
-                        <td className="currency">₹{formatCurrency(item.latest_ledger_debit)}</td>
-                        <td className="currency">₹{formatCurrency(item.latest_ledger_credit)}</td>
-                        <td className="narration">{item.latest_narration || 'N/A'}</td>
-                        
-                        {/* Latest Invoice columns */}
-                        <td>{formatDate(item.latest_invoice_date)}</td>
-                        <td className="currency">₹{formatCurrency(item.latest_nettotal)}</td>
-                        <td className="currency">₹{formatCurrency(item.latest_paid)}</td>
-                        <td className="bill-ref">{item.latest_bill_ref || 'N/A'}</td>
-                        
-                        {/* Total Outstanding */}
-                        {/* <td className={`currency total-outstanding ${parseFloat(item.total_outstanding_balance || 0) > 0 ? 'balance-due' : 'balance-paid'}`}>
-                            ₹{formatCurrency(item.total_outstanding_balance)}
-                        </td> */}
-                    </tr>
-                ))}
-            </tbody>
-        </table>
-    </div>
-</div>
-                        
+                            <div className="table-wrapper">
+                                <table className="debtors-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Code</th>
+                                            <th>Name</th>
+                                            <th>Ledger</th>
+                                            <th>Invoice</th>
+                                            <th>Place</th>
+                                            <th>Phone</th>
+                                            <th>Opening</th>
+                                            <th>Debit</th>
+                                            <th>Credit</th>
+                                            <th>Dept</th>
+                                            
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {debtorsData.map((item, index) => (
+                                            <tr key={`${item.code}-${index}`}>
+                                                <td className="account-code">{item.code}</td>
+                                                <td className="account-name">{item.name || 'N/A'}</td>
+                                                <td className="eye-icon-cell">
+                                                    <button 
+                                                        className="eye-icon-btn" 
+                                                        onClick={() => handleLedgerEyeClick(item)}
+                                                        title="View Ledger Details"
+                                                    >
+                                                        👁️
+                                                    </button>
+                                                </td>
+                                                <td className="eye-icon-cell">
+                                                    <button 
+                                                        className="eye-icon-btn" 
+                                                        onClick={() => handleInvoiceEyeClick(item)}
+                                                        title="View Invoice Details"
+                                                    >
+                                                        👁️
+                                                    </button>
+                                                </td>
+                                                <td>{item.place || 'N/A'}</td>
+                                                <td>{item.phone2 || 'N/A'}</td>
+                                                <td className="currency">₹{formatCurrency(item.opening_balance)}</td>
+                                                <td className="currency">₹{formatCurrency(item.master_debit)}</td>
+                                                <td className="currency">₹{formatCurrency(item.master_credit)}</td>
+                                                <td className="opening-dept">{item.openingdepartment || 'N/A'}</td>
+                                                
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
                         {renderPagination()}
                     </>
                 )}
             </div>
+
+            <LedgerModal />
+            <InvoiceModal />
         </div>
     );
 };

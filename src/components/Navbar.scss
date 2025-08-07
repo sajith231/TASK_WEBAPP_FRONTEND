@@ -163,25 +163,57 @@
   flex-direction: column;
   padding-top: 1rem;
   z-index: 1000;
+  transform: translateX(0);
 
-  &.collapsed {
-    width: 60px;
-
-    .nav-menu li span,
-    .brand {
-      display: none;
+  // Mobile-only collapse behavior
+  @media (max-width: 768px) {
+    &.collapsed {
+      transform: translateX(-100%);
     }
+  }
+}
 
-    .icon {
-      margin-right: 0;
+// Toggle button when sidebar is collapsed (Mobile only)
+.sidebar-toggle {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  z-index: 1001;
+  background: #1e272e;
+  border: none;
+  color: white;
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 10px;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+  opacity: 0;
+  visibility: hidden;
+
+  // Only show on mobile
+  @media (max-width: 768px) {
+    &.show {
+      opacity: 1;
+      visibility: visible;
     }
+  }
+
+  // Hide on desktop
+  @media (min-width: 769px) {
+    display: none;
+  }
+
+  &:hover {
+    background: #2f3640;
+    transform: scale(1.05);
   }
 }
 
 .sidebar-header {
   display: flex;
   align-items: center;
-  justify-content: start;
+  justify-content: space-between;
   padding: 0 1rem;
   gap: 10px;
 
@@ -191,11 +223,29 @@
     color: white;
     font-size: 1.5rem;
     cursor: pointer;
+    padding: 5px;
+    border-radius: 4px;
+    transition: background 0.2s ease;
+
+    // Only show on mobile
+    @media (max-width: 768px) {
+      display: block;
+    }
+
+    // Hide on desktop
+    @media (min-width: 769px) {
+      display: none;
+    }
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
   }
 
   .brand {
     font-size: 1.2rem;
     font-weight: bold;
+    flex: 1;
   }
 }
 
@@ -209,15 +259,20 @@
     align-items: center;
     padding: 1rem 1.5rem;
     cursor: pointer;
-    transition: background 0.2s ease;
+    transition: all 0.2s ease;
     gap: 10px;
+    border-left: 3px solid transparent;
 
     &:hover {
       background-color: #2f3640;
+      border-left-color: #00a8ff;
+      transform: translateX(5px);
     }
 
     .icon {
       font-size: 1.2rem;
+      color: #a4b0be;
+      transition: color 0.2s ease;
     }
 
     span {
@@ -228,10 +283,23 @@
       letter-spacing: 1px;
       color: #f5f6fa;
       transition: color 0.2s ease;
-
-      &:hover {
-        color: #00a8ff;
-      }
     }
+
+    &:hover .icon,
+    &:hover span {
+      color: #00a8ff;
+    }
+  }
+}
+
+// Content area adjustment
+.main-content {
+  margin-left: 220px;
+  transition: margin-left 0.3s ease;
+  min-height: 100vh;
+  padding: 20px;
+
+  &.sidebar-collapsed {
+    margin-left: 0;
   }
 }

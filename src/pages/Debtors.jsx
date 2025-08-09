@@ -7,6 +7,7 @@ const Debtors = () => {
     const [error, setError] = useState('');
     const [searchTerm, setSearchTerm] = useState('');
     const [loading, setLoading] = useState(false);
+    const [pageSize, setPageSize] = useState(20); // New state for page size
     const [pagination, setPagination] = useState({
         current_page: 1,
         total_pages: 1,
@@ -23,6 +24,9 @@ const Debtors = () => {
     const [invoiceDetails, setInvoiceDetails] = useState([]);
     const [modalLoading, setModalLoading] = useState(false);
 
+    // Page size options
+    const pageSizeOptions = [10, 20, 50, 100];
+
     useEffect(() => {
         fetchDebtorsData(1); // Start with page 1
     }, []);
@@ -36,6 +40,11 @@ const Debtors = () => {
         return () => clearTimeout(timeoutId);
     }, [searchTerm]);
 
+    // Fetch data when page size changes
+    useEffect(() => {
+        fetchDebtorsData(1, searchTerm); // Reset to page 1 when page size changes
+    }, [pageSize]);
+
     const fetchDebtorsData = async (page = 1, search = '') => {
         try {
             setLoading(true);
@@ -48,7 +57,7 @@ const Debtors = () => {
             }
 
             // Build query parameters
-            let url = `http://127.0.0.1:8000/api/get-debtors-data/?page=${page}&page_size=20`;
+            let url = `http://127.0.0.1:8000/api/get-debtors-data/?page=${page}&page_size=${pageSize}`;
             if (search.trim()) {
                 url += `&search=${encodeURIComponent(search.trim())}`;
             }
@@ -81,6 +90,11 @@ const Debtors = () => {
 
     const handleSearchChange = (e) => {
         setSearchTerm(e.target.value);
+    };
+
+    const handlePageSizeChange = (e) => {
+        const newPageSize = parseInt(e.target.value);
+        setPageSize(newPageSize);
     };
 
     const fetchLedgerDetails = async (accountCode) => {
@@ -157,6 +171,13 @@ const Debtors = () => {
     const formatCurrency = (amount) => {
         if (!amount) return '0.00';
         return parseFloat(amount).toFixed(2);
+    };
+
+    // Calculate balance (debit - credit)
+    const calculateBalance = (debit, credit) => {
+        const debitAmount = parseFloat(debit || 0);
+        const creditAmount = parseFloat(credit || 0);
+        return debitAmount - creditAmount;
     };
 
     const renderPagination = () => {
@@ -324,25 +345,69 @@ const Debtors = () => {
     return (
         <div className="all-body">
             <div className="debtors-container">
-                <h2>Debtors Management</h2>
+                <h2>Debtors Statement</h2>
 
-                <div className="search-container">
-                    <input
-                        type="text"
-                        placeholder="Search by name..."
-                        value={searchTerm}
-                        onChange={handleSearchChange}
-                        className="search-input"
-                        disabled={loading}
-                    />
-                    {searchTerm && (
-                        <button 
-                            className="clear-search-btn"
-                            onClick={() => setSearchTerm('')}
-                            disabled={loading}
-                        >
-                            Clear
-                        </button>
+                {/* Updated search and filter container */}
+                <div className="search-filter-container">
+                    <div className="search-row">
+                        <div className="search-group">
+                            <label htmlFor="searchInput">Search</label>
+                            <input
+                                id="searchInput"
+                                type="text"
+                                placeholder="Search by name..."
+                                value={searchTerm}
+                                onChange={handleSearchChange}
+                                className="search-input"
+                                disabled={loading}
+                            />
+                        </div>
+                        
+                        <div className="search-group">
+                            <label htmlFor="pageSize">Rows Count</label>
+                            <select
+                                id="pageSize"
+                                value={pageSize}
+                                onChange={handlePageSizeChange}
+                                className="page-size-select"
+                                disabled={loading}
+                            >
+                                {pageSizeOptions.map(size => (
+                                    <option key={size} value={size}>
+                                        {size}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+
+                        <div className="search-buttons">
+                            {searchTerm && (
+                                <button 
+                                    className="clear-btn"
+                                    onClick={() => setSearchTerm('')}
+                                    disabled={loading}
+                                >
+                                    Clear Search
+                                </button>
+                            )}
+                        </div>
+                    </div>
+
+                    {(searchTerm || pageSize !== 20) && (
+                        <div className="search-results-info">
+                            {searchTerm && `Searching for: "${searchTerm}"`}
+                            {searchTerm && pageSize !== 20 && ' | '}
+                            {pageSize !== 20 && `Showing ${pageSize} rows per page`}
+                            <span 
+                                className="clear-search" 
+                                onClick={() => {
+                                    setSearchTerm('');
+                                    setPageSize(20);
+                                }}
+                            >
+                                Reset Filters
+                            </span>
+                        </div>
                     )}
                 </div>
 
@@ -371,42 +436,47 @@ const Debtors = () => {
                                             <th>Opening</th>
                                             <th>Debit</th>
                                             <th>Credit</th>
+                                            <th>Balance</th>
                                             <th>Dept</th>
-                                            
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {debtorsData.map((item, index) => (
-                                            <tr key={`${item.code}-${index}`}>
-                                                <td className="account-code">{item.code}</td>
-                                                <td className="account-name">{item.name || 'N/A'}</td>
-                                                <td className="eye-icon-cell">
-                                                    <button 
-                                                        className="eye-icon-btn" 
-                                                        onClick={() => handleLedgerEyeClick(item)}
-                                                        title="View Ledger Details"
-                                                    >
-                                                        👁️
-                                                    </button>
-                                                </td>
-                                                <td className="eye-icon-cell">
-                                                    <button 
-                                                        className="eye-icon-btn" 
-                                                        onClick={() => handleInvoiceEyeClick(item)}
-                                                        title="View Invoice Details"
-                                                    >
-                                                        👁️
-                                                    </button>
-                                                </td>
-                                                <td>{item.place || 'N/A'}</td>
-                                                <td>{item.phone2 || 'N/A'}</td>
-                                                <td className="currency">₹{formatCurrency(item.opening_balance)}</td>
-                                                <td className="currency">₹{formatCurrency(item.master_debit)}</td>
-                                                <td className="currency">₹{formatCurrency(item.master_credit)}</td>
-                                                <td className="opening-dept">{item.openingdepartment || 'N/A'}</td>
-                                                
-                                            </tr>
-                                        ))}
+                                        {debtorsData.map((item, index) => {
+                                            const balance = calculateBalance(item.master_debit, item.master_credit);
+                                            return (
+                                                <tr key={`${item.code}-${index}`}>
+                                                    <td className="account-code">{item.code}</td>
+                                                    <td className="account-name">{item.name || 'N/A'}</td>
+                                                    <td className="eye-icon-cell">
+                                                        <button 
+                                                            className="eye-icon-btn" 
+                                                            onClick={() => handleLedgerEyeClick(item)}
+                                                            title="View Ledger Details"
+                                                        >
+                                                            👁️
+                                                        </button>
+                                                    </td>
+                                                    <td className="eye-icon-cell">
+                                                        <button 
+                                                            className="eye-icon-btn" 
+                                                            onClick={() => handleInvoiceEyeClick(item)}
+                                                            title="View Invoice Details"
+                                                        >
+                                                            👁️
+                                                        </button>
+                                                    </td>
+                                                    <td>{item.place || 'N/A'}</td>
+                                                    <td>{item.phone2 || 'N/A'}</td>
+                                                    <td className="currency">₹{formatCurrency(item.opening_balance)}</td>
+                                                    <td className="currency">₹{formatCurrency(item.master_debit)}</td>
+                                                    <td className="currency">₹{formatCurrency(item.master_credit)}</td>
+                                                    <td className={`currency balance-cell ${balance >= 0 ? 'balance-positive' : 'balance-negative'}`}>
+                                                        ₹{formatCurrency(Math.abs(balance))} {balance >= 0 ? 'Dr' : 'Cr'}
+                                                    </td>
+                                                    <td className="opening-dept">{item.openingdepartment || 'N/A'}</td>
+                                                </tr>
+                                            );
+                                        })}
                                     </tbody>
                                 </table>
                             </div>

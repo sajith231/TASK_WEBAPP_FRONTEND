@@ -80,18 +80,18 @@ const Navbar = () => {
             {/* Top Navbar with Profile Dropdown */}
             <div className="top-navbar">
                 <div className="profile-dropdown" ref={dropdownRef}>
-                    <button 
-                        className="profile-button" 
+                    <button
+                        className="profile-button"
                         onClick={toggleDropdown}
                         aria-label="User menu"
                     >
                         <div className="profile-avatar">
                             {getUserInitials(user?.username)}
                         </div>
-                        <svg 
+                        <svg
                             className={`dropdown-arrow ${isDropdownOpen ? 'open' : ''}`}
-                            width="12" 
-                            height="12" 
+                            width="12"
+                            height="12"
                             viewBox="0 0 12 12"
                         >
                             <path d="M6 8L2 4h8l-4 4z" fill="currentColor" />
@@ -110,33 +110,33 @@ const Navbar = () => {
                                 </div>
                             </div>
                             <div className="dropdown-divider"></div>
-                            <button 
-                                className="logout-button" 
+                            <button
+                                className="logout-button"
                                 onClick={handleLogout}
                             >
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                                    <path 
+                                    <path
                                         d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"
-                                        stroke="currentColor" 
-                                        strokeWidth="2" 
-                                        strokeLinecap="round" 
+                                        stroke="currentColor"
+                                        strokeWidth="2"
+                                        strokeLinecap="round"
                                         strokeLinejoin="round"
                                     />
-                                    <polyline 
+                                    <polyline
                                         points="16,17 21,12 16,7"
-                                        stroke="currentColor" 
-                                        strokeWidth="2" 
-                                        strokeLinecap="round" 
+                                        stroke="currentColor"
+                                        strokeWidth="2"
+                                        strokeLinecap="round"
                                         strokeLinejoin="round"
                                     />
-                                    <line 
-                                        x1="21" 
-                                        y1="12" 
-                                        x2="9" 
+                                    <line
+                                        x1="21"
+                                        y1="12"
+                                        x2="9"
                                         y2="12"
-                                        stroke="currentColor" 
-                                        strokeWidth="2" 
-                                        strokeLinecap="round" 
+                                        stroke="currentColor"
+                                        strokeWidth="2"
+                                        strokeLinecap="round"
                                         strokeLinejoin="round"
                                     />
                                 </svg>
@@ -149,7 +149,7 @@ const Navbar = () => {
 
             {/* Toggle button that appears when sidebar is collapsed (Mobile only) */}
             {isMobile && (
-                <button 
+                <button
                     className={`sidebar-toggle ${!isOpen ? 'show' : ''}`}
                     onClick={toggleSidebar}
                     aria-label="Open sidebar"
@@ -162,8 +162,8 @@ const Navbar = () => {
             <div className={`sidebar ${!isOpen && isMobile ? 'collapsed' : ''}`}>
                 <div className="sidebar-header">
                     {isMobile && (
-                        <button 
-                            className="toggle-btn" 
+                        <button
+                            className="toggle-btn"
                             onClick={toggleSidebar}
                             aria-label="Close sidebar"
                         >
@@ -185,6 +185,10 @@ const Navbar = () => {
                         <FaBuilding className="icon" />
                         <span>Company Info</span>
                     </li>
+                    <li onClick={() => handleNavigation('/punchin')}>
+                        <FaBox className="icon" />
+                        <span>Punch In</span>
+                    </li>
                     <li onClick={() => handleNavigation('/settings')}>
                         <FaCog className="icon" />
                         <span>Settings</span>
@@ -194,7 +198,7 @@ const Navbar = () => {
 
             {/* Overlay to close sidebar when clicking outside on mobile */}
             {isOpen && isMobile && (
-                <div 
+                <div
                     className="sidebar-overlay"
                     onClick={() => setIsOpen(false)}
                     style={{

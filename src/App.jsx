@@ -5,13 +5,15 @@ import DashboardUser from './pages/Dashboard_user';
 import ProtectedRoute from './components/ProtectedRoute';
 import Navbar from './components/Navbar'; // Adjust the path if needed
 import Debtors from './pages/Debtors';
+import PunchIn from './pages/Punchin/PunchIn';
 
 // Separate AppLayout to access location
 const AppLayout = () => {
     const location = useLocation();
 
-    // Hide Navbar only on login page (you can add more paths here if needed)
+    // Hide Na  vbar only on login page (you can add more paths here if needed)
     const hideNavbarRoutes = ['/', '/login'];
+
 
     return (
         <>
@@ -20,30 +22,39 @@ const AppLayout = () => {
 
             <Routes>
                 <Route path="/" element={<Login />} />
-                
-                <Route 
-                    path="/dashboard/admin" 
+
+                <Route
+                    path="/dashboard/admin"
                     element={
                         <ProtectedRoute>
                             <DashboardAdmin />
                         </ProtectedRoute>
-                    } 
+                    }
                 />
 
-                <Route 
-                    path="/dashboard/user" 
+                <Route
+                    path="/dashboard/user"
                     element={
                         <ProtectedRoute>
                             <DashboardUser />
                         </ProtectedRoute>
-                    } 
+                    }
                 />
-                 <Route 
-                    path="/debtors" 
+                <Route
+                    path="/debtors"
                     element={
                         <ProtectedRoute>
                             <Debtors></Debtors>
                         </ProtectedRoute>
+                    }
+                />
+
+                {/* Punch IN  */}
+
+                <Route
+                    path="/punchin"
+                    element={
+                        <PunchIn />
                     }
                 />
             </Routes>

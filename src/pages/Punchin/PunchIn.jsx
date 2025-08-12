@@ -1,13 +1,14 @@
 
 
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import "./punchin.scss";
 import AddLocation from "../../components/Punchin/AddLocation";
 import { IoMdArrowDropdown, IoMdArrowDropup } from "react-icons/io";
-import { IoSearchSharp } from "react-icons/io5";
+import { IoClose, IoCloseCircle, IoSearchSharp } from "react-icons/io5";
 import { MdNotListedLocation, MdOutlineCameraAlt } from "react-icons/md";
 import { IoLocation } from "react-icons/io5";
 import { motion } from "framer-motion";
+import { LuCamera } from "react-icons/lu";
 
 
 
@@ -70,7 +71,10 @@ const PunchIn = () => {
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [showCamera, setShowCamera] = useState(false)
   const [capturedImage, setCapturedImage] = useState(null);
-
+  const [openConfirmPunchIn, setOpenConfirmPunchIn] = useState(false)
+  const [facingMode, setFacingMode] = useState("user");
+  const videoRef = useRef(null);
+  const streamRef = useRef(null);
 
 
   const filtered = customers.filter((c) =>
@@ -78,6 +82,45 @@ const PunchIn = () => {
       .toLowerCase()
       .includes(searchTerm.toLowerCase())
   );
+
+  useEffect(() => {
+    if (showCamera) {
+      startCamera();
+    } else {
+      stopCamera();
+    }
+    return () => stopCamera();
+  }, [showCamera, facingMode]);
+
+  const startCamera = async () => {
+    try {
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach((track) => track.stop());
+      }
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: { exact: facingMode } },
+      });
+      if (videoRef.current) videoRef.current.srcObject = stream;
+      streamRef.current = stream;
+    } catch (err) {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: facingMode },
+        });
+        if (videoRef.current) videoRef.current.srcObject = stream;
+        streamRef.current = stream;
+      } catch (fallbackErr) {
+        alert("Failed to access camera. Please check browser permissions.");
+      }
+    }
+  };
+
+  const stopCamera = () => {
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach((track) => track.stop());
+      streamRef.current = null;
+    }
+  };
 
   return (
     <div className="container">
@@ -127,6 +170,7 @@ const PunchIn = () => {
           </div>
         )}
 
+        {/* Location unavailable */}
         {selectedCustomer && !selectedCustomer.area && (
           <div className="addLocation">
             <div className="location-warning">
@@ -141,10 +185,10 @@ const PunchIn = () => {
             </div>
           </div>
         )}
+
+        {/* location available label */}
         {selectedCustomer && selectedCustomer.area && (
           <div className="section_punchin">
-
-            {/* location available label */}
             <div className="location_available">
               <p>
                 <IoLocation style={{ color: '#0bb838' }} />
@@ -162,34 +206,97 @@ const PunchIn = () => {
             </div>
 
             {/* Image Preview */}
-            {/* capturedImage && */}
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{
-                height: "auto",
-                opacity: 1,
-                transition: { duration: 1, delay: 0.2, ease: "backInOut" },
-              }}
-              className="preview_section" >
+            {capturedImage && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{
+                  height: "auto",
+                  opacity: 1,
+                  transition: { duration: 1, delay: 0.2, ease: "backInOut" },
+                }}
+                className="preview_section" >
 
-              <div className="photo_container">
+                <div className="photo_container">
+                  <div className="photo">
+                    <img src={capturedImage.url} />
+                  </div>
+                </div>
 
-              </div>
-              <div className="photo_actions">
-                <span className="discard">Discard</span>
-                <span className="discard">Retake</span>
-              </div>
+                <div className="photo_actions">
+                  <button className="discard"
+                    onClick={() => {
+                      if (capturedImage.url)
+                        URL.revokeObjectURL(capturedImage.url);
+                      setCapturedImage(null);
+                    }} >Discard</button>
 
-              <div className="puchin_button">Punch In</div>
+                  <button className="discard" onClick={() => {
 
-            </motion.div>
+                  }} >Retake</button>
+                </div>
 
+                <div className="puchin_button">Punch In</div>
 
-
-
+              </motion.div>
+            )}
           </div>
         )}
+
       </div>
+
+      {/* modals */}
+      {showCamera && (
+        <div className="camera_modal">
+          <div className="camera_container">
+
+            <div className="camera_switch">
+              <h3>{facingMode === "user" ? "Front Camera" : "Back Camera"}</h3>
+              <div className="camera_switch_button">
+                <button
+                  onClick={() =>
+                    setFacingMode((prev) =>
+                      prev === "user" ? "environment" : "user"
+                    )
+                  }
+                  className=""
+                >
+                  Switch Camera
+                </button>
+
+                <button
+                  onClick={() => setShowCamera(false)}
+                  className="text-white text-2xl hover:text-gray-300"
+                >
+                  <IoCloseCircle />
+                </button>
+              </div>
+            </div>
+
+            <video
+              ref={videoRef}
+              autoPlay
+              playsInline
+              muted
+              className="video"
+              style={{
+                transform: facingMode === "user" ? "scaleX(-1)" : "none",
+              }}
+            />
+
+            <div className="photo_capture">
+              <button
+                // onClick={capturePhoto}
+                className=""
+              >
+                <LuCamera /> Capture
+              </button>
+
+            </div>
+
+          </div>
+        </div>
+      )}
+
     </div>
   );
 };

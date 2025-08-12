@@ -49,8 +49,7 @@
             max-height: 220px;
             overflow-y: auto;
             z-index: 10;
-            position: absolute;
-            width: 100%;
+          
         }
 
         .customer {
@@ -105,6 +104,9 @@
 
             h2 {
                 font-size: 1.35rem;
+            }
+            .customer-list{
+                width: 100%;
             }
         }
     }

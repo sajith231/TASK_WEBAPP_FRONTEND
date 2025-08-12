@@ -1,76 +1,75 @@
-import React, { useState } from 'react'
-import './punchin.scss'
 
-// Sample customer data for demonstration
-const filteredCustomers = [
-    { id: 1, name: 'John Doe', area: 'Downtown' },
-    { id: 2, name: 'Jane Smith', area: 'Uptown' },
-    { id: 3, customerName: 'Acme Corp', area: 'Industrial Park' },
+
+import React, { useState } from "react";
+import "./punchin.scss";
+import AddLocation from "../../components/Punchin/AddLocation";
+
+const customers = [
+  { id: 1, name: "John Doe", area: "" },
+  { id: 2, name: "Jane Smith", area: "Uptown" },
+  { id: 3, customerName: "Acme Corp", area: "" }, 
 ];
 
 const PunchIn = () => {
-    const [dropdownOpen, setDropdownOpen] = useState(false);
-    const [searchTerm, setSearchTerm] = useState("");
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCustomer, setSelectedCustomer] = useState(null);
 
-    return (
-        <div className='container'>
+  const filtered = customers.filter((c) =>
+    (c.name || c.customerName || "")
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase())
+  );
 
-            {/* select Customer */}
-            <div className='select_cus'>
-                <h2 > Customers:</h2>
+  return (
+    <div className="container">
+      <div className="select_cus">
+        <h2>Customers:</h2>
 
-                <div className="drop_button">
-                    <div
-                        className=''
-                        onClick={() => setDropdownOpen(!dropdownOpen)}
-                    >
-                        {"Select a customer"}
-                    </div>
-                </div>
-
-                {dropdownOpen && (
-                    <div>
-                        <input
-                            type="text"
-                            placeholder="Search..."
-                            className=""
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            autoFocus />
-                       
-                    <div className="customer-list">
-                        {filteredCustomers.length > 0 ? (
-                            filteredCustomers.map((customer) => (
-                                <div
-                                    key={customer.id || customer._id}
-                                    onClick={() => {
-                                        setSelectedCustomer(
-                                            customer.name ||
-                                            customer.customerName ||
-                                            "Unnamed Customer"
-                                        );
-                                        setSelectedCustomerLocation(customer.area);
-                                        setDropdownOpen(false);
-                                        setSearchTerm("");
-                                    }}
-                                    className="customer"
-                                >
-                                    {customer.name || customer.customerName || "Unnamed Customer"}
-                                </div>
-                            ))
-                        ) : (
-                            <div className="no-customers">
-                                No matching customers
-                            </div>
-                        )}
-                    </div>
-
-                    </div>
-                )}
-
-            </div>
+        <div className="drop_button" onClick={() => setDropdownOpen(!dropdownOpen)}>
+          {selectedCustomer?.name || selectedCustomer?.customerName || "Select a customer"}
         </div>
-    )
-}
 
-export default PunchIn
+        {dropdownOpen && (
+          <div>
+            <input
+              type="text"
+              placeholder="Search..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              autoFocus
+            />
+
+            <div className="customer-list">
+              {filtered.length > 0 ? (
+                filtered.map((customer) => (
+                  <div
+                    key={customer.id}
+                    className="customer"
+                    onClick={() => {
+                      setSelectedCustomer(customer);
+                      setDropdownOpen(false);
+                      setSearchTerm("");
+                    }}
+                  >
+                    {customer.name || customer.customerName || "Unnamed Customer"}
+                  </div>
+                ))
+              ) : (
+                <div className="no-customers">No matching customers</div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {selectedCustomer && !selectedCustomer.area && (
+          <div className="addLocation">Add Location
+          <AddLocation/>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default PunchIn;

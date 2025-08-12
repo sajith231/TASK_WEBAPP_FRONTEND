@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import API_BASE_URL from '../config/api';
 import './Debtors.scss';
 
 const Debtors = () => {
@@ -57,7 +58,7 @@ const Debtors = () => {
             }
 
             // Build query parameters
-            let url = `http://127.0.0.1:8000/api/get-debtors-data/?page=${page}&page_size=${pageSize}`;
+            let url = `${API_BASE_URL}/get-debtors-data/?page=${page}&page_size=${pageSize}`;
             if (search.trim()) {
                 url += `&search=${encodeURIComponent(search.trim())}`;
             }
@@ -101,7 +102,7 @@ const Debtors = () => {
         try {
             setModalLoading(true);
             const token = localStorage.getItem('token');
-            const response = await axios.get(`http://127.0.0.1:8000/api/get-ledger-details/?account_code=${accountCode}`, {
+            const response = await axios.get(`${API_BASE_URL}/get-ledger-details/?account_code=${accountCode}`, {
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
@@ -124,7 +125,7 @@ const Debtors = () => {
         try {
             setModalLoading(true);
             const token = localStorage.getItem('token');
-            const response = await axios.get(`http://127.0.0.1:8000/api/get-invoice-details/?account_code=${accountCode}`, {
+            const response = await axios.get(`${API_BASE_URL}/get-invoice-details/?account_code=${accountCode}`, {
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'

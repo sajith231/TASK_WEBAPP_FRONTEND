@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import './CashBook.scss';
 import axios from "axios";
+import API_BASE_URL from '../config/api';
 
 function CashBook() {
   const [cashData, setCashData] = useState([]);
@@ -16,7 +17,7 @@ function CashBook() {
     }
 
     axios
-      .get("http://127.0.0.1:8000/api/get-cash-book-data/", {
+      .get(`${API_BASE_URL}/get-cash-book-data/`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

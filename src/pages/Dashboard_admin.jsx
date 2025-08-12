@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Dashboard_admin.scss';
+import API_BASE_URL from '../config/api';
 import axios from 'axios';
 
 const Dashboard = () => {
@@ -19,7 +20,7 @@ const Dashboard = () => {
 
     const fetchMiselData = async () => {
         try {
-            const response = await axios.get('http://127.0.0.1:8000/api/get-misel-data/', {
+            const response = await axios.get(`${API_BASE_URL}/get-misel-data/`, {
                 headers: {
                     'Authorization': `Bearer ${localStorage.getItem('token')}`,
                 }

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import './BankBook.scss';
 import axios from "axios";
+import API_BASE_URL from '../config/api';
 
 function BankBook() {
   const [bankData, setBankData] = useState([]);
@@ -16,7 +17,7 @@ function BankBook() {
     }
 
     axios
-      .get("http://127.0.0.1:8000/api/get-bank-book-data/", {
+      .get(`${API_BASE_URL}/get-bank-book-data/`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

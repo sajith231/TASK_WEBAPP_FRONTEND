@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FaBars, FaBox, FaBuilding, FaCog, FaTimes } from 'react-icons/fa';
+import { FaBars, FaBox, FaBuilding, FaCog, FaTimes, FaUniversity, FaChevronDown, FaChevronRight } from 'react-icons/fa';
 import { FaMoneyBillWave } from 'react-icons/fa';
 import './Navbar.scss';
 
@@ -8,6 +8,7 @@ const Navbar = () => {
     const [isOpen, setIsOpen] = useState(true);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [isMobile, setIsMobile] = useState(false);
+    const [isBankCashOpen, setIsBankCashOpen] = useState(false);
     const dropdownRef = useRef(null);
     const navigate = useNavigate();
     const user = JSON.parse(localStorage.getItem('user'));
@@ -52,6 +53,11 @@ const Navbar = () => {
         setIsDropdownOpen(!isDropdownOpen);
     };
 
+    const toggleBankCash = (e) => {
+        e.stopPropagation();
+        setIsBankCashOpen(!isBankCashOpen);
+    };
+
     const handleNavigation = (route) => {
         if (route === 'company') {
             if (user?.role === 'Admin') {
@@ -61,6 +67,11 @@ const Navbar = () => {
             }
         } else {
             navigate(route);
+        }
+        
+        // Close sidebar on mobile after navigation
+        if (isMobile) {
+            setIsOpen(false);
         }
     };
 
@@ -177,6 +188,34 @@ const Navbar = () => {
                         <FaBox className="icon" />
                         <span>Item Details</span>
                     </li>
+                    
+                    {/* Bank & Cash Menu with Dropdown */}
+                    <li className={`menu-item ${isBankCashOpen ? 'active' : ''}`}>
+                        <div className="menu-main" onClick={toggleBankCash}>
+                            <FaUniversity className="icon" />
+                            <span>Bank & Cash</span>
+                            {isBankCashOpen ? (
+                                <FaChevronDown className="chevron" />
+                            ) : (
+                                <FaChevronRight className="chevron" />
+                            )}
+                        </div>
+                        {isBankCashOpen && (
+                            <ul className="submenu">
+                                <li onClick={() => handleNavigation('/cash-book')}>
+                                    <FaMoneyBillWave style={{ marginRight: '8px' }} />
+                                    <span>Cash Book</span>
+                                </li>
+                                <li onClick={() => handleNavigation('/bank-book')}>
+                                    <FaUniversity style={{ marginRight: '8px' }} />
+                                    <span>Bank Book</span>
+                                </li>
+
+
+                            </ul>
+                        )}
+                    </li>
+                    
                     <li onClick={() => handleNavigation('/debtors')}>
                         <FaMoneyBillWave className="icon" />
                         <span>Debtors</span>

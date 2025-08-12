@@ -314,7 +314,8 @@ const Debtors = () => {
                                         <th>Payment Mode</th>
                                         <th>Net Total</th>
                                         <th>Paid</th>
-                                        <th>Balance</th>
+                                        {/* <th>Balance</th> */}
+                                        
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -327,9 +328,9 @@ const Debtors = () => {
                                                 <td className="payment-mode-cell">{invoice.modeofpayment || 'N/A'}</td>
                                                 <td className="currency">₹{formatCurrency(invoice.nettotal)}</td>
                                                 <td className="currency">₹{formatCurrency(invoice.paid)}</td>
-                                                <td className={`currency ${balance > 0 ? 'balance-due' : 'balance-paid'}`}>
+                                                {/* <td className={`currency ${balance > 0 ? 'balance-due' : 'balance-paid'}`}>
                                                     ₹{formatCurrency(balance)}
-                                                </td>
+                                                </td> */}
                                             </tr>
                                         );
                                     })}

@@ -5,6 +5,9 @@ import DashboardUser from './pages/Dashboard_user';
 import ProtectedRoute from './components/ProtectedRoute';
 import Navbar from './components/Navbar'; // Adjust the path if needed
 import Debtors from './pages/Debtors';
+import BankBook from "./pages/BankBook";
+import CashBook from "./pages/CashBook";  // Add this line
+
 
 // Separate AppLayout to access location
 const AppLayout = () => {
@@ -45,6 +48,22 @@ const AppLayout = () => {
                             <Debtors></Debtors>
                         </ProtectedRoute>
                     }
+                />
+                <Route                      
+                    path="/cash-book"                      
+                    element={                         
+                        <ProtectedRoute>                             
+                            <CashBook></CashBook>                         
+                        </ProtectedRoute>                     
+                    }                 
+                />                 
+                <Route                      
+                    path="/bank-book"                      
+                    element={                         
+                        <ProtectedRoute>                             
+                            <BankBook></BankBook>                         
+                        </ProtectedRoute>                     
+                    }                 
                 />
             </Routes>
         </>

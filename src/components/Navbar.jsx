@@ -59,8 +59,12 @@ const Navbar = () => {
             } else {
                 navigate('/dashboard/user');
             }
+
         } else {
             navigate(route);
+            // auto close after click
+            setIsOpen(!isOpen);
+
         }
     };
 

@@ -4,7 +4,7 @@ import React, { useEffect, useRef, useState } from "react";
 import "./punchin.scss";
 import AddLocation from "../../components/Punchin/AddLocation";
 import { IoMdArrowDropdown, IoMdArrowDropup } from "react-icons/io";
-import { IoClose, IoCloseCircle, IoSearchSharp } from "react-icons/io5";
+import { IoCameraReverse, IoClose, IoCloseCircle, IoSearchSharp } from "react-icons/io5";
 import { MdNotListedLocation, MdOutlineCameraAlt } from "react-icons/md";
 import { IoLocation } from "react-icons/io5";
 import { motion } from "framer-motion";
@@ -92,28 +92,30 @@ const PunchIn = () => {
     return () => stopCamera();
   }, [showCamera, facingMode]);
 
+
   const startCamera = async () => {
     try {
       if (streamRef.current) {
-        streamRef.current.getTracks().forEach((track) => track.stop());
+        streamRef.current.getTracks().forEach((track) => track.stop())
       }
       const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: { exact: facingMode } },
-      });
-      if (videoRef.current) videoRef.current.srcObject = stream;
-      streamRef.current = stream;
-    } catch (err) {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: facingMode },
-        });
-        if (videoRef.current) videoRef.current.srcObject = stream;
-        streamRef.current = stream;
-      } catch (fallbackErr) {
-        alert("Failed to access camera. Please check browser permissions.");
+        video: { facingMode: { ideal: facingMode } },
+
+        audio: false
+      })
+
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
       }
+      streamRef.current = stream;
+
+    } catch (error) {
+      console.error("Camera access failed:", error);
+      alert("Unable to access camera. Please check your browser permissions and try again.");
+
     }
-  };
+  }
+
 
   const stopCamera = () => {
     if (streamRef.current) {
@@ -124,6 +126,7 @@ const PunchIn = () => {
 
   return (
     <div className="container">
+
       <div className="select_cus">
         <h2>Select Customer</h2>
 
@@ -245,31 +248,34 @@ const PunchIn = () => {
       </div>
 
       {/* modals */}
-      {showCamera && (
+      {showCamera == 39 && (
         <div className="camera_modal">
           <div className="camera_container">
 
             <div className="camera_switch">
-              <h3>{facingMode === "user" ? "Front Camera" : "Back Camera"}</h3>
-              <div className="camera_switch_button">
-                <button
-                  onClick={() =>
-                    setFacingMode((prev) =>
-                      prev === "user" ? "environment" : "user"
-                    )
-                  }
-                  className=""
-                >
-                  Switch Camera
-                </button>
+              {/* <div className="camera_switch_buttons"> */}
+              <button
+                onClick={() =>
+                  setFacingMode((prev) =>
+                    prev === "user" ? "environment" : "user"
+                  )
+                }
+                className=""
+              >
+                {/* Switch Camera */}
+                <IoCameraReverse />
 
-                <button
-                  onClick={() => setShowCamera(false)}
-                  className="text-white text-2xl hover:text-gray-300"
-                >
-                  <IoCloseCircle />
-                </button>
-              </div>
+              </button>
+
+              <button
+                onClick={() => setShowCamera(false)}
+                className="text-white text-2xl hover:text-gray-300"
+              >
+                <IoCloseCircle />
+              </button>
+              {/* </div> */}
+              {/* <h3>{facingMode === "user" ? "Front Camera" : "Back Camera"}</h3> */}
+
             </div>
 
             <video
@@ -296,6 +302,55 @@ const PunchIn = () => {
           </div>
         </div>
       )}
+      {showCamera && (
+        <div className="camera_modal">
+          <div className="camera_container">
+
+            {/* Camera Controls */}
+            <div className="camera_header">
+
+              <button
+                onClick={() => setShowCamera(false)}
+                className="camera_btn close_btn"
+                title="Close"
+              >
+                <IoCloseCircle />
+              </button>
+
+              <button
+                onClick={() =>
+                  setFacingMode((prev) => (prev === "user" ? "environment" : "user"))
+                }
+                className="camera_btn"
+                title="Switch Camera"
+              >
+                <IoCameraReverse />
+              </button>
+            </div>
+
+            {/* Camera Preview */}
+            <video
+              ref={videoRef}
+              autoPlay
+              playsInline
+              muted
+              className="camera_video"
+              style={{
+                transform: facingMode === "user" ? "scaleX(-1)" : "none",
+              }}
+            />
+
+            {/* Capture Button */}
+            <div className="camera_footer">
+              <button className="capture_btn">
+                <LuCamera /> Capture
+              </button>
+            </div>
+
+          </div>
+        </div>
+      )}
+
 
     </div>
   );

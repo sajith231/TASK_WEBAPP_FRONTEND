@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
-import './BankBook.scss';
+import { useNavigate } from "react-router-dom";
+import './CashBook.scss'; // Reusing the same styles
 import axios from "axios";
 import API_BASE_URL from '../config/api';
 
@@ -7,6 +8,7 @@ function BankBook() {
   const [bankData, setBankData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const navigate = useNavigate();
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -35,9 +37,18 @@ function BankBook() {
       .finally(() => setLoading(false));
   }, []);
 
+  const handleViewLedger = (account) => {
+    navigate('/bank-book-ledger', { 
+      state: { 
+        accountCode: account.code, 
+        accountName: account.name 
+      } 
+    });
+  };
+
   if (loading) {
     return (
-      <div className="bank-book-container">
+      <div className="cash-book-container">
         <div className="loading">Loading bank book...</div>
       </div>
     );
@@ -45,25 +56,26 @@ function BankBook() {
 
   if (error) {
     return (
-      <div className="bank-book-container">
+      <div className="cash-book-container">
         <div className="error">{error}</div>
       </div>
     );
   }
 
   return (
-    <div className="bank-book-container">
+    <div className="cash-book-container">
       <h1>Bank Book</h1>
       {bankData.length === 0 ? (
         <div className="no-data">No bank records found.</div>
       ) : (
         <div className="table-container">
           <div className="table-wrapper">
-            <table className="bank-book-table">
+            <table className="cash-book-table">
               <thead>
                 <tr>
                   <th>Code</th>
                   <th>Name</th>
+                  <th>View Ledger</th>
                   <th>Opening Balance</th>
                   <th>Opening Date</th>
                   <th>Debit</th>
@@ -75,6 +87,15 @@ function BankBook() {
                   <tr key={index}>
                     <td>{item.code}</td>
                     <td>{item.name}</td>
+                    <td className="eye-icon-cell">
+                      <button 
+                        className="eye-icon-btn" 
+                        onClick={() => handleViewLedger(item)}
+                        title="View Ledger Details"
+                      >
+                        👁️
+                      </button>
+                    </td>
                     <td>{item.opening_balance}</td>
                     <td>{item.opening_date}</td>
                     <td>{item.debit}</td>

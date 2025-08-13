@@ -473,7 +473,7 @@ const Debtors = () => {
                                                     <td className="currency">₹{formatCurrency(item.master_debit)}</td>
                                                     <td className="currency">₹{formatCurrency(item.master_credit)}</td>
                                                     <td className={`currency balance-cell ${balance >= 0 ? 'balance-positive' : 'balance-negative'}`}>
-                                                        ₹{formatCurrency(Math.abs(balance))} {balance >= 0 ? 'Dr' : 'Cr'}
+                                                        ₹{formatCurrency(Math.abs(balance))} {balance >= 0 ? '' : ''}
                                                     </td>
                                                     <td className="opening-dept">{item.openingdepartment || 'N/A'}</td>
                                                 </tr>

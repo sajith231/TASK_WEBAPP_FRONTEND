@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import './CashBook.scss';
 import axios from "axios";
 import API_BASE_URL from '../config/api';
@@ -7,6 +8,7 @@ function CashBook() {
   const [cashData, setCashData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const navigate = useNavigate();
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -34,6 +36,15 @@ function CashBook() {
       })
       .finally(() => setLoading(false));
   }, []);
+
+  const handleViewLedger = (account) => {
+    navigate('/cash-book-ledger', { 
+      state: { 
+        accountCode: account.code, 
+        accountName: account.name 
+      } 
+    });
+  };
 
   if (loading) {
     return (
@@ -64,6 +75,7 @@ function CashBook() {
                 <tr>
                   <th>Code</th>
                   <th>Name</th>
+                  <th>View Ledger</th>
                   <th>Opening Balance</th>
                   <th>Opening Date</th>
                   <th>Debit</th>
@@ -75,6 +87,15 @@ function CashBook() {
                   <tr key={index}>
                     <td>{item.code}</td>
                     <td>{item.name}</td>
+                    <td className="eye-icon-cell">
+                      <button 
+                        className="eye-icon-btn" 
+                        onClick={() => handleViewLedger(item)}
+                        title="View Ledger Details"
+                      >
+                        👁️
+                      </button>
+                    </td>
                     <td>{item.opening_balance}</td>
                     <td>{item.opening_date}</td>
                     <td>{item.debit}</td>

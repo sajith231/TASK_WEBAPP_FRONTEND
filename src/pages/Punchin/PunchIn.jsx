@@ -9,7 +9,7 @@ import { MdNotListedLocation, MdOutlineCameraAlt } from "react-icons/md";
 import { IoLocation } from "react-icons/io5";
 import { motion } from "framer-motion";
 import { LuCamera } from "react-icons/lu";
-
+import test from '../../assets/test.jpeg';
 
 
 const customers = [
@@ -123,6 +123,50 @@ const PunchIn = () => {
       streamRef.current = null;
     }
   };
+
+  const capturePhoto = () => {
+    const video = videoRef.current;
+    if (!video) return
+
+    const canvas = document.createElement('canvas')
+    const width = video.videoWidth;
+    const height = video.videoHeight;
+
+    canvas.width = width;
+    canvas.height = height;
+
+    const ctx = canvas.getContext('2d')
+
+    if (facingMode === 'user') {
+      ctx.translate(width, 0);
+      ctx.scale(-1, 1)
+    }
+
+    ctx.drawImage(video, 0, 0, width, height);
+
+    canvas.toBlob(
+      (blob) => {
+        const file = new File([blob], 'photo.jpg', { type: 'image/jpeg' })
+        const imageUrl = URL.createObjectURL(blob);
+
+        // setCapturedImage({
+        //   url: imageUrl,
+        //   file: file,
+        // });
+
+        setCapturedImage({
+          url: test,
+          file: file,
+        });
+
+
+        setShowCamera(false);
+      },
+      "image/jpeg",
+      0.8
+    )
+
+  }
 
   return (
     <div className="container">
@@ -247,61 +291,8 @@ const PunchIn = () => {
 
       </div>
 
-      {/* modals */}
-      {showCamera == 39 && (
-        <div className="camera_modal">
-          <div className="camera_container">
+      {/*Camera modal */}
 
-            <div className="camera_switch">
-              {/* <div className="camera_switch_buttons"> */}
-              <button
-                onClick={() =>
-                  setFacingMode((prev) =>
-                    prev === "user" ? "environment" : "user"
-                  )
-                }
-                className=""
-              >
-                {/* Switch Camera */}
-                <IoCameraReverse />
-
-              </button>
-
-              <button
-                onClick={() => setShowCamera(false)}
-                className="text-white text-2xl hover:text-gray-300"
-              >
-                <IoCloseCircle />
-              </button>
-              {/* </div> */}
-              {/* <h3>{facingMode === "user" ? "Front Camera" : "Back Camera"}</h3> */}
-
-            </div>
-
-            <video
-              ref={videoRef}
-              autoPlay
-              playsInline
-              muted
-              className="video"
-              style={{
-                transform: facingMode === "user" ? "scaleX(-1)" : "none",
-              }}
-            />
-
-            <div className="photo_capture">
-              <button
-                // onClick={capturePhoto}
-                className=""
-              >
-                <LuCamera /> Capture
-              </button>
-
-            </div>
-
-          </div>
-        </div>
-      )}
       {showCamera && (
         <div className="camera_modal">
           <div className="camera_container">
@@ -342,7 +333,7 @@ const PunchIn = () => {
 
             {/* Capture Button */}
             <div className="camera_footer">
-              <button className="capture_btn">
+              <button className="capture_btn" onClick={() => capturePhoto()}>
                 <LuCamera /> Capture
               </button>
             </div>

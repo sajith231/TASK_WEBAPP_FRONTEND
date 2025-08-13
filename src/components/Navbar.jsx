@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FaBars, FaBox, FaBuilding, FaCog, FaTimes } from 'react-icons/fa';
+import { FaBars, FaBox, FaBuilding, FaCog, FaFingerprint, FaRegClipboard, FaTimes } from 'react-icons/fa';
 import { FaMoneyBillWave } from 'react-icons/fa';
 import './Navbar.scss';
 
@@ -186,7 +186,7 @@ const Navbar = () => {
                         <span>Company Info</span>
                     </li>
                     <li onClick={() => handleNavigation('/punchin')}>
-                        <FaBox className="icon" />
+                        <FaFingerprint className='icon' />
                         <span>Punch In</span>
                     </li>
                     <li onClick={() => handleNavigation('/settings')}>

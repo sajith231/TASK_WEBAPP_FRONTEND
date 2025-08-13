@@ -276,14 +276,14 @@ const PunchIn = () => {
                         URL.revokeObjectURL(capturedImage.url);
                       setCapturedImage(null);
                     }} >
-                    <RiDeleteBinLine />
+                    <RiDeleteBinLine className="icon"/>
                     <span>Discard</span>
                   </button>
 
-                  <button className="discard" onClick={() => {
+                  <button className="retake" onClick={() => {
 
                   }} >
-                    <LuSquarePen />
+                    <LuSquarePen className="icon" />
                     <span>Retake  </span></button>
                 </div>
 

@@ -3,13 +3,14 @@
 import React, { useEffect, useRef, useState } from "react";
 import "./punchin.scss";
 import AddLocation from "../../components/Punchin/AddLocation";
-import { IoMdArrowDropdown, IoMdArrowDropup } from "react-icons/io";
+import { IoMdArrowDropdown, IoMdArrowDropup, IoMdClose } from "react-icons/io";
 import { IoCameraReverse, IoClose, IoCloseCircle, IoSearchSharp } from "react-icons/io5";
 import { MdNotListedLocation, MdOutlineCameraAlt } from "react-icons/md";
 import { IoLocation } from "react-icons/io5";
 import { motion } from "framer-motion";
-import { LuCamera } from "react-icons/lu";
+import { LuCamera, LuSquarePen } from "react-icons/lu";
 import test from '../../assets/test.jpeg';
+import { RiDeleteBinLine } from "react-icons/ri";
 
 
 const customers = [
@@ -149,15 +150,11 @@ const PunchIn = () => {
         const file = new File([blob], 'photo.jpg', { type: 'image/jpeg' })
         const imageUrl = URL.createObjectURL(blob);
 
-        // setCapturedImage({
-        //   url: imageUrl,
-        //   file: file,
-        // });
-
         setCapturedImage({
-          url: test,
+          url: imageUrl,
           file: file,
         });
+
 
 
         setShowCamera(false);
@@ -244,13 +241,15 @@ const PunchIn = () => {
             </div>
 
             {/* photo capture */}
-            <div className="photo_section">
-              <div className="photo_label">Image :</div>
-              <div className="take_button" onClick={() => setShowCamera(true)} >
-                <MdOutlineCameraAlt className="icon" />
-                Take a Photo
+            {!capturedImage && (
+              <div className="photo_section">
+                <div className="photo_label">Image :</div>
+                <div className="take_button" onClick={() => setShowCamera(true)} >
+                  <MdOutlineCameraAlt className="icon" />
+                  Take a Photo
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Image Preview */}
             {capturedImage && (
@@ -266,6 +265,7 @@ const PunchIn = () => {
                 <div className="photo_container">
                   <div className="photo">
                     <img src={capturedImage.url} />
+                    {/* <img src={test} alt="" /> */}
                   </div>
                 </div>
 
@@ -275,17 +275,26 @@ const PunchIn = () => {
                       if (capturedImage.url)
                         URL.revokeObjectURL(capturedImage.url);
                       setCapturedImage(null);
-                    }} >Discard</button>
+                    }} >
+                    <RiDeleteBinLine />
+                    <span>Discard</span>
+                  </button>
 
                   <button className="discard" onClick={() => {
 
-                  }} >Retake</button>
+                  }} >
+                    <LuSquarePen />
+                    <span>Retake  </span></button>
                 </div>
 
-                <div className="puchin_button">Punch In</div>
+                <div className="punchin_button">Punch In</div>
 
               </motion.div>
             )}
+
+            {/* {selectedCustomer && selectedCustomer.area && capturedImage && (
+              <button className="punchin_button">Punch In</button>
+            )} */}
           </div>
         )}
 

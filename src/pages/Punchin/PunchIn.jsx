@@ -168,7 +168,7 @@ const PunchIn = () => {
   return (
     <div className="container">
 
-      <div className="select_cus">
+      <div className="customer_section">
         <h2>Select Customer</h2>
 
         <div className="drop_button" onClick={() => setDropdownOpen(!dropdownOpen)}>
@@ -279,7 +279,6 @@ const PunchIn = () => {
                     <RiDeleteBinLine className="icon" />
                     <span>Discard</span>
                   </button>
-
                   <button className="retake" onClick={() => setShowCamera(true)} >
                     <LuSquarePen className="icon" />
                     <span>Retake  </span></button>

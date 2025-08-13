@@ -9,7 +9,7 @@
 
 
 
-    .select_cus {
+    .customer_section {
 
         // padding: 16px 10px;
         // border-bottom: 1px solid #e0e0e0;
@@ -213,7 +213,7 @@
                         align-items: center;
                         gap: 8px;
 
-                        .icon{
+                        .icon {
                             font-size: 1.2rem;
                         }
                     }
@@ -278,6 +278,7 @@
         justify-content: center;
         // padding: 1rem;
         padding: 20px;
+        // aspect-ratio: 9/16;
 
         .camera_container {
             background: #1a1a1a;
@@ -325,7 +326,7 @@
                 width: 100%;
                 height: auto;
                 background: black;
-                aspect-ratio: 9/16;
+                // aspect-ratio: 9/16;
                 object-fit: cover;
             }
 
@@ -371,7 +372,7 @@
         padding: 28px 20px;
         max-width: 500px;
 
-        .select_cus {
+        .customer_section {
             margin-bottom: 20px;
             padding: 18px 0;
 
@@ -383,6 +384,10 @@
                 width: 100%;
             }
         }
+
+        .camera_modal{
+
+        }
     }
 }
 
@@ -393,7 +398,7 @@
         padding: 32px 24px;
         max-width: 600px;
 
-        .select_cus {
+        .customer_section {
             margin-bottom: 24px;
             padding: 20px 0;
 

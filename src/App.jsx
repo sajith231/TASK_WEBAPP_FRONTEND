@@ -9,6 +9,7 @@ import BankBook from "./pages/BankBook";
 import CashBook from "./pages/CashBook";
 import CashBookLedger from "./pages/CashBookLedger";
 import BankBookLedger from "./pages/BankBookLedger";
+import PunchIn from './pages/Punchin/PunchIn';
 
 const AppLayout = () => {
     const location = useLocation();
@@ -21,13 +22,24 @@ const AppLayout = () => {
 
             <Routes>
                 <Route path="/" element={<Login />} />
-                <Route 
-                    path="/dashboard/admin" 
-                    element={<ProtectedRoute><DashboardAdmin /></ProtectedRoute>} 
+
+                <Route
+                    path="/dashboard/admin"
+                    element={
+                        <ProtectedRoute>
+                            <DashboardAdmin />
+                        </ProtectedRoute>
+                    }
                 />
-                <Route 
-                    path="/dashboard/user" 
-                    element={<ProtectedRoute><DashboardUser /></ProtectedRoute>} 
+                
+
+                <Route
+                    path="/dashboard/user"
+                    element={
+                        <ProtectedRoute>
+                            <DashboardUser />
+                        </ProtectedRoute>
+                    }
                 />
                 <Route 
                     path="/debtors" 
@@ -48,6 +60,10 @@ const AppLayout = () => {
                 <Route 
                     path="/bank-book-ledger" 
                     element={<ProtectedRoute><BankBookLedger /></ProtectedRoute>} 
+                />   
+                <Route 
+                    path="/punchin" 
+                    element={<PunchIn/>} 
                 />   
             </Routes>
         </>

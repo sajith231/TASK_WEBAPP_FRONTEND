@@ -59,6 +59,20 @@ const AddLocation = ({ customer }) => {
                     </div>
                     <span>Fetch via Geolocation</span>
                 </div>
+
+                <div className="map">
+
+                </div>
+                <div className="fetch-current-btn">
+                    <BiCurrentLocation />
+                    Fetch Current Location
+                </div>
+
+                <div className="coordinates">
+                    <input type="text" value={"1,2,3,4"} />
+                    <input type="text" value={"1,2,3,4"} />
+
+                </div>
             </div>
 
 

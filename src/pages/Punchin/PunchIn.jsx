@@ -208,6 +208,11 @@ const PunchIn = () => {
                     }}
                   >
                     {customer.name || customer.customerName || "Unnamed Customer"}
+                    <div className="list_icons">
+                      {
+                        customer.area ? <IoLocation style={{ color: '#0bb838' }} /> : <MdNotListedLocation style={{ color: 'red' }} />
+                      }
+                    </div>
                   </div>
                 ))
               ) : (
@@ -219,18 +224,8 @@ const PunchIn = () => {
 
         {/* Location unavailable */}
         {selectedCustomer && !selectedCustomer.area && (
-          <div className="addLocation">
-            <div className="location-warning">
-              <h3>
-                <MdNotListedLocation style={{ color: 'red' }} />
-                Store location unavailable
-              </h3>
-              <p className="message">
-                This store does not have a location set yet. To punch in, please set the store's location first.
-              </p>
-              <AddLocation />
-            </div>
-          </div>
+          <AddLocation customer={selectedCustomer} />
+
         )}
 
         {/* location available label */}
@@ -386,6 +381,13 @@ const PunchIn = () => {
 
               <div className="confirm_buttons">
                 <button
+                  className="btn secondary"
+                  onClick={() => setOpenConfirmPunchIn(!openConfirmPunchIn)}
+                  disabled={isLoading}
+                >
+                  No, Cancel
+                </button>
+                <button
                   className="btn primary"
                   onClick={() => {
                     // handle punch in
@@ -394,13 +396,7 @@ const PunchIn = () => {
                 >
                   {isLoading ? "Processing..." : "Yes, Punch In"}
                 </button>
-                <button
-                  className="btn secondary"
-                  onClick={() => setOpenConfirmPunchIn(!openConfirmPunchIn)}
-                  disabled={isLoading}
-                >
-                  No, Cancel
-                </button>
+
               </div>
             </motion.div>
           </motion.div>

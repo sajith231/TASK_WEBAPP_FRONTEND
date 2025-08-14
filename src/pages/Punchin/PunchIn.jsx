@@ -7,10 +7,11 @@ import { IoMdArrowDropdown, IoMdArrowDropup, IoMdClose } from "react-icons/io";
 import { IoCameraReverse, IoClose, IoCloseCircle, IoSearchSharp } from "react-icons/io5";
 import { MdNotListedLocation, MdOutlineCameraAlt } from "react-icons/md";
 import { IoLocation } from "react-icons/io5";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { LuCamera, LuSquarePen } from "react-icons/lu";
 import test from '../../assets/test.jpeg';
 import { RiDeleteBinLine } from "react-icons/ri";
+import { FaRegClock } from "react-icons/fa";
 
 
 const customers = [
@@ -73,6 +74,7 @@ const PunchIn = () => {
   const [showCamera, setShowCamera] = useState(false)
   const [capturedImage, setCapturedImage] = useState(null);
   const [openConfirmPunchIn, setOpenConfirmPunchIn] = useState(false)
+  const [isLoading, SetIsLoading] = useState(false)
   const [facingMode, setFacingMode] = useState("user");
   const videoRef = useRef(null);
   const streamRef = useRef(null);
@@ -284,7 +286,11 @@ const PunchIn = () => {
                     <span>Retake  </span></button>
                 </div>
 
-                <div className="punchin_button">Punch In</div>
+                <div className="punchin_button" onClick={() => { setOpenConfirmPunchIn(true) }}
+                >
+
+                  <FaRegClock />
+                  Punch In</div>
 
               </motion.div>
             )}
@@ -299,57 +305,108 @@ const PunchIn = () => {
 
       {/*Camera modal */}
 
-      {showCamera && (
-        <div className="camera_modal">
-          <div className="camera_container">
+      {
+        showCamera && (
+          <div className="camera_modal">
+            <div className="camera_container">
 
-            {/* Camera Controls */}
-            <div className="camera_header">
+              {/* Camera Controls */}
+              <div className="camera_header">
 
-              <button
-                onClick={() => setShowCamera(false)}
-                className="camera_btn close_btn"
-                title="Close"
-              >
-                <IoCloseCircle />
-              </button>
+                <button
+                  onClick={() => setShowCamera(false)}
+                  className="camera_btn close_btn"
+                  title="Close"
+                >
+                  <IoCloseCircle />
+                </button>
 
-              <button
-                onClick={() =>
-                  setFacingMode((prev) => (prev === "user" ? "environment" : "user"))
-                }
-                className="camera_btn"
-                title="Switch Camera"
-              >
-                <IoCameraReverse />
-              </button>
+                <button
+                  onClick={() =>
+                    setFacingMode((prev) => (prev === "user" ? "environment" : "user"))
+                  }
+                  className="camera_btn"
+                  title="Switch Camera"
+                >
+                  <IoCameraReverse />
+                </button>
+              </div>
+
+              {/* Camera Preview */}
+              <video
+                ref={videoRef}
+                autoPlay
+                playsInline
+                muted
+                className="camera_video"
+                style={{
+                  transform: facingMode === "user" ? "scaleX(-1)" : "none",
+                }}
+              />
+
+              {/* Capture Button */}
+              <div className="camera_footer">
+                <button className="capture_btn" onClick={() => capturePhoto()}>
+                  <LuCamera /> Capture
+                </button>
+              </div>
+
             </div>
-
-            {/* Camera Preview */}
-            <video
-              ref={videoRef}
-              autoPlay
-              playsInline
-              muted
-              className="camera_video"
-              style={{
-                transform: facingMode === "user" ? "scaleX(-1)" : "none",
-              }}
-            />
-
-            {/* Capture Button */}
-            <div className="camera_footer">
-              <button className="capture_btn" onClick={() => capturePhoto()}>
-                <LuCamera /> Capture
-              </button>
-            </div>
-
           </div>
-        </div>
-      )}
+        )
+      }
 
+      {/* Confirm Punchin */}
+      <AnimatePresence>
+        {openConfirmPunchIn && (
+          <motion.div
+            className="confirm_modal"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            <motion.div
+              className="confirm_container"
+              initial={{ scale: 0.85, opacity: 0, y: 50 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.85, opacity: 0, y: 50 }}
+              transition={{
+                type: "spring",
+                stiffness: 300,
+                damping: 20
+              }}
+            >
+              <h3 className="confirm_title">Punch In Confirmation</h3>
+              <p className="confirm_text">
+                You’re about to punch in for this store.
+                Please confirm to continue.
+              </p>
 
-    </div>
+              <div className="confirm_buttons">
+                <button
+                  className="btn primary"
+                  onClick={() => {
+                    // handle punch in
+                  }}
+                  disabled={isLoading}
+                >
+                  {isLoading ? "Processing..." : "Yes, Punch In"}
+                </button>
+                <button
+                  className="btn secondary"
+                  onClick={() => setOpenConfirmPunchIn(!openConfirmPunchIn)}
+                  disabled={isLoading}
+                >
+                  No, Cancel
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+    </div >
   );
 };
 

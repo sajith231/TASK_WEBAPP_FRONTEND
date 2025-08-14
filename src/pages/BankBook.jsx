@@ -63,6 +63,7 @@ function BankBook() {
   }
 
   return (
+    <div className="all-body">
     <div className="cash-book-container">
       <h1>Bank Book</h1>
       {bankData.length === 0 ? (
@@ -107,7 +108,7 @@ function BankBook() {
           </div>
         </div>
       )}
-    </div>
+    </div></div>
   );
 }
 

@@ -1,5 +1,5 @@
-// BankBook.scss - Clean styling without icons
-.bank-book-container {
+// BankBook.scss - Complete styling with icons
+.cash-book-container {
     max-width: 1200px;
     margin: 0 auto;
     background: white;
@@ -63,7 +63,7 @@
             border-radius: 8px;
         }
 
-        .bank-book-table {
+        .cash-book-table {
             width: 100%;
             border-collapse: collapse;
             min-width: 800px;
@@ -153,9 +153,39 @@
                             line-height: 1.4;
                         }
 
-                        &:nth-child(3), // Opening Balance
-                        &:nth-child(5), // Debit
-                        &:nth-child(6) { // Credit
+                        // Eye icon cell (3rd column)
+                        &:nth-child(3) {
+                            text-align: center;
+                            padding: 8px;
+                            
+                            .eye-icon-btn {
+                                background: none;
+                                border: none;
+                                cursor: pointer;
+                                font-size: 1.2rem;
+                                padding: 8px;
+                                border-radius: 4px;
+                                transition: all 0.2s ease;
+                                display: inline-flex;
+                                align-items: center;
+                                justify-content: center;
+                                min-width: 32px;
+                                min-height: 32px;
+
+                                &:hover {
+                                    background-color: rgba(25, 118, 210, 0.1);
+                                    transform: scale(1.1);
+                                }
+
+                                &:active {
+                                    transform: scale(0.95);
+                                }
+                            }
+                        }
+
+                        &:nth-child(4), // Opening Balance
+                        &:nth-child(6), // Debit
+                        &:nth-child(7) { // Credit
                             text-align: right;
                             font-family: 'Courier New', monospace;
                             font-weight: 600;
@@ -169,19 +199,19 @@
                             }
                         }
 
-                        &:nth-child(4) { // Opening Date
+                        &:nth-child(5) { // Opening Date
                             text-align: center;
                             font-weight: 500;
                             color: #555;
                         }
 
                         // Special styling for debit amounts
-                        &:nth-child(5) {
+                        &:nth-child(6) {
                             color: #d32f2f;
                         }
 
                         // Special styling for credit amounts  
-                        &:nth-child(6) {
+                        &:nth-child(7) {
                             color: #388e3c;
                         }
                     }
@@ -250,12 +280,12 @@
 
 // Responsive design
 @media (max-width: 1200px) {
-    .bank-book-container {
+    .cash-book-container {
         max-width: 100%;
         padding: 20px;
         margin: 10px;
         
-        .table-container .bank-book-table {
+        .table-container .cash-book-table {
             min-width: 700px;
             
             thead th,
@@ -267,12 +297,18 @@
             thead th {
                 font-size: 0.85rem;
             }
+
+            tbody td:nth-child(3) .eye-icon-btn {
+                min-width: 28px;
+                min-height: 28px;
+                font-size: 1rem;
+            }
         }
     }
 }
 
 @media (max-width: 768px) {
-    .bank-book-container {
+    .cash-book-container {
         padding: 15px;
         margin: 5px;
         border-radius: 6px;
@@ -282,7 +318,7 @@
             margin-bottom: 20px;
         }
 
-        .table-container .bank-book-table {
+        .table-container .cash-book-table {
             min-width: 600px;
             
             thead th,
@@ -299,6 +335,13 @@
             tbody td {
                 &:nth-child(2) {
                     max-width: 120px;
+                }
+
+                &:nth-child(3) .eye-icon-btn {
+                    min-width: 24px;
+                    min-height: 24px;
+                    font-size: 0.9rem;
+                    padding: 4px;
                 }
             }
         }
@@ -319,7 +362,7 @@
 }
 
 @media (max-width: 480px) {
-    .bank-book-container {
+    .cash-book-container {
         padding: 10px;
         margin: 2px;
 
@@ -328,7 +371,7 @@
             letter-spacing: 0.5px;
         }
 
-        .table-container .bank-book-table {
+        .table-container .cash-book-table {
             min-width: 500px;
             
             thead th,
@@ -348,9 +391,16 @@
                     font-size: 0.65rem;
                 }
 
-                &:nth-child(3),
-                &:nth-child(5), 
-                &:nth-child(6) {
+                &:nth-child(3) .eye-icon-btn {
+                    min-width: 20px;
+                    min-height: 20px;
+                    font-size: 0.8rem;
+                    padding: 2px;
+                }
+
+                &:nth-child(4),
+                &:nth-child(6), 
+                &:nth-child(7) {
                     font-size: 0.75rem;
                 }
             }
@@ -365,7 +415,7 @@
 
 // Print styles
 @media print {
-    .bank-book-container {
+    .cash-book-container {
         box-shadow: none;
         border: 1px solid #ccc;
         
@@ -374,7 +424,7 @@
             border-bottom-color: #000 !important;
         }
 
-        .table-container .bank-book-table {
+        .table-container .cash-book-table {
             thead {
                 background: #f0f0f0 !important;
                 color: #000 !important;
@@ -398,6 +448,10 @@
                         background-color: #f9f9f9 !important;
                         color: #000 !important;
                         border-left-color: #000 !important;
+                    }
+
+                    &:nth-child(3) .eye-icon-btn {
+                        display: none !important;
                     }
                 }
             }

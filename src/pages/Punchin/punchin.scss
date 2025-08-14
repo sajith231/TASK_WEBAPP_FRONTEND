@@ -30,13 +30,12 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            font-size: 1.2rem;
+            // font-size: 1.2rem;
             font-family: sans-serif;
-            font-weight: 600;
-            background-color: gray;
+            background-color: #e5e7eb;
             border-radius: 10px;
-            color: #fff;
-            padding: 10px;
+            color: #0f0f0f;
+            padding: 14px 10px;
         }
 
         .drop_button>div {
@@ -144,8 +143,9 @@
 
             .location_available {
                 font-size: 0.7rem;
-                font-style: italic;
                 font-weight: 300;
+                color: #0bb838;
+
             }
 
             .photo_section {
@@ -155,19 +155,34 @@
 
                 .take_button {
                     margin: 24px 0;
-                    padding: 2px;
+                    padding: 6px;
                     gap: 6px;
                     width: 100%;
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    border: 2px solid gray;
                     border-radius: 4px;
                     font-size: 1.2rem;
+                    user-select: none;
+                    border: 1px solid gray;
 
                     .icon {
                         font-size: 24px;
                     }
+                }
+
+                .take_button:hover {
+                    background: rgb(243, 243, 243);
+                }
+
+                .take_button:focus {
+                    :focus {
+                        outline: none;
+                        box-shadow:
+                            0 0 0 2px #6366f1,
+                            0 0 0 4px #fff;
+                    }
+
                 }
 
             }
@@ -368,7 +383,7 @@
 
     // confirm modal
 
-    
+
 
     .confirm_modal {
         position: fixed;

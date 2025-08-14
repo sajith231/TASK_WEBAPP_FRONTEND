@@ -113,6 +113,7 @@ const PunchIn = () => {
       streamRef.current = stream;
 
     } catch (error) {
+      setShowCamera(false)
       console.error("Camera access failed:", error);
       alert("Unable to access camera. Please check your browser permissions and try again.");
 

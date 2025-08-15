@@ -62,10 +62,11 @@
     .fetch-current {
         margin-top: 20px;
         border-radius: 8px;
-        border: 1px solid grey;
+        border: 1px solid rgb(231, 219, 219);
         padding: 16px;
         display: flex;
         flex-direction: column;
+        box-shadow: 0px 6px 9px rgba(0, 0, 0, 0.3);
         gap: 8px;
 
         .geo-loc-label {
@@ -84,7 +85,7 @@
 
 
         .map {
-            min-height: 180px;
+            min-height: 200px;
             background-color: rgb(207, 202, 202);
             border-radius: 8px;
         }
@@ -191,3 +192,4 @@
 
 
 }
+

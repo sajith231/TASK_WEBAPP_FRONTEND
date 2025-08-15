@@ -73,14 +73,13 @@ const AddLocation = ({ customer }) => {
     // }, []);
 
     useEffect(() => {
-        mapRef.current = L.map(mapContainerRef.current).setView([0, 0], 60);
-
-        // ESRI Satellite Imagery Layer
+        
+        mapRef.current = L.map(mapContainerRef.current).setView([0, 0], 10);
         L.tileLayer(
             "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
             {
                 attribution:
-                    'Tiles © <a href="https://www.esri.com/">Esri</a> — Source: Esri, Earthstar Geographics',
+                    'Zain © <a href="https://www.esri.com/">Esri</a>',
                 maxZoom: 30
             }
         ).addTo(mapRef.current);

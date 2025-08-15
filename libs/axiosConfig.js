@@ -3,7 +3,8 @@ import axios from 'axios';
 
 // Create axios instance
 const api = axios.create({
-    baseURL: 'http://127.0.0.1:8000/api/',
+    // baseURL: 'http://127.0.0.1:8000/api/',
+    baseURL: 'https://taskwebsyncapi.imcbs.com/api/',
 });
 
 // Add request interceptor to include token

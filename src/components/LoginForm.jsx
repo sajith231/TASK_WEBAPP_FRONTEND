@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import API_BASE_URL from '../config/api';
 import axios from 'axios';
 
 const LoginForm = () => {
@@ -18,7 +19,7 @@ const LoginForm = () => {
         setError('');
 
         try {
-            const response = await axios.post('http://127.0.0.1:8000/api/login/', {
+            const response = await axios.post(`${API_BASE_URL}/login/`, {
                 username,
                 password,
                 accountcode: accountCode,

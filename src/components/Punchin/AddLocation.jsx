@@ -1,32 +1,34 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { MdNotListedLocation } from "react-icons/md";
 import './AddLocation.scss'
 import { BiCurrentLocation } from 'react-icons/bi';
 const AddLocation = ({ customer }) => {
-    const [locationName, setLocationName] = useState('');
-    const [address, setAddress] = useState('');
-    const [latitude, setLatitude] = useState('');
-    const [longitude, setLongitude] = useState('');
+    const [location, setLocation] = useState({ lat: "00.000", lon: "00.000" });
     const [error, setError] = useState('');
 
-    // const handleSubmit = (e) => {
-    //     e.preventDefault();
-    //     if (!locationName || !address || !latitude || !longitude) {
-    //         setError('Please fill in all fields.');
-    //         return;
-    //     }
-    //     setError('');
-    //     const newLocation = {
-    //         name: locationName,
-    //         address,
-    //         latitude: parseFloat(latitude),
-    //         longitude: parseFloat(longitude),
-    //     };
-    //     setLocationName('');
-    //     setAddress('');
-    //     setLatitude('');
-    //     setLongitude('');
-    // };
+
+    const getLocation = () => {
+        if (!navigator.geolocation) {
+            setError("Geolocation is not supported by your browser.");
+            return;
+        }
+
+        navigator.geolocation.getCurrentPosition((pos) => {
+            setLocation({
+                lat: pos.coords.latitude,
+                lon: pos.coords.longitude
+            });
+            setError('')
+        },
+            (err) => {
+                setError(err.message);
+            })
+    }
+
+
+    useEffect(() => {
+
+    }, [])
 
     return (
         <div className='add-location-container'>
@@ -54,25 +56,36 @@ const AddLocation = ({ customer }) => {
 
             <div className="fetch-current">
                 <div className="geo-loc-label">
-                    <div className="icon-geo">
-                        <BiCurrentLocation />
-                    </div>
+                    <BiCurrentLocation className="icon-geo" />
                     <span>Fetch via Geolocation</span>
                 </div>
 
                 <div className="map">
 
                 </div>
-                <div className="fetch-current-btn">
-                    <BiCurrentLocation />
+                <div className="fetch-current-btn" onClick={() => { getLocation() }}>
+                    <BiCurrentLocation className='icon' />
                     Fetch Current Location
                 </div>
 
                 <div className="coordinates">
-                    <input type="text" value={"1,2,3,4"} />
-                    <input type="text" value={"1,2,3,4"} />
-
+                    <div className="coordinate">
+                        <label htmlFor="latitude">latitude:</label>
+                        <input type="text" id="latitude" value={location.lat} readOnly />
+                    </div>
+                    <div className="coordinate">
+                        <label htmlFor="longitude">longitude:</label>
+                        <input type="text" id="longitude" value={location.lon} readOnly />
+                    </div>
                 </div>
+
+
+                <div className="form-actions">
+                    <button type="button" className="btn cancel">Cancel</button>
+                    <button type="submit" className="btn save">Confirm &amp; Save</button>
+                </div>
+
+
             </div>
 
 

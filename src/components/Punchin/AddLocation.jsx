@@ -1,34 +1,98 @@
-import React, { useState, useEffect } from 'react';
-import { MdNotListedLocation } from "react-icons/md";
-import './AddLocation.scss'
+import React, { useState, useEffect, useRef } from 'react';
+import { MdNetworkLocked, MdNotListedLocation } from "react-icons/md";
 import { BiCurrentLocation } from 'react-icons/bi';
+import './AddLocation.scss';
+import 'leaflet/dist/leaflet.css';
+import L from 'leaflet';
+
 const AddLocation = ({ customer }) => {
     const [location, setLocation] = useState({ lat: "00.000", lon: "00.000" });
     const [error, setError] = useState('');
+    const [loading, setLoading] = useState(false);
+    const mapRef = useRef(null);
+    const markerRef = useRef(null);
+    const mapContainerRef = useRef(null);
 
 
     const getLocation = () => {
+        setLoading(true);
+
         if (!navigator.geolocation) {
             setError("Geolocation is not supported by your browser.");
+            setLoading(false);
             return;
         }
 
-        navigator.geolocation.getCurrentPosition((pos) => {
-            setLocation({
-                lat: pos.coords.latitude,
-                lon: pos.coords.longitude
-            });
-            setError('')
-        },
+        navigator.geolocation.getCurrentPosition(
+            (pos) => {
+
+                const newLoc = {
+                    lat: pos.coords.latitude,
+                    lon: pos.coords.longitude
+                };
+
+                setLocation(newLoc);
+                setError('');
+
+                if (mapRef.current) {
+                    mapRef.current.setView([newLoc.lat, newLoc.lon], 15);
+                    if (markerRef.current) {
+                        markerRef.current.setLatLng([newLoc.lat, newLoc.lon]);
+                    } else {
+                        markerRef.current = L.marker([newLoc.lat, newLoc.lon]).addTo(mapRef.current);
+                    }
+                }
+
+
+                setTimeout(() => {
+                    setLoading(false);
+                }, 1000);
+            },
             (err) => {
                 setError(err.message);
-            })
-    }
+                setLoading(false);
+            }
+        );
+    };
 
+
+    // useEffect(() => {
+    //     mapRef.current = L.map(mapContainerRef.current).setView([0, 0], 2);
+    //     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    //         attribution: '&copy; OpenStreetMap contributors'
+    //     }).addTo(mapRef.current);
+
+    //     // getLocation()
+
+    //     return () => {
+    //         if (mapRef.current) {
+    //             mapRef.current.remove();
+    //             mapRef.current = null;
+    //         }
+    //     };
+    // }, []);
 
     useEffect(() => {
+        mapRef.current = L.map(mapContainerRef.current).setView([0, 0], 60);
 
-    }, [])
+        // ESRI Satellite Imagery Layer
+        L.tileLayer(
+            "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+            {
+                attribution:
+                    'Tiles © <a href="https://www.esri.com/">Esri</a> — Source: Esri, Earthstar Geographics',
+                maxZoom: 30
+            }
+        ).addTo(mapRef.current);
+
+        return () => {
+            if (mapRef.current) {
+                mapRef.current.remove();
+                mapRef.current = null;
+            }
+        };
+    }, []);
+
 
     return (
         <div className='add-location-container'>
@@ -48,8 +112,8 @@ const AddLocation = ({ customer }) => {
                     <div className="message">
                         <h5 className="title">Store location unavailable</h5>
                         <p className="description">
-                            This store does not have a location set yet. To punch in, please set the store's location first.
-                        </p>
+                            This store does not have a location set yet.
+                            Please move closer to the store to set its location accurately                        </p>
                     </div>
                 </div>
             </div>
@@ -60,13 +124,15 @@ const AddLocation = ({ customer }) => {
                     <span>Fetch via Geolocation</span>
                 </div>
 
-                <div className="map">
+                <div ref={mapContainerRef} className='map'>
 
                 </div>
-                <div className="fetch-current-btn" onClick={() => { getLocation() }}>
+
+                <button className="fetch-current-btn" onClick={() => { getLocation() }}  >
                     <BiCurrentLocation className='icon' />
-                    Fetch Current Location
-                </div>
+
+                    {loading ? "Fetching..." : "Fetch Current Location"}
+                </button>
 
                 <div className="coordinates">
                     <div className="coordinate">

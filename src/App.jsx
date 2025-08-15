@@ -10,6 +10,7 @@ import CashBook from "./pages/CashBook";
 import CashBookLedger from "./pages/CashBookLedger";
 import BankBookLedger from "./pages/BankBookLedger";
 import PunchIn from './pages/Punchin/PunchIn';
+import NotFound from './components/NotFound';
 
 const AppLayout = () => {
     const location = useLocation();
@@ -31,7 +32,7 @@ const AppLayout = () => {
                         </ProtectedRoute>
                     }
                 />
-                
+
 
                 <Route
                     path="/dashboard/user"
@@ -41,30 +42,34 @@ const AppLayout = () => {
                         </ProtectedRoute>
                     }
                 />
-                <Route 
-                    path="/debtors" 
-                    element={<ProtectedRoute><Debtors /></ProtectedRoute>} 
+                <Route
+                    path="/debtors"
+                    element={<ProtectedRoute><Debtors /></ProtectedRoute>}
                 />
-                <Route 
-                    path="/cash-book" 
-                    element={<ProtectedRoute><CashBook /></ProtectedRoute>} 
-                /> 
-                <Route 
-                    path="/cash-book-ledger" 
-                    element={<ProtectedRoute><CashBookLedger /></ProtectedRoute>} 
-                />                 
-                <Route 
-                    path="/bank-book" 
-                    element={<ProtectedRoute><BankBook /></ProtectedRoute>} 
-                />                 
-                <Route 
-                    path="/bank-book-ledger" 
-                    element={<ProtectedRoute><BankBookLedger /></ProtectedRoute>} 
-                />   
-                <Route 
-                    path="/punchin" 
-                    element={<PunchIn/>} 
-                />   
+                <Route
+                    path="/cash-book"
+                    element={<ProtectedRoute><CashBook /></ProtectedRoute>}
+                />
+                <Route
+                    path="/cash-book-ledger"
+                    element={<ProtectedRoute><CashBookLedger /></ProtectedRoute>}
+                />
+                <Route
+                    path="/bank-book"
+                    element={<ProtectedRoute><BankBook /></ProtectedRoute>}
+                />
+                <Route
+                    path="/bank-book-ledger"
+                    element={<ProtectedRoute><BankBookLedger /></ProtectedRoute>}
+                />
+                <Route
+                    path="/punchin"
+                    element={<PunchIn />}
+                />
+                <Route
+                    path='/*'
+                    element={<NotFound />}
+                />
             </Routes>
         </>
     );

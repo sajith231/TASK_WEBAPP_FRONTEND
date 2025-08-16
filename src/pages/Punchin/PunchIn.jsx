@@ -31,6 +31,7 @@ import {
   MdNotListedLocation,
   MdOutlineCameraAlt,
   MdOutlineNotListedLocation,
+  MdOutlineSocialDistance,
 } from "react-icons/md";
 import { AnimatePresence, motion } from "framer-motion";
 import { LuCamera, LuSquarePen } from "react-icons/lu";
@@ -40,19 +41,28 @@ import { FaRegClock } from "react-icons/fa";
 // Assets
 import test from "../../assets/test.jpeg";
 
-// Customers Data
-const customers = [
-  { id: 1, name: "ShopMart", area: "" },
-  { id: 2, name: "QuickBuy", area: "24.8615,67.0099" },
-  { id: 3, customerName: "SuperStore", area: "" },
-  { id: 4, name: "MegaMart", area: "24.8630,67.0105" },
-  { id: 5, customerName: "GroceryHub", area: "24.8641,67.0033" },
-  // ... (keep rest of customers as in your code)
-];
+//utils 
+import { distanceKm } from "../../utils/geoDis";
 
-// --------------------------------------
-// Component
-// --------------------------------------
+// Customers Data
+// const customers = [
+//   { id: 1, name: "ShopMart", area: "" },
+//   { id: 2, name: "QuickBuy", area: "24.8615,67.0099" },
+//   { id: 3, customerName: "SuperStore", area: "" },
+//   { id: 4, name: "MegaMart", area: "24.8630,67.0105" },
+//   { id: 5, customerName: "GroceryHub", area: "24.8641,67.0033" },
+// ];
+
+
+const customers = [
+  { id: 1, name: "ShopMart", area: { lat: null, lon: null } },
+  { id: 2, name: "IMC Business ", area: { lat: 11.618052, lon: 76.081207 } },
+  { id: 3, name: "SuperStore", area: { lat: null, lon: null } },
+  { id: 4, name: "MegaMart", area: { lat: 24.863, lon: 67.0105 } },
+  { id: 5, name: "GroceryHub", area: { lat: 24.8641, lon: 67.0033 } }
+]
+
+
 const PunchIn = () => {
   // State
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -62,7 +72,7 @@ const PunchIn = () => {
   const [showCamera, setShowCamera] = useState(false);
   const [capturedImage, setCapturedImage] = useState(null);
   const [capturedLocation, setCapturedLocation] = useState(null);
-
+  const [distance, setDistance] = useState('')
   const [openConfirmPunchIn, setOpenConfirmPunchIn] = useState(false);
   const [isLoading, SetIsLoading] = useState(false);
 
@@ -189,8 +199,8 @@ const PunchIn = () => {
     );
   };
 
-  // FIX: Only initialize Leaflet map when mapContainerRef is mounted
   useEffect(() => {
+    getLocation();
     if (!mapContainerRef.current) return;
     if (!capturedImage) return; // only after photo is taken
 
@@ -216,12 +226,15 @@ const PunchIn = () => {
         return urls[0];
       })(),
       {
-        attribution: 'Zain © <a href="https://www.esri.com/">Esri</a>',
+        attribution: '© <a href="https://www.esri.com/">Esri</a>',
         maxZoom: 23,
       }
     ).addTo(mapRef.current);
 
-    getLocation();
+    console.log(selectedCustomer.area.lat, selectedCustomer.area.lon, capturedLocation.lat, capturedLocation.lon)
+    // setDistance(distanceKm(selectedCustomer.area, capturedLocation))
+    console.log(distanceKm(selectedCustomer.area.lat, selectedCustomer.area.lon, capturedLocation.lat, capturedLocation.lon))
+    setDistance(distanceKm(selectedCustomer.area.lat, selectedCustomer.area.lon, capturedLocation.lat, capturedLocation.lon))
 
     return () => {
       if (mapRef.current) {
@@ -229,7 +242,7 @@ const PunchIn = () => {
         mapRef.current = null;
       }
     };
-  }, [capturedImage]);
+  }, [capturedImage, selectedCustomer]);
 
   // --------------------------------------
   // Render
@@ -278,7 +291,7 @@ const PunchIn = () => {
                   >
                     {customer.name || customer.customerName || "Unnamed Customer"}
                     <div className="list_icons">
-                      {customer.area ? (
+                      {customer.area.lat ? (
                         <IoLocation style={{ color: "#0bb838" }} />
                       ) : (
                         <MdNotListedLocation style={{ color: "red" }} />
@@ -294,10 +307,10 @@ const PunchIn = () => {
         )}
 
         {/* If customer has no location */}
-        {selectedCustomer && !selectedCustomer.area && <AddLocation customer={selectedCustomer} />}
+        {selectedCustomer && !selectedCustomer.area.lat && <AddLocation customer={selectedCustomer} />}
 
         {/* If customer has location */}
-        {selectedCustomer && selectedCustomer.area && (
+        {selectedCustomer && selectedCustomer.area.lat && (
           <div className="section_punchin">
             {/* Location available label */}
             <div className="location_available">
@@ -358,12 +371,23 @@ const PunchIn = () => {
                           <MdOutlineNotListedLocation className="icon" />
                           Your Location
                         </div>
+                        <div className="km_dislance">
+                          {distance}Km
+                        </div>
                         <div className="fetch_btn" onClick={getLocation}>
                           <IoRefreshCircle />
                         </div>
                       </div>
 
                       <div className="location_map" ref={mapContainerRef}></div>
+
+                      <div className="km_container">
+                        <div className="mdOutline">
+                          <MdOutlineSocialDistance />
+                          <span>Distance from shop</span>
+                        </div>
+                        <div className="km_span">{distance}</div>
+                      </div>
                     </div>
                   </div>
                 )}

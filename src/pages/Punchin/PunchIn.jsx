@@ -303,12 +303,24 @@ const PunchIn = () => {
 
       {
         showCamera && (
+
           <div className="camera_modal">
             <div className="camera_container">
 
+              {/* Camera Preview */}
+              <video
+                ref={videoRef}
+                autoPlay
+                playsInline
+                muted
+                className="camera_video"
+                style={{
+                  transform: facingMode === "user" ? "scaleX(-1)" : "none",
+                }}
+              />
+
               {/* Camera Controls */}
               <div className="camera_header">
-
                 <button
                   onClick={() => setShowCamera(false)}
                   className="camera_btn close_btn"
@@ -328,27 +340,16 @@ const PunchIn = () => {
                 </button>
               </div>
 
-              {/* Camera Preview */}
-              <video
-                ref={videoRef}
-                autoPlay
-                playsInline
-                muted
-                className="camera_video"
-                style={{
-                  transform: facingMode === "user" ? "scaleX(-1)" : "none",
-                }}
-              />
-
-              {/* Capture Button */}
-              <div className="camera_footer">
+              {/* Capture Button Floating Over Video */}
+              <div className="capture_overlay">
                 <button className="capture_btn" onClick={() => capturePhoto()}>
-                  <LuCamera /> Capture
+                  <LuCamera />
                 </button>
               </div>
 
             </div>
           </div>
+
         )
       }
 

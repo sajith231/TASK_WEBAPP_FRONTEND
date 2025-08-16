@@ -371,9 +371,7 @@ const PunchIn = () => {
                           <MdOutlineNotListedLocation className="icon" />
                           Your Location
                         </div>
-                        <div className="km_dislance">
-                          {distance}Km
-                        </div>
+                       
                         <div className="fetch_btn" onClick={getLocation}>
                           <IoRefreshCircle />
                         </div>
@@ -383,10 +381,10 @@ const PunchIn = () => {
 
                       <div className="km_container">
                         <div className="mdOutline">
-                          <MdOutlineSocialDistance />
+                          <MdOutlineSocialDistance className="icon" />
                           <span>Distance from shop</span>
                         </div>
-                        <div className="km_span">{distance}</div>
+                        <div className="km_span">{distance}&nbsp;Km</div>
                       </div>
                     </div>
                   </div>

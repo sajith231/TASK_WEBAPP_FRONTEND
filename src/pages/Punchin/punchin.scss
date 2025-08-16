@@ -11,8 +11,6 @@
 
     .customer_section {
 
-        // padding: 16px 10px;
-        // border-bottom: 1px solid #e0e0e0;
 
         h2 {
             font-size: 1.2rem;
@@ -287,9 +285,7 @@
                                 font-size: 1.6rem;
                                 color: #0077ff;
                                 cursor: pointer;
-                                // transition: transform 0.2s ease;
 
-             
                             }
                         }
 
@@ -304,6 +300,32 @@
                                 width: 100%;
                                 height: 100%;
                             }
+                        }
+
+                        .km_container {
+                            border: 1px solid rgb(174, 174, 184);
+                            background-color: #d8dfe9;
+                            display: flex;
+                            align-items: center;
+                            justify-content: space-between;
+                            border-radius: 5px;
+                            margin-top: 20px;
+                            font-size: 1rem;
+                            color: #0077ff;
+                            font-weight: 600;
+
+                            padding: 4px 10px;
+
+                            .mdOutline {
+                                display: flex;
+                                align-items: center;
+                                gap: 8px;
+                            }
+
+                            .icon {
+                                font-size: 2rem;
+                            }
+
                         }
                     }
                 }

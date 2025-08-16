@@ -4,6 +4,7 @@ import { BiCurrentLocation } from 'react-icons/bi';
 import './AddLocation.scss';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
+import { AnimatePresence, motion } from 'framer-motion';
 
 const AddLocation = ({ customer }) => {
     const [location, setLocation] = useState({ lat: "00.000", lon: "00.000" });
@@ -12,6 +13,7 @@ const AddLocation = ({ customer }) => {
     const mapRef = useRef(null);
     const markerRef = useRef(null);
     const mapContainerRef = useRef(null);
+    const [openConfirmPunchIn, setOpenConfirmPunchIn] = useState(false)
 
 
     const getLocation = () => {
@@ -56,31 +58,36 @@ const AddLocation = ({ customer }) => {
     };
 
 
-    // useEffect(() => {
-    //     mapRef.current = L.map(mapContainerRef.current).setView([0, 0], 2);
-    //     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    //         attribution: '&copy; OpenStreetMap contributors'
-    //     }).addTo(mapRef.current);
-
-    //     // getLocation()
-
-    //     return () => {
-    //         if (mapRef.current) {
-    //             mapRef.current.remove();
-    //             mapRef.current = null;
-    //         }
-    //     };
-    // }, []);
-
     useEffect(() => {
-        
-        mapRef.current = L.map(mapContainerRef.current).setView([0, 0], 10);
+
+        mapRef.current = L.map(mapContainerRef.current).setView([11.618044,76.081180], 33);
         L.tileLayer(
-            "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+    (() => {
+        const urls = [
+            "http://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}",
+            "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+        ];
+        // Pre-test primary; if it fails, add fallback layer after map init
+        const testImg = new Image();
+        testImg.onerror = () => {
+            if (mapRef.current && !mapRef.current.__fallbackAdded) {
+                mapRef.current.__fallbackAdded = true;
+                L.tileLayer(urls[1], {
+                    attribution: 'Zain © <a href="https://www.esri.com/">Esri</a>',
+                    maxZoom: 23
+                }).addTo(mapRef.current);
+            }
+        };
+        testImg.src = urls[0]
+            .replace('{z}', '1')
+            .replace('{x}', '1')
+            .replace('{y}', '1');
+        return urls[0];
+    })(),
             {
                 attribution:
                     'Zain © <a href="https://www.esri.com/">Esri</a>',
-                maxZoom: 30
+                maxZoom: 23
             }
         ).addTo(mapRef.current);
 
@@ -147,11 +154,64 @@ const AddLocation = ({ customer }) => {
 
                 <div className="form-actions">
                     <button type="button" className="btn cancel">Cancel</button>
-                    <button type="submit" className="btn save">Confirm &amp; Save</button>
+                    <button type="submit" className="btn save"
+                        onClick={() => setOpenConfirmPunchIn(!openConfirmPunchIn)}
+                    > Save</button>
                 </div>
 
 
             </div>
+
+
+
+            {/* Confirm Punchin */}
+            <AnimatePresence>
+                {openConfirmPunchIn && (
+                    <motion.div
+                        className="confirm_modal"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.3 }}
+                    >
+                        <motion.div
+                            className="confirm_container"
+                            initial={{ scale: 0.85, opacity: 0, y: 50 }}
+                            animate={{ scale: 1, opacity: 1, y: 0 }}
+                            exit={{ scale: 0.85, opacity: 0, y: 50 }}
+                            transition={{
+                                type: "spring",
+                                stiffness: 300,
+                                damping: 20
+                            }}
+                        >
+                            <h3 className="confirm_title">Location Confirmation</h3>
+                            <p className="confirm_text">
+                                {`Are you sure you want to set (${location.lat}, ${location.lon}) as this store's location? Make sure you are standing at or very near the store entrance before confirming.`}
+                            </p>
+
+                            <div className="confirm_buttons">
+                                <button
+                                    className="btn secondary"
+                                    onClick={() => setOpenConfirmPunchIn(!openConfirmPunchIn)}
+                                // disabled={isLoading}
+                                >
+                                    No, Cancel
+                                </button>
+                                <button
+                                    className="btn primary"
+                                    onClick={() => {
+                                        // handle punch in
+                                    }}
+
+                                >
+                                    {true ? "Processing..." : "Yes, Punch In"}
+                                </button>
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
 
 
 

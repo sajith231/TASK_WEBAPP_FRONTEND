@@ -287,12 +287,9 @@
                                 font-size: 1.6rem;
                                 color: #0077ff;
                                 cursor: pointer;
-                                transition: transform 0.2s ease;
+                                // transition: transform 0.2s ease;
 
-                                &:hover {
-                                    transform: rotate(90deg);
-                                    color: #0056b3;
-                                }
+             
                             }
                         }
 

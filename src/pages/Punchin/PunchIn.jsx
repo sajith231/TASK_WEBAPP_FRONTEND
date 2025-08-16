@@ -194,7 +194,7 @@ const PunchIn = () => {
     if (!mapContainerRef.current) return;
     if (!capturedImage) return; // only after photo is taken
 
-    mapRef.current = L.map(mapContainerRef.current).setView([11.618044, 76.081180], 13);
+    mapRef.current = L.map(mapContainerRef.current).setView([11.618044, 76.081180], 23);
 
     L.tileLayer(
       (() => {
@@ -207,7 +207,7 @@ const PunchIn = () => {
           if (mapRef.current && !mapRef.current.__fallbackAdded) {
             mapRef.current.__fallbackAdded = true;
             L.tileLayer(urls[1], {
-              attribution: 'Zain © <a href="https://www.esri.com/">Esri</a>',
+              attribution: '© <a href="https://www.esri.com/">Zain</a>',
               maxZoom: 23,
             }).addTo(mapRef.current);
           }

@@ -3,7 +3,7 @@ import apiClient from "./apiClient";
 export const PunchAPI = {
     getFirms: async () => {
         try {
-            const response = await apiClient.get("/punch-in/firms/");
+            const response = await apiClient.get("/shop-location/firms/");
             return response;
         } catch (error) {
             console.error("Error fetching firms:", error);
@@ -14,7 +14,7 @@ export const PunchAPI = {
     //post location
     AddShopLocation: async ({  firm_name, latitude, longitude }) => {
         try {
-            const response = await apiClient.post("/punch-in/", {
+            const response = await apiClient.post("/shop-location/", {
                 firm_name,
                 latitude,
                 longitude

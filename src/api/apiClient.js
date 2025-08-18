@@ -1,7 +1,9 @@
 import axios from "axios";
+const API_BASE =
+    import.meta.env.VITE_API_URL || "https://taskcloud.imcbs.com/api";
 
 const apiClient = axios.create({
-    baseURL: import.meta.env.VITE_API_URL,
+    baseURL: API_BASE,
     headers: {
         "Content-Type": "application/json"
     }

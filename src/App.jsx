@@ -64,7 +64,7 @@ const AppLayout = () => {
                 />
                 <Route
                     path="/punchin"
-                    element={<PunchIn />}
+                    element={<ProtectedRoute><PunchIn /></ProtectedRoute>}
                 />
                 <Route
                     path='/*'

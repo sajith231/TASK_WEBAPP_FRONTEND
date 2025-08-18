@@ -43,28 +43,22 @@ import test from "../../assets/test.jpeg";
 
 //utils 
 import { distanceKm } from "../../utils/geoDis";
+import apiClient from "../../api/apiClient";
+import { PunchAPI } from "../../api/punchService";
 
-// Customers Data
+
 // const customers = [
-//   { id: 1, name: "ShopMart", area: "" },
-//   { id: 2, name: "QuickBuy", area: "24.8615,67.0099" },
-//   { id: 3, customerName: "SuperStore", area: "" },
-//   { id: 4, name: "MegaMart", area: "24.8630,67.0105" },
-//   { id: 5, customerName: "GroceryHub", area: "24.8641,67.0033" },
-// ];
-
-
-const customers = [
-  { id: 1, name: "ShopMart", area: { lat: null, lon: null } },
-  { id: 2, name: "IMC Business ", area: { lat: 11.618052, lon: 76.081207 } },
-  { id: 3, name: "SuperStore", area: { lat: null, lon: null } },
-  { id: 4, name: "MegaMart", area: { lat: 24.863, lon: 67.0105 } },
-  { id: 5, name: "GroceryHub", area: { lat: 24.8641, lon: 67.0033 } }
-]
+//   { id: 1, name: "ShopMart", latitude: null, longitude: null },
+//   { id: 2, name: "IMC Business ", latitude: 11.618052, longitude: 76.081207 },
+//   { id: 3, name: "Blue Star Electronics", latitude: null, longitude: null },
+//   { id: 4, name: "MegaMart", latitude: 24.863, longitude: 67.0105 },
+//   { id: 5, name: "GroceryHub", latitude: 24.8641, longitude: 67.0033 }
+// ]
 
 
 const PunchIn = () => {
   // State
+  const [customers, setCustomers] = useState([]);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCustomer, setSelectedCustomer] = useState(null);
@@ -91,6 +85,24 @@ const PunchIn = () => {
   const filtered = customers.filter((c) =>
     (c.name || c.customerName || "").toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+
+
+  useEffect(() => {
+    const fetchCustomers = async () => {
+      try {
+        const response = await PunchAPI.getFirms()
+        setCustomers(response.firms)
+      } catch (error) {
+        console.error("Failed to fetch firms", err);
+
+      }
+    }
+
+    fetchCustomers();
+
+  }, [])
+
 
   // --------------------------------------
   // Camera handling
@@ -178,18 +190,18 @@ const PunchIn = () => {
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         const newLoc = {
-          lat: pos.coords.latitude,
-          lon: pos.coords.longitude,
+          latitude: pos.coords.latitude,
+          longitude: pos.coords.longitude,
         };
 
         setCapturedLocation(newLoc);
 
         if (mapRef.current) {
-          mapRef.current.setView([newLoc.lat, newLoc.lon], 15);
+          mapRef.current.setView([newLoc.latitude, newLoc.longitude], 15);
           if (markerRef.current) {
-            markerRef.current.setLatLng([newLoc.lat, newLoc.lon]);
+            markerRef.current.setLatLng([newLoc.latitude, newLoc.longitude]);
           } else {
-            markerRef.current = L.marker([newLoc.lat, newLoc.lon]).addTo(mapRef.current);
+            markerRef.current = L.marker([newLoc.latitude, newLoc.longitude]).addTo(mapRef.current);
           }
         }
       },
@@ -231,10 +243,10 @@ const PunchIn = () => {
       }
     ).addTo(mapRef.current);
 
-    console.log(selectedCustomer.area.lat, selectedCustomer.area.lon, capturedLocation.lat, capturedLocation.lon)
+    console.log(selectedCustomer.latitude, selectedCustomer.longitude, capturedLocation.latitude, capturedLocation.longitude)
     // setDistance(distanceKm(selectedCustomer.area, capturedLocation))
-    console.log(distanceKm(selectedCustomer.area.lat, selectedCustomer.area.lon, capturedLocation.lat, capturedLocation.lon))
-    setDistance(distanceKm(selectedCustomer.area.lat, selectedCustomer.area.lon, capturedLocation.lat, capturedLocation.lon))
+    console.log(distanceKm(selectedCustomer.latitude, selectedCustomer.longitude, capturedLocation.latitude, capturedLocation.longitude))
+    setDistance(distanceKm(selectedCustomer.latitude, selectedCustomer.longitude, capturedLocation.latitude, capturedLocation.longitude))
 
     return () => {
       if (mapRef.current) {
@@ -289,9 +301,9 @@ const PunchIn = () => {
                       setSearchTerm("");
                     }}
                   >
-                    {customer.name || customer.customerName || "Unnamed Customer"}
+                    {customer.firm_name || customer.customerName || "Unnamed Customer"}
                     <div className="list_icons">
-                      {customer.area.lat ? (
+                      {customer.latitude ? (
                         <IoLocation style={{ color: "#0bb838" }} />
                       ) : (
                         <MdNotListedLocation style={{ color: "red" }} />
@@ -307,10 +319,10 @@ const PunchIn = () => {
         )}
 
         {/* If customer has no location */}
-        {selectedCustomer && !selectedCustomer.area.lat && <AddLocation customer={selectedCustomer} />}
+        {selectedCustomer && !selectedCustomer.latitude && <AddLocation customer={selectedCustomer} />}
 
         {/* If customer has location */}
-        {selectedCustomer && selectedCustomer.area.lat && (
+        {selectedCustomer && selectedCustomer.latitude && (
           <div className="section_punchin">
             {/* Location available label */}
             <div className="location_available">
@@ -371,7 +383,7 @@ const PunchIn = () => {
                           <MdOutlineNotListedLocation className="icon" />
                           Your Location
                         </div>
-                       
+
                         <div className="fetch_btn" onClick={getLocation}>
                           <IoRefreshCircle />
                         </div>

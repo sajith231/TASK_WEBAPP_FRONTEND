@@ -8,7 +8,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { PunchAPI } from '../../api/punchService';
 
 const AddLocation = ({ customer }) => {
-    const [location, setLocation] = useState({ lat: "00.000", lon: "00.000" });
+    const [location, setLocation] = useState({ latitude: "00.000", longitude: "00.000" });
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const mapRef = useRef(null);
@@ -18,14 +18,23 @@ const AddLocation = ({ customer }) => {
     const [isSaving, setIsSaving] = useState(false);
 
 
-    const handleSaveLocation = () => {
+    const handleSaveLocation = async () => {
         setIsSaving(true);
         try {
-            // await PunchAPI.AddShopLocation({
-            //     // clientId:
-            // })
-        } catch (error) {
-            
+            await PunchAPI.AddShopLocation({
+                // clientId: "",
+                firm_name: customer.firm_name || customer.customerName,
+                latitude: location.latitude,
+                longitude: location.longitude
+            })
+            alert("Shop location saved successfully ✅");
+            setOpenConfirmPunchIn(false);
+
+        } catch (err) {
+            alert("❌ Failed to save location. Please try again.");
+            console.error(err);
+        } finally {
+            setIsSaving(false);
         }
     };
 
@@ -43,19 +52,19 @@ const AddLocation = ({ customer }) => {
             (pos) => {
 
                 const newLoc = {
-                    lat: pos.coords.latitude,
-                    lon: pos.coords.longitude
+                    latitude: pos.coords.latitude,
+                    longitude: pos.coords.longitude
                 };
 
                 setLocation(newLoc);
                 setError('');
 
                 if (mapRef.current) {
-                    mapRef.current.setView([newLoc.lat, newLoc.lon], 15);
+                    mapRef.current.setView([newLoc.latitude, newLoc.longitude], 15);
                     if (markerRef.current) {
-                        markerRef.current.setLatLng([newLoc.lat, newLoc.lon]);
+                        markerRef.current.setLatLng([newLoc.latitude, newLoc.longitude]);
                     } else {
-                        markerRef.current = L.marker([newLoc.lat, newLoc.lon]).addTo(mapRef.current);
+                        markerRef.current = L.marker([newLoc.latitude, newLoc.longitude]).addTo(mapRef.current);
                     }
                 }
 
@@ -74,7 +83,7 @@ const AddLocation = ({ customer }) => {
 
     useEffect(() => {
 
-        mapRef.current = L.map(mapContainerRef.current).setView([11.618044, 76.081180], 33);
+        mapRef.current = L.map(mapContainerRef.current).setView([11.618044, 76.081180], 20);
         L.tileLayer(
             (() => {
                 const urls = [
@@ -119,7 +128,7 @@ const AddLocation = ({ customer }) => {
             <h2 className='set-loc-text'>
                 Set Location for:
                 <span className="set-cus-name">
-                    {customer.name || customer.customerName || "Unnamed Customer"}
+                    {customer.firm_name || customer.customerName || "Unnamed Customer"}
                 </span>
 
             </h2>
@@ -157,11 +166,11 @@ const AddLocation = ({ customer }) => {
                 <div className="coordinates">
                     <div className="coordinate">
                         <label htmlFor="latitude">latitude:</label>
-                        <input type="text" id="latitude" value={location.lat} readOnly />
+                        <input type="text" id="latitude" value={location.latitude} readOnly />
                     </div>
                     <div className="coordinate">
                         <label htmlFor="longitude">longitude:</label>
-                        <input type="text" id="longitude" value={location.lon} readOnly />
+                        <input type="text" id="longitude" value={location.longitude} readOnly />
                     </div>
                 </div>
 
@@ -201,7 +210,7 @@ const AddLocation = ({ customer }) => {
                         >
                             <h3 className="confirm_title">Location Confirmation</h3>
                             <p className="confirm_text">
-                                {`Are you sure you want to set (${location.lat}, ${location.lon}) as this store's location? Make sure you are standing at or very near the store entrance before confirming.`}
+                                {`Are you sure you want to set (${location.latitude}, ${location.longitude}) as this store's location? Make sure you are standing at or very near the store entrance before confirming.`}
                             </p>
 
                             <div className="confirm_buttons">
@@ -215,7 +224,7 @@ const AddLocation = ({ customer }) => {
                                 <button
                                     className="btn primary"
                                     onClick={() => {
-                                        // handle punch in
+                                        handleSaveLocation()
                                     }}
 
                                 >

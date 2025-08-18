@@ -12,12 +12,12 @@ export const PunchAPI = {
     },
 
     //post location
-    AddShopLocation: async ({ clientId, customerName, newArea }) => {
+    AddShopLocation: async ({  firm_name, latitude, longitude }) => {
         try {
             const response = await apiClient.post("/punch-in/", {
-                clientId,
-                customerName,
-                newArea,
+                firm_name,
+                latitude,
+                longitude
             });
             console.log("Shop location updated:", response);
             return response;

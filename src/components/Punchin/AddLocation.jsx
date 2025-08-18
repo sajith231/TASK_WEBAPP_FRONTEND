@@ -5,6 +5,7 @@ import './AddLocation.scss';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import { AnimatePresence, motion } from 'framer-motion';
+import { PunchAPI } from '../../api/punchService';
 
 const AddLocation = ({ customer }) => {
     const [location, setLocation] = useState({ lat: "00.000", lon: "00.000" });
@@ -14,6 +15,19 @@ const AddLocation = ({ customer }) => {
     const markerRef = useRef(null);
     const mapContainerRef = useRef(null);
     const [openConfirmPunchIn, setOpenConfirmPunchIn] = useState(false)
+    const [isSaving, setIsSaving] = useState(false);
+
+
+    const handleSaveLocation = () => {
+        setIsSaving(true);
+        try {
+            // await PunchAPI.AddShopLocation({
+            //     // clientId:
+            // })
+        } catch (error) {
+            
+        }
+    };
 
 
     const getLocation = () => {
@@ -60,30 +74,30 @@ const AddLocation = ({ customer }) => {
 
     useEffect(() => {
 
-        mapRef.current = L.map(mapContainerRef.current).setView([11.618044,76.081180], 33);
+        mapRef.current = L.map(mapContainerRef.current).setView([11.618044, 76.081180], 33);
         L.tileLayer(
-    (() => {
-        const urls = [
-            "http://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}",
-            "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
-        ];
-        // Pre-test primary; if it fails, add fallback layer after map init
-        const testImg = new Image();
-        testImg.onerror = () => {
-            if (mapRef.current && !mapRef.current.__fallbackAdded) {
-                mapRef.current.__fallbackAdded = true;
-                L.tileLayer(urls[1], {
-                    attribution: 'Zain © <a href="https://www.esri.com/">Esri</a>',
-                    maxZoom: 23
-                }).addTo(mapRef.current);
-            }
-        };
-        testImg.src = urls[0]
-            .replace('{z}', '1')
-            .replace('{x}', '1')
-            .replace('{y}', '1');
-        return urls[0];
-    })(),
+            (() => {
+                const urls = [
+                    "http://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}",
+                    "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+                ];
+                // Pre-test primary; if it fails, add fallback layer after map init
+                const testImg = new Image();
+                testImg.onerror = () => {
+                    if (mapRef.current && !mapRef.current.__fallbackAdded) {
+                        mapRef.current.__fallbackAdded = true;
+                        L.tileLayer(urls[1], {
+                            attribution: 'Zain © <a href="https://www.esri.com/">Esri</a>',
+                            maxZoom: 23
+                        }).addTo(mapRef.current);
+                    }
+                };
+                testImg.src = urls[0]
+                    .replace('{z}', '1')
+                    .replace('{x}', '1')
+                    .replace('{y}', '1');
+                return urls[0];
+            })(),
             {
                 attribution:
                     'Zain © <a href="https://www.esri.com/">Esri</a>',

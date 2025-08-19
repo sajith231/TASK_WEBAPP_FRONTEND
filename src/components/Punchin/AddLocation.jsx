@@ -6,7 +6,7 @@ import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import { AnimatePresence, motion } from 'framer-motion';
 import { PunchAPI } from '../../api/punchService';
-
+import { toast } from 'react-toastify';
 
 import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
 import markerIcon from 'leaflet/dist/images/marker-icon.png';
@@ -25,36 +25,71 @@ const AddLocation = ({ customer }) => {
     const [loading, setLoading] = useState(false);
     const [openConfirmPunchIn, setOpenConfirmPunchIn] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
+    const [locationFetched, setLocationFetched] = useState(false);
 
     const mapRef = useRef(null);
     const markerRef = useRef(null);
     const mapContainerRef = useRef(null);
 
+    // Save location handler;
 
-    // Save location handler
     const handleSaveLocation = async () => {
+        // Validate location before saving
+        if (!locationFetched || location.latitude === "00.000" || location.longitude === "00.000") {
+            toast.error("❌ Please fetch your current location first before saving.");
+            return;
+        }
+
         setIsSaving(true);
+        setOpenConfirmPunchIn(false); // Close confirmation modal immediately
+
         try {
-            await PunchAPI.AddShopLocation({
-                firm_name: customer.firm_name || customer.customerName,
-                latitude: location.latitude,
-                longitude: location.longitude
-            });
-            alert("Shop location saved successfully ✅");
-            // navigate('/punchin')
-            window.location.reload();
-            setOpenConfirmPunchIn(false);
+            await toast.promise(
+                PunchAPI.AddShopLocation({
+                    firm_name: customer.firm_name || customer.customerName,
+                    latitude: parseFloat(location.latitude),
+                    longitude: parseFloat(location.longitude)
+                }),
+                {
+                    pending: {
+                        render: () => (
+                            <div className="toast-loading">
+                                <div className="spinner"></div>
+                                <span>Saving location...</span>
+                            </div>
+                        ),
+                        icon: false
+                    },
+                    success: {
+                        render: () => (
+                            <div className="toast-success">
+                                <span>✅ Shop location saved successfully!</span>
+                            </div>
+                        ),
+                        autoClose: 2000,
+                        onClose: () => window.location.reload()
+                    },
+                    error: {
+                        render: ({ data }) => (
+                            <div className="toast-error">
+                                <span>❌ Failed to save location: {data?.message || 'Please try again'}</span>
+                            </div>
+                        ),
+                        autoClose: 3000
+                    }
+                }
+            );
         } catch (err) {
-            alert("❌ Failed to save location. Please try again.");
-            console.error(err);
+            console.error("Save location error:", err);
         } finally {
             setIsSaving(false);
         }
     };
 
-    // Fetch geolocation
+    // Fetch geolocation with better error handling and options
     const getLocation = () => {
         setLoading(true);
+        setError('');
 
         if (!navigator.geolocation) {
             setError("Geolocation is not supported by your browser.");
@@ -62,70 +97,139 @@ const AddLocation = ({ customer }) => {
             return;
         }
 
+        // Enhanced geolocation options for better accuracy
+        const options = {
+            enableHighAccuracy: true,     // Use GPS if available
+            timeout: 15000,               // 15 second timeout
+            maximumAge: 0                 // Don't use cached location
+        };
+
         navigator.geolocation.getCurrentPosition(
             (pos) => {
+                console.log("Location fetched:", pos.coords);
+
+                // Round to 6 decimal places for better precision
                 const newLoc = {
-                    latitude: pos.coords.latitude,
-                    longitude: pos.coords.longitude
+                    latitude: pos.coords.latitude.toFixed(6),
+                    longitude: pos.coords.longitude.toFixed(6)
                 };
 
                 setLocation(newLoc);
+                setLocationFetched(true);
                 setError('');
 
+                // Update map and marker
                 if (mapRef.current) {
-                    mapRef.current.setView([newLoc.latitude, newLoc.longitude], 19);
+                    const latLng = [parseFloat(newLoc.latitude), parseFloat(newLoc.longitude)];
+
+                    // Set map view with high zoom for accuracy
+                    mapRef.current.setView(latLng, 19);
+
+                    // Update or create marker
                     if (markerRef.current) {
-                        markerRef.current.setLatLng([newLoc.latitude, newLoc.longitude]);
+                        markerRef.current.setLatLng(latLng);
                     } else {
-                        markerRef.current = L.marker([newLoc.latitude, newLoc.longitude]).addTo(mapRef.current);
+                        markerRef.current = L.marker(latLng).addTo(mapRef.current);
+                    }
+
+                    // Add accuracy circle if available
+                    if (pos.coords.accuracy) {
+                        L.circle(latLng, {
+                            radius: pos.coords.accuracy,
+                            color: '#007bff',
+                            fillColor: 'transparent',
+                            fillOpacity: 0,
+                            weight: 2,
+                            dashArray: '5, 5'
+                        }).addTo(mapRef.current);
                     }
                 }
 
-                setTimeout(() => setLoading(false), 1000);
+                setTimeout(() => setLoading(false), 500);
             },
             (err) => {
-                setError(err.message);
+                console.error("Geolocation error:", err);
+                let errorMessage = "Failed to get location. ";
+
+                switch (err.code) {
+                    case err.PERMISSION_DENIED:
+                        errorMessage += "Location access denied. Please enable location permissions.";
+                        break;
+                    case err.POSITION_UNAVAILABLE:
+                        errorMessage += "Location information unavailable. Try again.";
+                        break;
+                    case err.TIMEOUT:
+                        errorMessage += "Location request timed out. Try again.";
+                        break;
+                    default:
+                        errorMessage += err.message;
+                        break;
+                }
+
+                setError(errorMessage);
                 setLoading(false);
-            }
+            },
+            options
         );
     };
 
-    // Initialize map
+    // Initialize map with Google Maps first, fallback to OpenStreetMap
     useEffect(() => {
-        mapRef.current = L.map(mapContainerRef.current, {
-            attributionControl: false,
-        }).setView([11.618044, 76.081180], 16);
+        if (mapContainerRef.current && !mapRef.current) {
+            mapRef.current = L.map(mapContainerRef.current, {
+                attributionControl: false,
+                zoomControl: true,
+            }).setView([11.618044, 76.081180], 16);
 
-        L.tileLayer(
-            (() => {
-                const urls = [
-                    "http://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}",
-                    "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
-                ];
-                const testImg = new Image();
-                testImg.onerror = () => {
-                    if (mapRef.current && !mapRef.current.__fallbackAdded) {
-                        mapRef.current.__fallbackAdded = true;
-                        L.tileLayer(urls[1], {
-                            maxZoom: 23
-                        }).addTo(mapRef.current);
-                    }
-                };
-                testImg.src = urls[0]
-                    .replace('{z}', '1')
-                    .replace('{x}', '1')
-                    .replace('{y}', '1');
-                return urls[0];
-            })(),
-            {
-                maxZoom: 23
-            }
-        ).addTo(mapRef.current);
+            // Try Google Maps first
+            const googleSatelliteUrl = 'https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}';
+            const openStreetMapUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+
+            // Test Google Maps availability
+            const testGoogleTile = new Image();
+            testGoogleTile.crossOrigin = 'anonymous';
+
+            testGoogleTile.onload = () => {
+                console.log('Google Maps tiles available, using satellite view');
+                L.tileLayer(googleSatelliteUrl, {
+                    maxZoom: 23,
+                    attribution: '© Google'
+                }).addTo(mapRef.current);
+            };
+
+            testGoogleTile.onerror = () => {
+                console.log('Google Maps tiles unavailable, falling back to OpenStreetMap');
+                L.tileLayer(openStreetMapUrl, {
+                    maxZoom: 20,
+                    attribution: '© OpenStreetMap contributors'
+                }).addTo(mapRef.current);
+            };
+
+            // Test with a sample tile
+            const testTileUrl = googleSatelliteUrl
+                .replace('{x}', '1')
+                .replace('{y}', '1')
+                .replace('{z}', '2');
+
+            testGoogleTile.src = testTileUrl;
+
+            // Fallback timeout in case the test takes too long
+            setTimeout(() => {
+                if (!mapRef.current._layers || Object.keys(mapRef.current._layers).length === 0) {
+                    console.log('Timeout reached, using OpenStreetMap as fallback');
+                    L.tileLayer(openStreetMapUrl, {
+                        maxZoom: 20,
+                        attribution: '© OpenStreetMap contributors'
+                    }).addTo(mapRef.current);
+                }
+            }, 3000);
+        }
 
         return () => {
             if (mapRef.current) {
                 mapRef.current.remove();
                 mapRef.current = null;
+                markerRef.current = null;
             }
         };
     }, []);
@@ -158,29 +262,58 @@ const AddLocation = ({ customer }) => {
                     <span>Fetch via Geolocation</span>
                 </div>
 
-                <div ref={mapContainerRef} className='map'></div>
+                <div ref={mapContainerRef} className='map' style={{ height: '300px', width: '100%' }}></div>
 
-                <button className="fetch-current-btn" onClick={getLocation}>
+                {error && (
+                    <div className="error-message" style={{ color: 'red', margin: '10px 0', padding: '10px', backgroundColor: '#fee', borderRadius: '4px' }}>
+                        {error}
+                    </div>
+                )}
+
+                <button
+                    className="fetch-current-btn"
+                    onClick={getLocation}
+                    disabled={loading}
+                    style={{ opacity: loading ? 0.6 : 1 }}
+                >
                     <BiCurrentLocation className='icon' />
                     {loading ? "Fetching..." : "Fetch Current Location"}
                 </button>
 
                 <div className="coordinates">
                     <div className="coordinate">
-                        <label htmlFor="latitude">latitude:</label>
-                        <input type="text" id="latitude" value={location.latitude} readOnly />
+                        <label htmlFor="latitude">Latitude:</label>
+                        <input
+                            type="text"
+                            id="latitude"
+                            value={location.latitude}
+                            readOnly
+                            style={{ backgroundColor: locationFetched ? '#e8f5e8' : '#f5f5f5' }}
+                        />
                     </div>
                     <div className="coordinate">
-                        <label htmlFor="longitude">longitude:</label>
-                        <input type="text" id="longitude" value={location.longitude} readOnly />
+                        <label htmlFor="longitude">Longitude:</label>
+                        <input
+                            type="text"
+                            id="longitude"
+                            value={location.longitude}
+                            readOnly
+                            style={{ backgroundColor: locationFetched ? '#e8f5e8' : '#f5f5f5' }}
+                        />
                     </div>
                 </div>
 
                 <div className="form-actions">
                     <button type="button" className="btn cancel">Cancel</button>
-                    <button type="submit" className="btn save"
+                    <button
+                        type="submit"
+                        className="btn save"
                         onClick={() => setOpenConfirmPunchIn(!openConfirmPunchIn)}
-                    > Save</button>
+                        disabled={!locationFetched}
+                        style={{ opacity: locationFetched ? 1 : 0.6 }}
+                    >
+                        Save
+                    </button>
                 </div>
             </div>
 

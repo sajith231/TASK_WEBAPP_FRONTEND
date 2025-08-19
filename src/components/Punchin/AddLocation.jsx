@@ -81,6 +81,8 @@ const AddLocation = ({ customer }) => {
             );
         } catch (err) {
             console.error("Save location error:", err);
+            toast.error("❌ An unexpected error occurred. Please try again.");
+
         } finally {
             setIsSaving(false);
         }
@@ -99,16 +101,15 @@ const AddLocation = ({ customer }) => {
 
         // Enhanced geolocation options for better accuracy
         const options = {
-            enableHighAccuracy: true,     // Use GPS if available
-            timeout: 15000,               // 15 second timeout
-            maximumAge: 0                 // Don't use cached location
+            enableHighAccuracy: true,     
+            timeout: 15000,              
+            maximumAge: 0                
         };
 
         navigator.geolocation.getCurrentPosition(
             (pos) => {
                 console.log("Location fetched:", pos.coords);
 
-                // Round to 6 decimal places for better precision
                 const newLoc = {
                     latitude: pos.coords.latitude.toFixed(6),
                     longitude: pos.coords.longitude.toFixed(6)
@@ -304,7 +305,9 @@ const AddLocation = ({ customer }) => {
                 </div>
 
                 <div className="form-actions">
-                    <button type="button" className="btn cancel">Cancel</button>
+                    <button type="button" className="btn cancel" onClick={() => {
+                        window.location.reload()
+                    }}>Cancel</button>
                     <button
                         type="submit"
                         className="btn save"

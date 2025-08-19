@@ -1,27 +1,17 @@
-// PunchIn.jsx
-// --------------------------------------
-// A React component for Punch In flow:
-// - Customer selection dropdown
-// - Camera capture with preview & retake
-// - Location fetch + Leaflet map
-// - Punch In confirmation modal
-// --------------------------------------
-
 import React, { useEffect, useRef, useState } from "react";
 import "./punchin.scss";
 
 // Components
 import AddLocation from "../../components/Punchin/AddLocation";
+import ConfirmModal from "../../components/Modal/ConfirmModal";
 
 // Icons
 import {
   IoMdArrowDropdown,
   IoMdArrowDropup,
-  IoMdClose,
 } from "react-icons/io";
 import {
   IoCameraReverse,
-  IoClose,
   IoCloseCircle,
   IoRefreshCircle,
   IoSearchSharp,
@@ -38,26 +28,14 @@ import { LuCamera, LuSquarePen } from "react-icons/lu";
 import { RiDeleteBinLine } from "react-icons/ri";
 import { FaRegClock } from "react-icons/fa";
 
-// Assets
-import test from "../../assets/test.jpeg";
-
-//utils 
+// Utils
+import { initHybridMap, setViewAndMarker } from "../../utils/mapHelpers";
+import { getCurrentPosition } from "../../utils/geolocation";
 import { distanceKm } from "../../utils/geoDis";
-import apiClient from "../../api/apiClient";
 import { PunchAPI } from "../../api/punchService";
 
-
-// const customers = [
-//   { id: 1, name: "ShopMart", latitude: null, longitude: null },
-//   { id: 2, name: "IMC Business ", latitude: 11.618052, longitude: 76.081207 },
-//   { id: 3, name: "Blue Star Electronics", latitude: null, longitude: null },
-//   { id: 4, name: "MegaMart", latitude: 24.863, longitude: 67.0105 },
-//   { id: 5, name: "GroceryHub", latitude: 24.8641, longitude: 67.0033 }
-// ]
-
-
 const PunchIn = () => {
-  // State
+  // ------------------ State ------------------
   const [customers, setCustomers] = useState([]);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -66,47 +44,41 @@ const PunchIn = () => {
   const [showCamera, setShowCamera] = useState(false);
   const [capturedImage, setCapturedImage] = useState(null);
   const [capturedLocation, setCapturedLocation] = useState(null);
-  const [distance, setDistance] = useState('')
+  const [distance, setDistance] = useState("");
   const [openConfirmPunchIn, setOpenConfirmPunchIn] = useState(false);
-  const [isLoading, SetIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const [facingMode, setFacingMode] = useState("user");
 
-  // Refs
+  // ------------------ Refs ------------------
   const videoRef = useRef(null);
   const streamRef = useRef(null);
   const mapRef = useRef(null);
   const markerRef = useRef(null);
   const mapContainerRef = useRef(null);
 
-  // --------------------------------------
-  // Filter customers by search term
-  // --------------------------------------
-  const filtered = customers.filter((c) =>
-    (c.name || c.customerName || "").toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-
-
+  // ------------------ Fetch Customers ------------------
   useEffect(() => {
     const fetchCustomers = async () => {
       try {
-        const response = await PunchAPI.getFirms()
-        setCustomers(response.firms)
-      } catch (error) {
+        const response = await PunchAPI.getFirms();
+        setCustomers(response.firms || []);
+      } catch (err) {
         console.error("Failed to fetch firms", err);
-
       }
-    }
+    };
 
     fetchCustomers();
+  }, []);
 
-  }, [])
+  // ------------------ Filter Customers ------------------
+  const filteredCustomers = customers.filter((c) =>
+    (c.name || c.customerName || c.firm_name || "")
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase())
+  );
 
-
-  // --------------------------------------
-  // Camera handling
-  // --------------------------------------
+  // ------------------ Camera Handling ------------------
   useEffect(() => {
     if (showCamera) {
       startCamera();
@@ -127,14 +99,12 @@ const PunchIn = () => {
         audio: false,
       });
 
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-      }
+      if (videoRef.current) videoRef.current.srcObject = stream;
       streamRef.current = stream;
     } catch (error) {
       setShowCamera(false);
       console.error("Camera access failed:", error);
-      alert("Unable to access camera. Please check your browser permissions and try again.");
+      alert("Unable to access camera. Please check your browser permissions.");
     }
   };
 
@@ -150,136 +120,117 @@ const PunchIn = () => {
     if (!video) return;
 
     const canvas = document.createElement("canvas");
-    const width = video.videoWidth;
-    const height = video.videoHeight;
-
+    const { videoWidth: width, videoHeight: height } = video;
     canvas.width = width;
     canvas.height = height;
 
     const ctx = canvas.getContext("2d");
-
     if (facingMode === "user") {
       ctx.translate(width, 0);
       ctx.scale(-1, 1);
     }
-
     ctx.drawImage(video, 0, 0, width, height);
 
-    canvas.toBlob(
-      (blob) => {
-        const file = new File([blob], "photo.jpg", { type: "image/jpeg" });
-        const imageUrl = URL.createObjectURL(blob);
-
-        setCapturedImage({ url: imageUrl, file: file });
-        setShowCamera(false);
-      },
-      "image/jpeg",
-      0.8
-    );
+    canvas.toBlob((blob) => {
+      const file = new File([blob], "photo.jpg", { type: "image/jpeg" });
+      const imageUrl = URL.createObjectURL(blob);
+      setCapturedImage({ url: imageUrl, file });
+      setShowCamera(false);
+    }, "image/jpeg", 0.8);
   };
 
-  // --------------------------------------
-  // Location handling + Leaflet map
-  // --------------------------------------
-  const getLocation = () => {
-    if (!navigator.geolocation) {
-      console.error("Geolocation is not supported by your browser.");
-      return;
-    }
+  // ------------------ Location & Map ------------------
+  const getLocation = async () => {
+    try {
+      const pos = await getCurrentPosition();
+      const newLoc = {
+        latitude: pos.coords.latitude,
+        longitude: pos.coords.longitude,
+      };
+      setCapturedLocation(newLoc);
 
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        const newLoc = {
-          latitude: pos.coords.latitude,
-          longitude: pos.coords.longitude,
-        };
-
-        setCapturedLocation(newLoc);
-
-        if (mapRef.current) {
-          mapRef.current.setView([newLoc.latitude, newLoc.longitude], 15);
-          if (markerRef.current) {
-            markerRef.current.setLatLng([newLoc.latitude, newLoc.longitude]);
-          } else {
-            markerRef.current = L.marker([newLoc.latitude, newLoc.longitude]).addTo(mapRef.current);
-          }
-        }
-      },
-      (err) => {
-        console.error("Error fetching location:", err.message);
+      if (mapRef.current) {
+        setViewAndMarker(mapRef.current, markerRef, newLoc.latitude, newLoc.longitude, 19);
       }
-    );
+    } catch (err) {
+      console.error("Error fetching location:", err.message || err);
+    }
   };
+
+  // useEffect(() => {
+  //   getLocation();
+  //   if (!mapContainerRef.current || !capturedImage) return;
+
+  //   mapRef.current = initHybridMap(mapContainerRef.current, {
+  //     center: [11.618044, 76.081180],
+  //     zoom: 18,
+  //   });
+
+  //   if (selectedCustomer?.latitude && capturedLocation?.latitude) {
+  //     setDistance(
+  //       distanceKm(
+  //         selectedCustomer.latitude,
+  //         selectedCustomer.longitude,
+  //         capturedLocation.latitude,
+  //         capturedLocation.longitude
+  //       )
+  //     );
+  //   }
+
+  //   return () => {
+  //     if (mapRef.current) {
+  //       mapRef.current.remove();
+  //       mapRef.current = null;
+  //     }
+  //   };
+  // }, [capturedImage, selectedCustomer]);
+
+  // ------------------ Render ------------------
+
 
   useEffect(() => {
-    getLocation();
-    if (!mapContainerRef.current) return;
-    if (!capturedImage) return; // only after photo is taken
+    if (!mapContainerRef.current || mapRef.current) return;
+    mapRef.current = initHybridMap(mapContainerRef.current, {
+      center: [11.618044, 76.081180],
+      zoom: 18,
+    });
+        getLocation();
 
-    mapRef.current = L.map(mapContainerRef.current).setView([11.618044, 76.081180], 23);
+  }, [capturedImage]);
 
-    L.tileLayer(
-      (() => {
-        const urls = [
-          "http://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}",
-          "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
-        ];
-        const testImg = new Image();
-        testImg.onerror = () => {
-          if (mapRef.current && !mapRef.current.__fallbackAdded) {
-            mapRef.current.__fallbackAdded = true;
-            L.tileLayer(urls[1], {
-              attribution: '© <a href="https://www.esri.com/">Zain</a>',
-              maxZoom: 23,
-            }).addTo(mapRef.current);
-          }
-        };
-        testImg.src = urls[0].replace("{z}", "1").replace("{x}", "1").replace("{y}", "1");
-        return urls[0];
-      })(),
-      {
-        attribution: '© <a href="https://www.esri.com/">Esri</a>',
-        maxZoom: 23,
-      }
-    ).addTo(mapRef.current);
 
-    console.log(selectedCustomer.latitude, selectedCustomer.longitude, capturedLocation.latitude, capturedLocation.longitude)
-    // setDistance(distanceKm(selectedCustomer.area, capturedLocation))
-    console.log(distanceKm(selectedCustomer.latitude, selectedCustomer.longitude, capturedLocation.latitude, capturedLocation.longitude))
-    setDistance(distanceKm(selectedCustomer.latitude, selectedCustomer.longitude, capturedLocation.latitude, capturedLocation.longitude))
+  useEffect(() => {
+    if (selectedCustomer?.latitude && capturedLocation?.latitude) {
+      setDistance(
+        distanceKm(
+          selectedCustomer.latitude,
+          selectedCustomer.longitude,
+          capturedLocation.latitude,
+          capturedLocation.longitude
+        ))
+    }
+  }, [selectedCustomer, capturedLocation]);
 
-    return () => {
-      if (mapRef.current) {
-        mapRef.current.remove();
-        mapRef.current = null;
-      }
-    };
-  }, [capturedImage, selectedCustomer]);
 
-  // --------------------------------------
-  // Render
-  // --------------------------------------
   return (
     <div className="container">
       {/* ------------------ Customer Selection ------------------ */}
       <div className="customer_section">
         <h2>Select Customer</h2>
 
-        {/* Dropdown button */}
+        {/* Dropdown Button */}
         <div className="drop_button" onClick={() => setDropdownOpen(!dropdownOpen)}>
           {selectedCustomer?.name || selectedCustomer?.customerName || "Select a customer"}
-          <span style={{ marginLeft: 8, display: "inline-flex", verticalAlign: "middle" }}>
+          <span style={{ marginLeft: 8, display: "inline-flex" }}>
             {dropdownOpen ? <IoMdArrowDropup /> : <IoMdArrowDropdown />}
           </span>
         </div>
 
-        {/* Dropdown menu */}
+        {/* Dropdown Menu */}
         {dropdownOpen && (
           <div className="dropdownOpen">
             <div className="input_section">
-              <span className="search_icon">
-                <IoSearchSharp />
-              </span>
+              <span className="search_icon"><IoSearchSharp /></span>
               <input
                 type="text"
                 placeholder="Search..."
@@ -290,8 +241,8 @@ const PunchIn = () => {
             </div>
 
             <div className="customer-list">
-              {filtered.length > 0 ? (
-                filtered.map((customer) => (
+              {filteredCustomers.length > 0 ? (
+                filteredCustomers.map((customer) => (
                   <div
                     key={customer.id}
                     className="customer"
@@ -318,42 +269,38 @@ const PunchIn = () => {
           </div>
         )}
 
-        {/* If customer has no location */}
-        {selectedCustomer && !selectedCustomer.latitude && <AddLocation customer={selectedCustomer} />}
+        {/* Location Handling */}
+        {selectedCustomer && !selectedCustomer.latitude && (
+          <AddLocation customer={selectedCustomer} />
+        )}
 
-        {/* If customer has location */}
         {selectedCustomer && selectedCustomer.latitude && (
           <div className="section_punchin">
-            {/* Location available label */}
+            {/* Location Label */}
             <div className="location_available">
-              <p>
-                <IoLocation style={{ color: "#0bb838" }} />
-                Store location available
-              </p>
+              <p><IoLocation style={{ color: "#0bb838" }} /> Store location available</p>
             </div>
 
-            {/* Photo capture */}
+            {/* Photo Capture */}
             {!capturedImage && (
               <div className="photo_section">
                 <div className="photo_label">Image :</div>
                 <div className="take_button" onClick={() => setShowCamera(true)}>
-                  <MdOutlineCameraAlt className="icon" />
-                  Take a Photo
+                  <MdOutlineCameraAlt className="icon" /> Take a Photo
                 </div>
               </div>
             )}
 
-            {/* Image Preview */}
+            {/* Captured Image Preview */}
             {capturedImage && (
               <motion.div
                 initial={{ height: 0, opacity: 0 }}
-                animate={{ height: "auto", opacity: 1, transition: { duration: 1, delay: 0.2, ease: "backInOut" } }}
+                animate={{ height: "auto", opacity: 1 }}
+                transition={{ duration: 1, delay: 0.2, ease: "backInOut" }}
                 className="preview_section"
               >
                 <div className="photo_container">
-                  <div className="photo">
-                    <img src={capturedImage.url} alt="Captured" />
-                  </div>
+                  <img src={capturedImage.url} alt="Captured" />
                 </div>
 
                 <div className="photo_actions">
@@ -364,49 +311,41 @@ const PunchIn = () => {
                       setCapturedImage(null);
                     }}
                   >
-                    <RiDeleteBinLine className="icon" />
-                    <span>Discard</span>
+                    <RiDeleteBinLine className="icon" /> Discard
                   </button>
 
                   <button className="retake" onClick={() => setShowCamera(true)}>
-                    <LuSquarePen className="icon" />
-                    <span>Retake</span>
+                    <LuSquarePen className="icon" /> Retake
                   </button>
                 </div>
 
-                {/* Location capture */}
-                {capturedImage && (
-                  <div className="capture_location">
-                    <div className="location_container">
-                      <div className="location_header">
-                        <div className="your_location">
-                          <MdOutlineNotListedLocation className="icon" />
-                          Your Location
-                        </div>
-
-                        <div className="fetch_btn" onClick={getLocation}>
-                          <IoRefreshCircle />
-                        </div>
+                {/* Location Capture */}
+                <div className="capture_location">
+                  <div className="location_container">
+                    <div className="location_header">
+                      <div className="your_location">
+                        <MdOutlineNotListedLocation className="icon" /> Your Location
                       </div>
-
-                      <div className="location_map" ref={mapContainerRef}></div>
-
-                      <div className="km_container">
-                        <div className="mdOutline">
-                          <MdOutlineSocialDistance className="icon" />
-                          <span>Distance from shop</span>
-                        </div>
-                        <div className="km_span">{distance}&nbsp;Km</div>
+                      <div className="fetch_btn" onClick={getLocation}>
+                        <IoRefreshCircle />
                       </div>
                     </div>
-                  </div>
-                )}
 
-                {/* Punch In button */}
+                    <div className="location_map" ref={mapContainerRef} style={{ height: "300px", width: "100%" }} />
+
+                    <div className="km_container">
+                      <div className="mdOutline">
+                        <MdOutlineSocialDistance className="icon" /> Distance from shop
+                      </div>
+                      <div className="km_span">{distance} Km</div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Punch In Button */}
                 {capturedLocation && (
                   <div className="punchin_button" onClick={() => setOpenConfirmPunchIn(true)}>
-                    <FaRegClock />
-                    Punch In
+                    <FaRegClock /> Punch In
                   </div>
                 )}
               </motion.div>
@@ -419,7 +358,6 @@ const PunchIn = () => {
       {showCamera && (
         <div className="camera_modal">
           <div className="camera_container">
-            {/* Camera Preview */}
             <video
               ref={videoRef}
               autoPlay
@@ -428,25 +366,19 @@ const PunchIn = () => {
               className="camera_video"
               style={{ transform: facingMode === "user" ? "scaleX(-1)" : "none" }}
             />
-
-            {/* Camera Controls */}
             <div className="camera_header">
-              <button onClick={() => setShowCamera(false)} className="camera_btn close_btn" title="Close">
+              <button onClick={() => setShowCamera(false)} className="camera_btn close_btn">
                 <IoCloseCircle />
               </button>
-
               <button
                 onClick={() => setFacingMode((prev) => (prev === "user" ? "environment" : "user"))}
                 className="camera_btn"
-                title="Switch Camera"
               >
                 <IoCameraReverse />
               </button>
             </div>
-
-            {/* Capture Button */}
             <div className="capture_overlay">
-              <button className="capture_btn" onClick={() => capturePhoto()}>
+              <button className="capture_btn" onClick={capturePhoto}>
                 <LuCamera />
               </button>
             </div>
@@ -457,46 +389,18 @@ const PunchIn = () => {
       {/* ------------------ Confirm Punch In ------------------ */}
       <AnimatePresence>
         {openConfirmPunchIn && (
-          <motion.div
-            className="confirm_modal"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
-          >
-            <motion.div
-              className="confirm_container"
-              initial={{ scale: 0.85, opacity: 0, y: 50 }}
-              animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.85, opacity: 0, y: 50 }}
-              transition={{ type: "spring", stiffness: 300, damping: 20 }}
-            >
-              <h3 className="confirm_title">Punch In Confirmation</h3>
-              <p className="confirm_text">
-                You’re about to punch in for this store. Please confirm to continue.
-              </p>
-
-              <div className="confirm_buttons">
-                <button
-                  className="btn secondary"
-                  onClick={() => setOpenConfirmPunchIn(false)}
-                  disabled={isLoading}
-                >
-                  No, Cancel
-                </button>
-
-                <button
-                  className="btn primary"
-                  onClick={() => {
-                    // handle punch in
-                  }}
-                  disabled={isLoading}
-                >
-                  {isLoading ? "Processing..." : "Yes, Punch In"}
-                </button>
-              </div>
-            </motion.div>
-          </motion.div>
+          <ConfirmModal
+            open={openConfirmPunchIn}
+            title="Punch In Confirmation"
+            message="You’re about to punch in for this store. Please confirm to continue."
+            confirmText={isLoading ? "Processing..." : "Yes, Punch In"}
+            cancelText="No, Cancel"
+            loading={isLoading}
+            onCancel={() => setOpenConfirmPunchIn(false)}
+            onConfirm={() => {
+              // TODO: handle punch in API
+            }}
+          />
         )}
       </AnimatePresence>
     </div>

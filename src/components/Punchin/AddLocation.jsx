@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { MdNetworkLocked, MdNotListedLocation } from "react-icons/md";
+import { MdNotListedLocation } from "react-icons/md";
 import { BiCurrentLocation } from 'react-icons/bi';
 import './AddLocation.scss';
 import 'leaflet/dist/leaflet.css';
@@ -7,29 +7,43 @@ import L from 'leaflet';
 import { AnimatePresence, motion } from 'framer-motion';
 import { PunchAPI } from '../../api/punchService';
 
+
+import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
+import markerIcon from 'leaflet/dist/images/marker-icon.png';
+import markerShadow from 'leaflet/dist/images/marker-shadow.png';
+
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+    iconRetinaUrl: markerIcon2x,
+    iconUrl: markerIcon,
+    shadowUrl: markerShadow,
+});
+
 const AddLocation = ({ customer }) => {
     const [location, setLocation] = useState({ latitude: "00.000", longitude: "00.000" });
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
+    const [openConfirmPunchIn, setOpenConfirmPunchIn] = useState(false);
+    const [isSaving, setIsSaving] = useState(false);
+
     const mapRef = useRef(null);
     const markerRef = useRef(null);
     const mapContainerRef = useRef(null);
-    const [openConfirmPunchIn, setOpenConfirmPunchIn] = useState(false)
-    const [isSaving, setIsSaving] = useState(false);
 
 
+    // Save location handler
     const handleSaveLocation = async () => {
         setIsSaving(true);
         try {
             await PunchAPI.AddShopLocation({
-                // clientId: "",
                 firm_name: customer.firm_name || customer.customerName,
                 latitude: location.latitude,
                 longitude: location.longitude
-            })
+            });
             alert("Shop location saved successfully ✅");
+            // navigate('/punchin')
+            window.location.reload();
             setOpenConfirmPunchIn(false);
-
         } catch (err) {
             alert("❌ Failed to save location. Please try again.");
             console.error(err);
@@ -38,7 +52,7 @@ const AddLocation = ({ customer }) => {
         }
     };
 
-
+    // Fetch geolocation
     const getLocation = () => {
         setLoading(true);
 
@@ -50,7 +64,6 @@ const AddLocation = ({ customer }) => {
 
         navigator.geolocation.getCurrentPosition(
             (pos) => {
-
                 const newLoc = {
                     latitude: pos.coords.latitude,
                     longitude: pos.coords.longitude
@@ -60,7 +73,7 @@ const AddLocation = ({ customer }) => {
                 setError('');
 
                 if (mapRef.current) {
-                    mapRef.current.setView([newLoc.latitude, newLoc.longitude], 15);
+                    mapRef.current.setView([newLoc.latitude, newLoc.longitude], 19);
                     if (markerRef.current) {
                         markerRef.current.setLatLng([newLoc.latitude, newLoc.longitude]);
                     } else {
@@ -68,10 +81,7 @@ const AddLocation = ({ customer }) => {
                     }
                 }
 
-
-                setTimeout(() => {
-                    setLoading(false);
-                }, 1000);
+                setTimeout(() => setLoading(false), 1000);
             },
             (err) => {
                 setError(err.message);
@@ -80,23 +90,23 @@ const AddLocation = ({ customer }) => {
         );
     };
 
-
+    // Initialize map
     useEffect(() => {
+        mapRef.current = L.map(mapContainerRef.current, {
+            attributionControl: false,
+        }).setView([11.618044, 76.081180], 16);
 
-        mapRef.current = L.map(mapContainerRef.current).setView([11.618044, 76.081180], 20);
         L.tileLayer(
             (() => {
                 const urls = [
                     "http://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}",
                     "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
                 ];
-                // Pre-test primary; if it fails, add fallback layer after map init
                 const testImg = new Image();
                 testImg.onerror = () => {
                     if (mapRef.current && !mapRef.current.__fallbackAdded) {
                         mapRef.current.__fallbackAdded = true;
                         L.tileLayer(urls[1], {
-                            attribution: 'Zain © <a href="https://www.esri.com/">Esri</a>',
                             maxZoom: 23
                         }).addTo(mapRef.current);
                     }
@@ -108,8 +118,6 @@ const AddLocation = ({ customer }) => {
                 return urls[0];
             })(),
             {
-                attribution:
-                    'Zain © <a href="https://www.esri.com/">Esri</a>',
                 maxZoom: 23
             }
         ).addTo(mapRef.current);
@@ -122,7 +130,6 @@ const AddLocation = ({ customer }) => {
         };
     }, []);
 
-
     return (
         <div className='add-location-container'>
             <h2 className='set-loc-text'>
@@ -130,10 +137,7 @@ const AddLocation = ({ customer }) => {
                 <span className="set-cus-name">
                     {customer.firm_name || customer.customerName || "Unnamed Customer"}
                 </span>
-
             </h2>
-
-
 
             <div className="add-location">
                 <div className="location-warning">
@@ -142,7 +146,8 @@ const AddLocation = ({ customer }) => {
                         <h5 className="title">Store location unavailable</h5>
                         <p className="description">
                             This store does not have a location set yet.
-                            Please move closer to the store to set its location accurately                        </p>
+                            Please move closer to the store to set its location accurately.
+                        </p>
                     </div>
                 </div>
             </div>
@@ -153,13 +158,10 @@ const AddLocation = ({ customer }) => {
                     <span>Fetch via Geolocation</span>
                 </div>
 
-                <div ref={mapContainerRef} className='map'>
+                <div ref={mapContainerRef} className='map'></div>
 
-                </div>
-
-                <button className="fetch-current-btn" onClick={() => { getLocation() }}  >
+                <button className="fetch-current-btn" onClick={getLocation}>
                     <BiCurrentLocation className='icon' />
-
                     {loading ? "Fetching..." : "Fetch Current Location"}
                 </button>
 
@@ -174,18 +176,13 @@ const AddLocation = ({ customer }) => {
                     </div>
                 </div>
 
-
                 <div className="form-actions">
                     <button type="button" className="btn cancel">Cancel</button>
                     <button type="submit" className="btn save"
                         onClick={() => setOpenConfirmPunchIn(!openConfirmPunchIn)}
                     > Save</button>
                 </div>
-
-
             </div>
-
-
 
             {/* Confirm Punchin */}
             <AnimatePresence>
@@ -202,11 +199,7 @@ const AddLocation = ({ customer }) => {
                             initial={{ scale: 0.85, opacity: 0, y: 50 }}
                             animate={{ scale: 1, opacity: 1, y: 0 }}
                             exit={{ scale: 0.85, opacity: 0, y: 50 }}
-                            transition={{
-                                type: "spring",
-                                stiffness: 300,
-                                damping: 20
-                            }}
+                            transition={{ type: "spring", stiffness: 300, damping: 20 }}
                         >
                             <h3 className="confirm_title">Location Confirmation</h3>
                             <p className="confirm_text">
@@ -217,27 +210,21 @@ const AddLocation = ({ customer }) => {
                                 <button
                                     className="btn secondary"
                                     onClick={() => setOpenConfirmPunchIn(!openConfirmPunchIn)}
-                                // disabled={isLoading}
                                 >
-                                    No, Cancel
+                                    Cancel
                                 </button>
                                 <button
                                     className="btn primary"
-                                    onClick={() => {
-                                        handleSaveLocation()
-                                    }}
-
+                                    onClick={handleSaveLocation}
+                                    disabled={isSaving}
                                 >
-                                    {true ? "Processing..." : "Yes, Punch In"}
+                                    {isSaving ? "Processing..." : "Yes, Confirm"}
                                 </button>
                             </div>
                         </motion.div>
                     </motion.div>
                 )}
             </AnimatePresence>
-
-
-
         </div>
     );
 };

@@ -9,6 +9,7 @@ const Navbar = () => {
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [isMobile, setIsMobile] = useState(false);
     const [isBankCashOpen, setIsBankCashOpen] = useState(false);
+    const [isPuchOpen, setIsPunchOpen] = useState(false)
     const dropdownRef = useRef(null);
     const navigate = useNavigate();
     const user = JSON.parse(localStorage.getItem('user'));
@@ -69,7 +70,7 @@ const Navbar = () => {
         } else {
             navigate(route);
         }
-        
+
         // Close sidebar on mobile after navigation
         if (isMobile) {
             setIsOpen(false);
@@ -189,7 +190,7 @@ const Navbar = () => {
                         <FaBox className="icon" />
                         <span>Item Details</span>
                     </li>
-                    
+
                     {/* Bank & Cash Menu with Dropdown */}
                     <li className={`menu-item ${isBankCashOpen ? 'active' : ''}`}>
                         <div className="menu-main" onClick={toggleBankCash}>
@@ -216,7 +217,7 @@ const Navbar = () => {
                             </ul>
                         )}
                     </li>
-                    
+
                     <li onClick={() => handleNavigation('/debtors')}>
                         <FaMoneyBillWave className="icon" />
                         <span>Debtors</span>
@@ -225,10 +226,38 @@ const Navbar = () => {
                         <FaBuilding className="icon" />
                         <span>Company Info</span>
                     </li>
-                    <li onClick={() => handleNavigation('/punchin')}>
+                    {/* <li onClick={() => handleNavigation('/punchin')}>
                         <FaFingerprint className='icon' />
                         <span>Punch In</span>
+                    </li> */}
+
+                    {/* Bank & Cash Menu with Dropdown */}
+                    <li className={`menu-item ${isBankCashOpen ? 'active' : ''}`}>
+                        <div className="menu-main" onClick={()=>setIsPunchOpen(!isPuchOpen)}>
+                            <FaFingerprint className='icon' />
+                            <span>Punch In</span>
+                            {isBankCashOpen ? (
+                                <FaChevronDown className="chevron" />
+                            ) : (
+                                <FaChevronRight className="chevron" />
+                            )}
+                        </div>
+                        {isPuchOpen && (
+                            <ul className="submenu">
+                                <li onClick={() => handleNavigation('/punchin')}>
+                                    <FaMoneyBillWave style={{ marginRight: '8px' }} />
+                                    <span>Location Capture</span>
+                                </li>
+                                <li onClick={() => handleNavigation('/bank-book')}>
+                                    <FaUniversity style={{ marginRight: '8px' }} />
+                                    <span>PunchIn Details  </span>
+                                </li>
+
+
+                            </ul>
+                        )}
                     </li>
+
                     <li onClick={() => handleNavigation('/settings')}>
                         <FaCog className="icon" />
                         <span>Settings</span>

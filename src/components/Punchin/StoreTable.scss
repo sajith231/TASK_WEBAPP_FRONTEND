@@ -1,4 +1,4 @@
-.table_container {
+.table_section {
     .search_section {
         position: relative;
         width: 100%;
@@ -13,7 +13,7 @@
         }
 
         .search_input {
-            padding: 12px 12px 12px 36px; // extra left padding for the icon
+            padding: 12px 12px 12px 36px; 
             width: 100%;
             border: 1px solid rgb(219, 214, 214);
             background-color: rgb(249 250 251);
@@ -21,4 +21,10 @@
             outline: none;
         }
     }
-}
+
+
+    .table_container{
+
+    }
+
+} 

@@ -19,7 +19,10 @@ const StoreCard = ({ name, status = "Active", area, captureTime, map, onDelete =
                     <p className="last_captured">
                         Last Captured: {captureTime}
                     </p>
-                    <a href="#" className="map_link">View on Map</a>
+
+                    <a href="#" className="map_link"
+                        onClick={() => map && window.open(map, '_blank')}
+                    >View on Map</a>
 
                 </div>
                 <div className="actions">

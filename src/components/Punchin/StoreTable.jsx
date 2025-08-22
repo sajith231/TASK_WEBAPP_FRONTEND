@@ -36,7 +36,7 @@ const StoreTable = () => {
                     <div className="empty_state">No matching stores found.</div>
                 )}
                 {filteredStores.map((s, idx) => {
-                    const times = ['08:05 AM', '09:30 AM', '11:15 AM', '01:50 PM', '03:10 PM', '05:45 PM'];
+                    const times = ['08:05 AM 12 2 2023', '09:30 AM', '11:15 AM', '01:50 PM', '03:10 PM', '05:45 PM'];
                     const captureTime = times[idx % times.length];
                     const mapLink = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${s.name} ${s.city}`)}`;
                     return (

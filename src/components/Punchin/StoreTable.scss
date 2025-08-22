@@ -1,0 +1,24 @@
+.table_container {
+    .search_section {
+        position: relative;
+        width: 100%;
+
+        .search_icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: gray;
+            font-size: 18px;
+        }
+
+        .search_input {
+            padding: 12px 12px 12px 36px; // extra left padding for the icon
+            width: 100%;
+            border: 1px solid rgb(219, 214, 214);
+            background-color: rgb(249 250 251);
+            border-radius: 8px;
+            outline: none;
+        }
+    }
+}

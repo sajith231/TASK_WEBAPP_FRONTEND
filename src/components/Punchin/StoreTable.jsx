@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import './StoreTable.scss'
 import { GoSearch } from 'react-icons/go';
+import StoreCard from './StoreCard';
 
 const StoresData = [
     { id: 1, name: "Downtown Store", city: "New York" },
@@ -29,7 +30,26 @@ const StoreTable = () => {
             </div>
 
 
-
+            {/* Mobile View Card */}
+            <div className="mobile_cards">
+                {filteredStores.length === 0 && (
+                    <div className="empty_state">No matching stores found.</div>
+                )}
+                {filteredStores.map((s, idx) => {
+                    const times = ['08:05 AM', '09:30 AM', '11:15 AM', '01:50 PM', '03:10 PM', '05:45 PM'];
+                    const captureTime = times[idx % times.length];
+                    const mapLink = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${s.name} ${s.city}`)}`;
+                    return (
+                        <StoreCard
+                            key={s.id}
+                            name={s.name}
+                            captureTime={captureTime}
+                            area={s.city}
+                            map={mapLink}
+                        />
+                    );
+                })}
+            </div>
 
         </div>
     )

@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useMemo, useState } from 'react'
 import './StoreTable.scss'
 import { GoSearch } from 'react-icons/go';
 import StoreCard from './StoreCard';
@@ -94,19 +94,19 @@ const StoresData = [
 
 const defaultColumns = [
     {
-        header: "storeName",
+        header: "Store Name",
         accessorKey: "storeName"
     },
     {
-        header: "storeLocation",
+        header: "Store Location",
         accessorKey: "storeLocation"
     },
     {
-        header: "lastCapturedTime",
+        header: "Last Captured",
         accessorKey: "lastCapturedTime"
     },
     {
-        header: "Map",
+        header: "Location Map",
         cell: ({ row }) => {
             const { latitude, longitude } = row.original;
             const mapsUrl = `https://www.google.com/maps?q=${latitude},${longitude}`;
@@ -128,9 +128,15 @@ const defaultColumns = [
 const StoreTable = () => {
     const [search, setSearch] = useState('')
 
-    const filteredStores = StoresData.filter((store) =>
-        store.storeName.toLowerCase().includes(search.toLowerCase())
-    )
+    const filteredStores = useMemo(() => {
+        return StoresData.filter((store) =>
+            store.storeName.toLowerCase().includes(search.toLowerCase()) ||
+            store.storeLocation.toLowerCase().includes(search.toLowerCase())
+
+        )
+    }, [search])
+
+
 
     const table = useReactTable({
         data: filteredStores,
@@ -146,7 +152,7 @@ const StoreTable = () => {
                 <GoSearch className="search_icon" />
                 <input
                     type="text"
-                    placeholder="Search stores..."
+                    placeholder="Search by store name..."
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                     className="search_input"
@@ -155,11 +161,37 @@ const StoreTable = () => {
 
             {/* Table Container */}
             <div className="table_container">
-
+                <table>
+                    <thead>
+                        {table.getHeaderGroups().map((headerGroup) => (
+                            <tr key={headerGroup.id}>
+                                {headerGroup.headers.map((header) => (
+                                    <th key={header.id}>
+                                        {flexRender(
+                                            header.column.columnDef.header,
+                                            header.getContext()
+                                        )}
+                                    </th>
+                                ))}
+                            </tr>
+                        ))}
+                    </thead>
+                    <tbody>
+                        {table.getRowModel().rows.map((row) => (
+                            <tr key={row.id}>
+                                {row.getVisibleCells().map((cell) => (
+                                    <td
+                                        key={cell.id}
+                                        data-label={cell.column.columnDef.header} // 🔹 mobile label
+                                    >
+                                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                                    </td>
+                                ))}
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
             </div>
-
-
-
         </div>
     )
 }

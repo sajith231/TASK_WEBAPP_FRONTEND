@@ -6,12 +6,13 @@ import {
     createColumnHelper,
     flexRender,
     getCoreRowModel,
-    useReactTable
+    useReactTable,
+    getPaginationRowModel
 } from '@tanstack/react-table';
 
 const StoresData = [
     {
-        storeName: "Harbor Diner",
+        storeName: " Diner",
         storeLocation: "101 Harbor Street, Anytown",
         lastCapturedTime: "2024-02-15 09:30 AM",
         status: "Active",
@@ -89,6 +90,46 @@ const StoresData = [
         status: "Active",
         latitude: 40.7240,
         longitude: -74.0029
+    },
+    {
+        storeName: "The Urban Forge",
+        storeLocation: "1102 Innovation Way, Anytown",
+        lastCapturedTime: "2024-02-16 01:05 PM",
+        status: "Active",
+        latitude: 40.7255,
+        longitude: -74.0150
+    },
+    {
+        storeName: "Boardwalk Bakery",
+        storeLocation: "123 Boardwalk, Seaside",
+        lastCapturedTime: "2024-02-15 08:00 AM",
+        status: "Active",
+        latitude: 40.7100,
+        longitude: -74.0001
+    },
+    {
+        storeName: "Highline Hotel Cafe",
+        storeLocation: "45 Highline Drive, Uptown",
+        lastCapturedTime: "2024-02-14 10:45 AM",
+        status: "Inactive",
+        latitude: 40.7190,
+        longitude: -74.0120
+    },
+    {
+        storeName: "Summit Grocers",
+        storeLocation: "789 Summit Avenue, Hilltop",
+        lastCapturedTime: "2024-02-13 05:30 PM",
+        status: "Active",
+        latitude: 40.7280,
+        longitude: -74.0050
+    },
+    {
+        storeName: "The Daily Grind",
+        storeLocation: "246 Coffee Bean Lane, Anytown",
+        lastCapturedTime: "2024-02-12 07:15 AM",
+        status: "Active",
+        latitude: 40.7145,
+        longitude: -74.0075
     }
 ];
 
@@ -127,12 +168,12 @@ const defaultColumns = [
 
 const StoreTable = () => {
     const [search, setSearch] = useState('')
+    const [pageSize, setPageSize] = useState(10)
 
     const filteredStores = useMemo(() => {
         return StoresData.filter((store) =>
             store.storeName.toLowerCase().includes(search.toLowerCase()) ||
             store.storeLocation.toLowerCase().includes(search.toLowerCase())
-
         )
     }, [search])
 
@@ -142,6 +183,10 @@ const StoreTable = () => {
         data: filteredStores,
         columns: defaultColumns,
         getCoreRowModel: getCoreRowModel(),
+        getPaginationRowModel: getPaginationRowModel(),
+        initialState: {
+            pagination: { pageSize }
+        }
     })
 
     return (
@@ -191,6 +236,25 @@ const StoreTable = () => {
                         ))}
                     </tbody>
                 </table>
+            </div>
+            <div className="pagination_controls">
+                <button onClick={() => table.previousPage()} disabled={!table.getCanPreviousPage()} >
+                    Prev
+                </button>
+                <span>
+                    Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount()}
+                </span>
+                <button onClick={() => table.nextPage()} disabled={!table.getCanNextPage()}>
+                    Next
+                </button>
+                <select value={table.getState().pagination.pageSize}
+                    onChange={(e) => table.setPageSize(Number(e.target.value))} >
+                    {[5, 10, 20].map((size) => (
+                        <option key={size} value={size}>
+                            Show {size}
+                        </option>
+                    ))}
+                </select>
             </div>
         </div>
     )

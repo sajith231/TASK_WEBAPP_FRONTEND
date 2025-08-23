@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { FaBars, FaBox, FaBuilding, FaCog, FaTimes, FaUniversity, FaChevronDown, FaChevronRight, FaFingerprint } from 'react-icons/fa';
 import { FaMoneyBillWave } from 'react-icons/fa';
 import './Navbar.scss';
+import { useDispatch } from 'react-redux';
+import { logout } from '../store/userSlice';
 
 const Navbar = () => {
     const [isOpen, setIsOpen] = useState(true);
@@ -13,6 +15,7 @@ const Navbar = () => {
     const dropdownRef = useRef(null);
     const navigate = useNavigate();
     const user = JSON.parse(localStorage.getItem('user'));
+    const dispatch = useDispatch()
 
     // Check if device is mobile
     useEffect(() => {
@@ -79,6 +82,7 @@ const Navbar = () => {
 
     const handleLogout = () => {
         localStorage.removeItem('user');
+        dispatch(logout())
         navigate('/');
     };
 
@@ -233,7 +237,7 @@ const Navbar = () => {
 
                     {/* Bank & Cash Menu with Dropdown */}
                     <li className={`menu-item ${isBankCashOpen ? 'active' : ''}`}>
-                        <div className="menu-main" onClick={()=>setIsPunchOpen(!isPuchOpen)}>
+                        <div className="menu-main" onClick={() => setIsPunchOpen(!isPuchOpen)}>
                             <FaFingerprint className='icon' />
                             <span>Punch In</span>
                             {isBankCashOpen ? (

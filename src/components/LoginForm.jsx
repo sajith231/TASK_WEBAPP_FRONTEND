@@ -3,6 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import API_BASE_URL from '../config/api';
 import axios from 'axios';
 
+import { useDispatch, useSelector } from 'react-redux';
+import { login, logout } from './../store/userSlice'
+
 const LoginForm = () => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
@@ -12,6 +15,9 @@ const LoginForm = () => {
     const [loading, setLoading] = useState(false);
     const [loginType, setLoginType] = useState('personal');
     const navigate = useNavigate();
+
+    const dispatch = useDispatch()
+    const { user: currentUser, isAuthenticated } = useSelector((state) => state.user)
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -29,18 +35,22 @@ const LoginForm = () => {
             if (response.data.success) {
                 const user = response.data.user;
                 const token = response.data.token; // Get the token from response
-                
+
                 if (loginType === 'personal' && user.role === 'Admin') {
                     setError('Admin users must use Corporate Login');
                     setLoading(false);
                     return;
                 }
-                
+
                 if (loginType === 'corporate' && user.role === 'User') {
                     setError('Regular users must use Personal Login');
                     setLoading(false);
                     return;
                 }
+
+                //set user into Redux store
+                dispatch(login(user))
+
 
                 // Store both user data and token
                 localStorage.setItem('user', JSON.stringify(user));

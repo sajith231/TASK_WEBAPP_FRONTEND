@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react'
 import './StoreTable.scss'
 import { GoSearch } from 'react-icons/go';
-// import StoreCard from './StoreCard';
+import { useSelector } from 'react-redux';
 import {
     createColumnHelper,
     flexRender,
@@ -10,14 +10,16 @@ import {
     getPaginationRowModel
 } from '@tanstack/react-table';
 
+
 const StoresData = [
     {
-        storeName: " Diner",
+        storeName: "Diner",
         storeLocation: "101 Harbor Street, Anytown",
         lastCapturedTime: "2024-02-15 09:30 AM",
         status: "Active",
         latitude: 40.7128,
-        longitude: -74.0060
+        longitude: -74.0060,
+        taskDoneBy: "Admin"
     },
     {
         storeName: "Greenfield Market",
@@ -25,151 +27,34 @@ const StoresData = [
         lastCapturedTime: "2024-02-14 02:10 PM",
         status: "Inactive",
         latitude: 40.7139,
-        longitude: -74.0021
+        longitude: -74.0021,
+        taskDoneBy: "User Alice"
     },
-    {
-        storeName: "Cedar Cafe",
-        storeLocation: "303 Cedar Lane, Anytown",
-        lastCapturedTime: "2024-02-13 11:45 AM",
-        status: "Active",
-        latitude: 40.7150,
-        longitude: -74.0105
-    },
-    {
-        storeName: "Sunset Grill",
-        storeLocation: "404 Sunset Blvd, Anytown",
-        lastCapturedTime: "2024-02-12 01:20 PM",
-        status: "Inactive",
-        latitude: 40.7162,
-        longitude: -74.0088
-    },
-    {
-        storeName: "Valley Bistro",
-        storeLocation: "505 Valley Road, Anytown",
-        lastCapturedTime: "2024-02-11 10:15 AM",
-        status: "Active",
-        latitude: 40.7175,
-        longitude: -74.0033
-    },
-    {
-        storeName: "Pinecrest Deli",
-        storeLocation: "606 Pinecrest Ave, Anytown",
-        lastCapturedTime: "2024-02-10 03:40 PM",
-        status: "Active",
-        latitude: 40.7189,
-        longitude: -74.0011
-    },
-    {
-        storeName: "Metro Market",
-        storeLocation: "707 Metro Plaza, Anytown",
-        lastCapturedTime: "2024-02-09 12:00 PM",
-        status: "Inactive",
-        latitude: 40.7202,
-        longitude: -74.0092
-    },
-    {
-        storeName: "Golden Spoon",
-        storeLocation: "808 Golden Street, Anytown",
-        lastCapturedTime: "2024-02-08 08:25 AM",
-        status: "Active",
-        latitude: 40.7215,
-        longitude: -74.0077
-    },
-    {
-        storeName: "Riverbend Eatery",
-        storeLocation: "909 Riverbend Way, Anytown",
-        lastCapturedTime: "2024-02-07 04:55 PM",
-        status: "Inactive",
-        latitude: 40.7228,
-        longitude: -74.0044
-    },
-    {
-        storeName: "Oakwood Cafe",
-        storeLocation: "1001 Oakwood Drive, Anytown",
-        lastCapturedTime: "2024-02-06 07:10 AM",
-        status: "Active",
-        latitude: 40.7240,
-        longitude: -74.0029
-    },
-    {
-        storeName: "The Urban Forge",
-        storeLocation: "1102 Innovation Way, Anytown",
-        lastCapturedTime: "2024-02-16 01:05 PM",
-        status: "Active",
-        latitude: 40.7255,
-        longitude: -74.0150
-    },
-    {
-        storeName: "Boardwalk Bakery",
-        storeLocation: "123 Boardwalk, Seaside",
-        lastCapturedTime: "2024-02-15 08:00 AM",
-        status: "Active",
-        latitude: 40.7100,
-        longitude: -74.0001
-    },
-    {
-        storeName: "Highline Hotel Cafe",
-        storeLocation: "45 Highline Drive, Uptown",
-        lastCapturedTime: "2024-02-14 10:45 AM",
-        status: "Inactive",
-        latitude: 40.7190,
-        longitude: -74.0120
-    },
-    {
-        storeName: "Summit Grocers",
-        storeLocation: "789 Summit Avenue, Hilltop",
-        lastCapturedTime: "2024-02-13 05:30 PM",
-        status: "Active",
-        latitude: 40.7280,
-        longitude: -74.0050
-    },
-    {
-        storeName: "The Daily Grind",
-        storeLocation: "246 Coffee Bean Lane, Anytown",
-        lastCapturedTime: "2024-02-12 07:15 AM",
-        status: "Active",
-        latitude: 40.7145,
-        longitude: -74.0075
-    }
 ];
 
-const defaultColumns = [
-    {
-        header: "Store Name",
-        accessorKey: "storeName"
-    },
-    {
-        header: "Store Location",
-        accessorKey: "storeLocation"
-    },
-    {
-        header: "Last Captured",
-        accessorKey: "lastCapturedTime"
-    },
-    {
-        header: "Location Map",
-        cell: ({ row }) => {
-            const { latitude, longitude } = row.original;
-            const mapsUrl = `https://www.google.com/maps?q=${latitude},${longitude}`;
-            return (
-                <a href={mapsUrl} target="_blank" rel="noopener noreferrer">
-                    View on Map
-                </a>
-            );
-        }
-    },
-    {
-        header: "",
-        id: "blank",
-        cell: () => null,
-    }
 
-]
+const StatusCell = ({ initialStatus }) => {
+    const [status, setStatus] = useState(initialStatus);
+
+    const handleChange = (e) => {
+        setStatus(e.target.value);
+        console.log("Updated status:", e.target.value);
+    };
+
+    return (
+        <select value={status} onChange={handleChange}>
+            <option value="Active">Active</option>
+            <option value="Inactive">Inactive</option>
+        </select>
+    );
+};
 
 const StoreTable = () => {
     const [search, setSearch] = useState('')
     const [pageSize, setPageSize] = useState(10)
 
+    const userRole = useSelector((state) => state.user)
+console.log("userRole :",userRole)
     const filteredStores = useMemo(() => {
         return StoresData.filter((store) =>
             store.storeName.toLowerCase().includes(search.toLowerCase()) ||
@@ -179,9 +64,80 @@ const StoreTable = () => {
 
 
 
+    const userColumns = useMemo(() => [
+        {
+            header: "Store Name",
+            accessorKey: "storeName"
+        },
+        {
+            header: "Store Location",
+            accessorKey: "storeLocation"
+        },
+        {
+            header: "Last Captured",
+            accessorKey: "lastCapturedTime"
+        },
+        {
+            header: "Location Map",
+            cell: ({ row }) => {
+                const { latitude, longitude } = row.original;
+                const mapsUrl = `https://www.google.com/maps?q=${latitude},${longitude}`;
+                return (
+                    <a href={mapsUrl} target="_blank" rel="noopener noreferrer">
+                        View on Map
+                    </a>
+                );
+            }
+        },
+        {
+            header: "Status",
+            accessorKey: 'status'
+        }
+
+    ])
+
+    const adminColumns = useMemo(() => [
+        {
+            header: "Store Name",
+            accessorKey: "storeName"
+        },
+        {
+            header: "Store Location",
+            accessorKey: "storeLocation"
+        },
+        {
+            header: "Last Captured",
+            accessorKey: "lastCapturedTime"
+        },
+        {
+            header: "Updated By",
+            accessorKey: "taskDoneBy"
+        },
+        {
+            header: "Location Map",
+            cell: ({ row }) => {
+                const { latitude, longitude } = row.original;
+                const mapsUrl = `https://www.google.com/maps?q=${latitude},${longitude}`;
+                return (
+                    <a href={mapsUrl} target="_blank" rel="noopener noreferrer">
+                        View on Map
+                    </a>
+                );
+            }
+        },
+        {
+            header: "Status (Editable)",
+            accessorKey: "status",
+            cell: ({ row }) => <StatusCell initialStatus={row.original.status} />
+        },
+    ])
+
+
+
     const table = useReactTable({
         data: filteredStores,
-        columns: defaultColumns,
+        // columns: adminColumns,
+        columns: userRole === "Admin" ? adminColumns : userColumns,
         getCoreRowModel: getCoreRowModel(),
         getPaginationRowModel: getPaginationRowModel(),
         initialState: {

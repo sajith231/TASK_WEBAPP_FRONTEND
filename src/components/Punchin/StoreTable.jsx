@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react'
 import './StoreTable.scss'
 import { GoSearch } from 'react-icons/go';
-import StoreCard from './StoreCard';
+// import StoreCard from './StoreCard';
 import {
     createColumnHelper,
     flexRender,

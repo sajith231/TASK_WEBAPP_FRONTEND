@@ -1,7 +1,9 @@
 import { createSlice } from '@reduxjs/toolkit';
 
+const Localuser = JSON.parse(localStorage.getItem('user'));
+console.log("loc user",Localuser)
 const initialState = {
-    user: null,   // will store user object after login
+    user: Localuser || null,
     isAuthenticated: false,
 };
 

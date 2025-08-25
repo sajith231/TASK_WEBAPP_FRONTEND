@@ -72,47 +72,67 @@
             }
         }
 
-        // 🔹 Responsive stacked view on mobile
-        //   @media (max-width: 640px) {
-        //     table,
-        //     thead,
-        //     tbody,
-        //     th,
-        //     td,
-        //     tr {
-        //       display: block;
-        //       width: 100%;
-        //     }
+        .status-select {
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            border: 1px solid #ccc;
+            outline: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
 
-        //     thead {
-        //       display: none;
-        //     }
+            &:hover {
+                opacity: 0.9;
+            }
 
-        //     tbody {
-        //       tr {
-        //         margin-bottom: 1rem;
-        //         border: 1px solid #e5e7eb;
-        //         border-radius: 0.5rem;
-        //         padding: 0.5rem;
-        //         background: #fff;
-        //         box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-        //       }
+            &.pending-verification {
+                background-color: #fff3cd; // light yellow
+                border-color: #ffeeba;
+                color: #856404; // dark gold text
+            }
 
-        //       td {
-        //         display: flex;
-        //         justify-content: space-between;
-        //         padding: 0.6rem;
-        //         border: none;
+            &.verified {
+                background-color: #d4edda; // light green
+                border-color: #c3e6cb;
+                color: #155724; // dark green text
+            }
 
-        //         &::before {
-        //           content: attr(data-label);
-        //           font-weight: 600;
-        //           color: #6b7280;
-        //           margin-right: 0.5rem;
-        //         }
-        //       }
-        //     }
-        //   }
+            &.rejected {
+                background-color: #f8d7da; // light red
+                border-color: #f5c6cb;
+                color: #721c24; // dark red text
+            }
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 600;
+            text-align: center;
+            white-space: nowrap;
+
+            &.pending-verification {
+                background-color: #fff3cd; // light yellow
+                border: 1px solid #ffeeba;
+                color: #856404;
+            }
+
+            &.verified {
+                background-color: #d4edda; // light green
+                border: 1px solid #c3e6cb;
+                color: #155724;
+            }
+
+            &.rejected {
+                background-color: #f8d7da; // light red
+                border: 1px solid #f5c6cb;
+                color: #721c24;
+            }
+        }
+
     }
 
     // .pagination_controls {

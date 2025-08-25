@@ -48,13 +48,16 @@ const LoginForm = () => {
                     return;
                 }
 
-                //set user into Redux store
-                dispatch(login(user))
 
 
                 // Store both user data and token
                 localStorage.setItem('user', JSON.stringify(user));
                 localStorage.setItem('token', token); // Store token separately
+               
+                //set user into Redux store
+                dispatch(login(user))
+
+
 
                 if (user.role === 'Admin') {
                     navigate('/dashboard/admin');

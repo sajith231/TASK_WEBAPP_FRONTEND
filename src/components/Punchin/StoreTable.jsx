@@ -7,7 +7,8 @@ import {
     flexRender,
     getCoreRowModel,
     useReactTable,
-    getPaginationRowModel
+    getPaginationRowModel,
+    getFilteredRowModel
 } from '@tanstack/react-table';
 
 
@@ -15,8 +16,8 @@ const StoresData = [
     {
         storeName: "Diner",
         storeLocation: "101 Harbor Street, Anytown",
-        lastCapturedTime: "2024-02-15 09:30 AM",
-        status: "Active",
+        lastCapturedTime: "09:30 AM 2024-02-15",
+        status: "Pending Verification",
         latitude: 40.7128,
         longitude: -74.0060,
         taskDoneBy: "Admin"
@@ -24,13 +25,13 @@ const StoresData = [
     {
         storeName: "Greenfield Market",
         storeLocation: "202 Greenfield Drive, Anytown",
-        lastCapturedTime: "2024-02-14 02:10 PM",
-        status: "Inactive",
+        lastCapturedTime: "02:10 PM 2024-02-14",
+        status: "Rejected",
         latitude: 40.7139,
         longitude: -74.0021,
         taskDoneBy: "User Alice"
-    },
-];
+    }
+]
 
 
 const StatusCell = ({ initialStatus }) => {
@@ -42,19 +43,29 @@ const StatusCell = ({ initialStatus }) => {
     };
 
     return (
-        <select value={status} onChange={handleChange}>
-            <option value="Active">Active</option>
-            <option value="Inactive">Inactive</option>
+        <select
+            value={status}
+            onChange={handleChange}
+            className={`status-select ${status.replace(/\s+/g, '-').toLowerCase()}`}
+        >
+            <option value="Pending Verification">Pending Verification</option>
+            <option value="Verified">Verified</option>
+            <option value="Rejected">Rejected</option>
         </select>
     );
 };
 
+
+
 const StoreTable = () => {
     const [search, setSearch] = useState('')
     const [pageSize, setPageSize] = useState(10)
+    const [columnFilters, setColumnFilters] = useState([])
 
-    const userRole = useSelector((state) => state.user)
-console.log("userRole :",userRole)
+    const userRole = useSelector((state) => state.user.user.role)
+    console.log("userRole :", userRole)
+
+
     const filteredStores = useMemo(() => {
         return StoresData.filter((store) =>
             store.storeName.toLowerCase().includes(search.toLowerCase()) ||
@@ -91,7 +102,17 @@ console.log("userRole :",userRole)
         },
         {
             header: "Status",
-            accessorKey: 'status'
+            // accessorKey: 'status',
+            cell: ({ row }) => {
+                const { status } = row.original;
+                return (
+                    <span className={`status-badge ${status.replace(/\s+/g, '-').toLowerCase()}`}>
+                        {status}
+                    </span>
+                )
+            },
+            enableColumnFilter: true
+
         }
 
     ])
@@ -133,16 +154,18 @@ console.log("userRole :",userRole)
     ])
 
 
+    console.log(userRole)
 
     const table = useReactTable({
         data: filteredStores,
-        // columns: adminColumns,
         columns: userRole === "Admin" ? adminColumns : userColumns,
         getCoreRowModel: getCoreRowModel(),
         getPaginationRowModel: getPaginationRowModel(),
         initialState: {
             pagination: { pageSize }
-        }
+        },
+        onColumnFiltersChange: setColumnFilters,
+        getFilteredRowModel: getFilteredRowModel()
     })
 
     return (
@@ -176,6 +199,14 @@ console.log("userRole :",userRole)
                                 ))}
                             </tr>
                         ))}
+                        <tr>
+                            {table.getHeaderGroups()[0].headers.map((header)=>(
+                                <th key={header.id}>
+                                    
+
+                                </th>
+                            ))}
+                        </tr>
                     </thead>
                     <tbody>
                         {table.getRowModel().rows.map((row) => (

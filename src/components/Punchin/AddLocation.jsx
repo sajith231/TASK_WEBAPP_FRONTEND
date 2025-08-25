@@ -6,6 +6,7 @@ import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import { PunchAPI } from '../../api/punchService';
 import { toast } from 'react-toastify';
+import { useNavigate } from 'react-router-dom';
 
 import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
 import markerIcon from 'leaflet/dist/images/marker-icon.png';
@@ -14,6 +15,7 @@ import markerShadow from 'leaflet/dist/images/marker-shadow.png';
 import ConfirmModal from '../Modal/ConfirmModal';
 import { initHybridMap, setViewAndMarker, addAccuracyCircle } from "../../utils/mapHelpers";
 import { getCurrentPosition, toFixed6 } from "../../utils/geolocation";
+
 
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -33,6 +35,8 @@ const AddLocation = ({ customer }) => {
   const mapRef = useRef(null);
   const markerRef = useRef(null);
   const mapContainerRef = useRef(null);
+
+  const navigate = useNavigate()
 
   // Save location handler
   const handleSaveLocation = async () => {
@@ -202,8 +206,8 @@ const AddLocation = ({ customer }) => {
         </div>
 
         <div className="form-actions">
-          <button type="button" className="btn cancel" onClick={() => window.location.reload()}>
-            Cancel
+          <button type="button" className="btn cancel" onClick={() =>navigate("/punch-in") }>
+            Back
           </button>
           <button
             type="submit"

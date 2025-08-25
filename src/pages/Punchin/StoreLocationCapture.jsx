@@ -10,7 +10,7 @@ import { initHybridMap, setViewAndMarker } from "../../utils/mapHelpers";
 import { getCurrentPosition } from "../../utils/geolocation";
 import { distanceKm } from "../../utils/geoDis";
 
-const CaptureLocation = ({ selectedCustomer }) => {
+const StoreLocationCapture = ({ selectedCustomer }) => {
     const [capturedLocation, setCapturedLocation] = useState(null);
     const [distance, setDistance] = useState("");
 

@@ -106,9 +106,10 @@ const StoreLocationCapture = () => {
                 )}
 
                 {/* Location Handling */}
-                {selectedCustomer && !selectedCustomer.latitude && (
+                {selectedCustomer && (
                     <AddLocation customer={selectedCustomer} />
                 )}
+
             </div>
         </div>
     );

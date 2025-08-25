@@ -68,11 +68,11 @@ const AddLocation = ({ customer }) => {
           success: {
             render: () => (
               <div className="toast-success">
-                <span>✅ Shop location saved successfully!</span>
+                <span> Shop location saved successfully!</span>
               </div>
             ),
             autoClose: 2000,
-            onClose: () => window.location.reload(),
+            onClose: () =>navigate('/punch-in'),
           },
           error: {
             render: ({ data }) => (
@@ -139,24 +139,40 @@ const AddLocation = ({ customer }) => {
   return (
     <div className='add-location-container'>
       <h2 className='set-loc-text'>
-        Set Location for:
+       {!customer.latitude ?( "Set Location for:"):("Location Details for:")}
         <span className="set-cus-name">
           {customer.firm_name || customer.customerName || "Unnamed Customer"}
         </span>
       </h2>
-
-      <div className="add-location">
-        <div className="location-warning">
-          <MdNotListedLocation className="icon" />
-          <div className="message">
-            <h5 className="title">Store location unavailable</h5>
-            <p className="description">
-              This store does not have a location set yet.
-              Please move closer to the store to set its location accurately.
-            </p>
+      {!customer.latitude ? (
+        <div className="add-location">
+          <div className="location-warning">
+            <MdNotListedLocation className="icon" />
+            <div className="message">
+              <h5 className="title">Store location unavailable</h5>
+              <p className="description">
+                This store does not have a location set yet.
+                Please move closer to the store to set its location accurately.
+              </p>
+            </div>
           </div>
         </div>
-      </div>
+      ) : (
+        <div className="location-available-">
+          <div className="location-success">
+            <BiCurrentLocation className="icon" />
+            <div className="messge">
+              <h5 className='title'>Location Available</h5>
+              <p className="description">
+                This store already has a saved location. You can edit and save again if needed.
+              </p>
+            </div>
+          </div>
+
+        </div>
+
+      )
+      }
 
       <div className="fetch-current">
         <div className="geo-loc-label">
@@ -206,7 +222,7 @@ const AddLocation = ({ customer }) => {
         </div>
 
         <div className="form-actions">
-          <button type="button" className="btn cancel" onClick={() =>navigate("/punch-in") }>
+          <button type="button" className="btn cancel" onClick={() => navigate("/punch-in")}>
             Back
           </button>
           <button

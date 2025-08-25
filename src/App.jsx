@@ -11,7 +11,8 @@ import CashBookLedger from "./pages/CashBookLedger";
 import BankBookLedger from "./pages/BankBookLedger";
 import PunchIn from './pages/Punchin/PunchIn';
 import NotFound from './components/NotFound';
-import LocationCapture from './pages/Punchin/LocationCapture';
+import LocationCapture from './pages/Punchin/LocationRecords';
+import StoreLocationCapture from './pages/Punchin/StoreLocationCapture';
 
 const AppLayout = () => {
     const location = useLocation();
@@ -63,11 +64,16 @@ const AppLayout = () => {
                     path="/bank-book-ledger"
                     element={<ProtectedRoute><BankBookLedger /></ProtectedRoute>}
                 />
+
                 <Route
-                    path="/punchin"
+                    path="/punch-in"
                     // element={<ProtectedRoute><PunchIn /></ProtectedRoute>}
-                    element={<LocationCapture />}
-                />
+                    element={<LocationCapture />}>
+
+
+                </Route>
+                <Route path='/punch-in/capture' element={<StoreLocationCapture />} />
+
                 <Route
                     path='/*'
                     element={<NotFound />}

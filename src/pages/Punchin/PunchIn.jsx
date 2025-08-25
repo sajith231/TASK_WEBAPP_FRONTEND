@@ -157,33 +157,6 @@ const PunchIn = () => {
     }
   };
 
-  // useEffect(() => {
-  //   getLocation();
-  //   if (!mapContainerRef.current || !capturedImage) return;
-
-  //   mapRef.current = initHybridMap(mapContainerRef.current, {
-  //     center: [11.618044, 76.081180],
-  //     zoom: 18,
-  //   });
-
-  //   if (selectedCustomer?.latitude && capturedLocation?.latitude) {
-  //     setDistance(
-  //       distanceKm(
-  //         selectedCustomer.latitude,
-  //         selectedCustomer.longitude,
-  //         capturedLocation.latitude,
-  //         capturedLocation.longitude
-  //       )
-  //     );
-  //   }
-
-  //   return () => {
-  //     if (mapRef.current) {
-  //       mapRef.current.remove();
-  //       mapRef.current = null;
-  //     }
-  //   };
-  // }, [capturedImage, selectedCustomer]);
 
   // ------------------ Render ------------------
 

@@ -1,0 +1,65 @@
+.capture_location {
+  .location_container {
+    background: #fff;
+    padding: 1rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+
+    .location_header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.5rem;
+
+      .your_location {
+        display: flex;
+        align-items: center;
+        font-weight: 600;
+        color: #374151;
+
+        .icon {
+          margin-right: 6px;
+          color: #007bff;
+        }
+      }
+
+      .fetch_btn {
+        cursor: pointer;
+        font-size: 1.5rem;
+        color: #007bff;
+        transition: transform 0.2s;
+        &:hover {
+          transform: rotate(90deg);
+        }
+      }
+    }
+
+    .location_map {
+      border-radius: 8px;
+      overflow: hidden;
+      margin-bottom: 1rem;
+    }
+
+    .km_container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.95rem;
+      background: #f9fafb;
+      padding: 0.6rem 0.8rem;
+      border-radius: 6px;
+
+      .mdOutline {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        color: #444;
+      }
+
+      .km_span {
+        font-weight: 600;
+        color: #111;
+      }
+    }
+  }
+}

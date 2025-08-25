@@ -1,14 +1,15 @@
 import React, { useState } from 'react'
-import './LocationCapture.scss'
+import './LocationRecords.scss'
 import { AiOutlinePlus } from 'react-icons/ai'
 import BaseModal from '../../components/Modal/BaseModal';
 import PunchIn from './PunchIn';
 import StoreTable from '../../components/Punchin/StoreTable';
 import { div } from 'framer-motion/client';
+import { useNavigate } from 'react-router-dom';
 
 const LocationCapture = () => {
     const [isConfirmOpen, setIsConfirmOpen] = useState(false);
-
+    const navigate = useNavigate();
 
 
     return (
@@ -17,7 +18,7 @@ const LocationCapture = () => {
                 <div className="header_section">
                     <div className="header_title">Managed Store Locations</div>
                     <div className="add_new_button" onClick={() => {
-                        setIsConfirmOpen(!isConfirmOpen)
+                        navigate("/punch-in/capture")
                     }}>
                         <AiOutlinePlus className='icon' />
                     </div>
@@ -27,12 +28,9 @@ const LocationCapture = () => {
                 </div>
 
 
-                <BaseModal isOpen={isConfirmOpen} onClose={() => setIsConfirmOpen(false)}>
+                {/* <BaseModal isOpen={isConfirmOpen} onClose={() => setIsConfirmOpen(false)}>
                     <PunchIn />
-                    {/* <h2>Are you sure?</h2>
-                <button onClick={() => { }}>Yes</button>
-                <button onClick={() => setIsConfirmOpen(false)}>Cancel</button> */}
-                </BaseModal>
+                </BaseModal> */}
             </div>
         </div>
 

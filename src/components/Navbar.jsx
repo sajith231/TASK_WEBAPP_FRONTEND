@@ -248,7 +248,7 @@ const Navbar = () => {
                         </div>
                         {isPuchOpen && (
                             <ul className="submenu">
-                                <li onClick={() => handleNavigation('/punchin')}>
+                                <li onClick={() => handleNavigation('/punch-in')}>
                                     <FaMoneyBillWave style={{ marginRight: '8px' }} />
                                     <span>Location Capture</span>
                                 </li>

@@ -199,14 +199,7 @@ const StoreTable = () => {
                                 ))}
                             </tr>
                         ))}
-                        <tr>
-                            {table.getHeaderGroups()[0].headers.map((header)=>(
-                                <th key={header.id}>
-                                    
 
-                                </th>
-                            ))}
-                        </tr>
                     </thead>
                     <tbody>
                         {table.getRowModel().rows.map((row) => (

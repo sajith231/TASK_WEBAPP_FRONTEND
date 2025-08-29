@@ -20,7 +20,7 @@ const StoresData = [
         status: "Pending Verification",
         latitude: 40.7128,
         longitude: -74.0060,
-        taskDoneBy: "Admin"
+        taskDoneBy: "John"
     },
     {
         storeName: "Greenfield Market",
@@ -29,7 +29,7 @@ const StoresData = [
         status: "Rejected",
         latitude: 40.7139,
         longitude: -74.0021,
-        taskDoneBy: "User Alice"
+        taskDoneBy: "Doe"
     }
 ]
 

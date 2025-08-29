@@ -6,10 +6,12 @@ import PunchIn from './PunchIn';
 import StoreTable from '../../components/Punchin/StoreTable';
 import { div } from 'framer-motion/client';
 import { useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 
 const LocationCapture = () => {
     const [isConfirmOpen, setIsConfirmOpen] = useState(false);
     const navigate = useNavigate();
+    const userRole = useSelector((state) => state.user.user.role)
 
 
     return (
@@ -17,11 +19,13 @@ const LocationCapture = () => {
             <div className='location_capture'>
                 <div className="header_section">
                     <div className="header_title">Managed Store Locations</div>
-                    <div className="add_new_button" onClick={() => {
-                        navigate("/punch-in/capture")
-                    }}>
-                        <AiOutlinePlus className='icon' />
-                    </div>
+                    {userRole !== "Admin" &&
+                        (<div className="add_new_button" onClick={() => {
+                            navigate("/punch-in/capture")
+                        }}>
+                            <AiOutlinePlus className='icon' />
+                        </div>)
+                    }
                 </div>
                 <div className="table_section">
                     <StoreTable />

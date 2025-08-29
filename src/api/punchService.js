@@ -12,7 +12,7 @@ export const PunchAPI = {
     },
 
     //post location
-    AddShopLocation: async ({  firm_name, latitude, longitude }) => {
+    AddShopLocation: async ({ firm_name, latitude, longitude }) => {
         try {
             const response = await apiClient.post("/shop-location/", {
                 firm_name,
@@ -23,6 +23,15 @@ export const PunchAPI = {
             return response;
         } catch (error) {
             console.error("Error updating shop location:", error);
+            throw error;
+        }
+    },
+    LocationTable: async () => {
+        try {
+            const res = await apiClient.get('/shop-location/table/')
+            return res
+        } catch (error) {
+            console.error("Error fetching Location Update Table:", error);
             throw error;
         }
     },

@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import './StoreTable.scss'
 import { GoSearch } from 'react-icons/go';
 import { useSelector } from 'react-redux';
@@ -10,28 +10,8 @@ import {
     getPaginationRowModel,
     getFilteredRowModel
 } from '@tanstack/react-table';
+import { PunchAPI } from '../../api/punchService';
 
-
-const StoresData = [
-    {
-        storeName: "Diner",
-        storeLocation: "101 Harbor Street, Anytown",
-        lastCapturedTime: "09:30 AM 2024-02-15",
-        status: "Pending Verification",
-        latitude: 40.7128,
-        longitude: -74.0060,
-        taskDoneBy: "John"
-    },
-    {
-        storeName: "Greenfield Market",
-        storeLocation: "202 Greenfield Drive, Anytown",
-        lastCapturedTime: "02:10 PM 2024-02-14",
-        status: "Rejected",
-        latitude: 40.7139,
-        longitude: -74.0021,
-        taskDoneBy: "Doe"
-    }
-]
 
 
 const StatusCell = ({ initialStatus }) => {
@@ -61,17 +41,34 @@ const StoreTable = () => {
     const [search, setSearch] = useState('')
     const [pageSize, setPageSize] = useState(10)
     const [columnFilters, setColumnFilters] = useState([])
+    const [storesData, setStoresData] = useState([])
 
     const userRole = useSelector((state) => state.user.user.role)
     console.log("userRole :", userRole)
 
 
+    useEffect(() => {
+        const fetchTableData = async () => {
+            try {
+                const response = await PunchAPI.LocationTable();
+                if (response?.data) {
+                    setStoresData(response.data);
+                } else {
+                    console.warn("No data received from API")
+                }
+            } catch (error) {
+                console.error('failed to fetch table data', error)
+            }
+        }
+        fetchTableData()
+    }, [])
+
     const filteredStores = useMemo(() => {
-        return StoresData.filter((store) =>
+        return storesData.filter((store) =>
             store.storeName.toLowerCase().includes(search.toLowerCase()) ||
             store.storeLocation.toLowerCase().includes(search.toLowerCase())
         )
-    }, [search])
+    }, [search,storesData])
 
 
 

@@ -35,7 +35,16 @@ export const PunchAPI = {
             throw error;
         }
     },
-
+    updateStatus: async (statusData) => {
+        console.log("client data:",statusData)
+        try {
+            const response = await apiClient.post("/shop-location/status/", statusData);
+            return response;
+        } catch (error) {
+            console.error("Error Updating location status:", error);
+            throw error;
+        }
+    },
     PunchIN: async (locationData) => {
         try {
             const response = await apiClient.post("/location", locationData);

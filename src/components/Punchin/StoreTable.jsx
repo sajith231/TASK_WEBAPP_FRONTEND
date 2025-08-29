@@ -12,65 +12,82 @@ import {
 } from '@tanstack/react-table';
 import { PunchAPI } from '../../api/punchService';
 
-
-
-const StatusCell = ({ initialStatus }) => {
+const StatusCell = ({ initialStatus, row, onStatusUpdate }) => {
     const [status, setStatus] = useState(initialStatus);
+    const [isUpdating, setIsUpdating] = useState(false);
 
-    const handleChange = (e) => {
-        setStatus(e.target.value);
-        console.log("Updated status:", e.target.value);
+
+    console.log('status :',status)
+    const handleChangeStatus = async (e) => {
+        const newStatus = e.target.value;
+        setStatus(newStatus);
+        setIsUpdating(true);
+        
+        try {
+            // Call API to update status
+            await PunchAPI.updateStatus({"shop_id":row.original.firm_code,"status": newStatus});
+            onStatusUpdate?.(row.original.id, newStatus);
+        } catch (error) {
+            console.error("Failed to update status", error);
+            // Revert to previous status on error
+            setStatus(initialStatus);
+        } finally {
+            setIsUpdating(false);
+        }
     };
 
     return (
-        <select
-            value={status}
-            onChange={handleChange}
-            className={`status-select ${status.replace(/\s+/g, '-').toLowerCase()}`}
-        >
-            <option value="Pending Verification">Pending Verification</option>
-            <option value="Verified">Verified</option>
-            <option value="Rejected">Rejected</option>
-        </select>
+        <div className="status-cell-container">
+            <select
+                value={status}
+                onChange={handleChangeStatus}
+                disabled={isUpdating}
+                className={`status-select ${status.replace(/\s+/g, '-').toLowerCase()}`}
+            >
+                <option value="pending">Pending</option>
+                <option value="verified">Verified</option>
+                <option value="rejected">Rejected</option>
+            </select>
+            {isUpdating && <span className="status-updating-indicator">Updating...</span>}
+        </div>
     );
 };
 
-
-
 const StoreTable = () => {
-    const [search, setSearch] = useState('')
-    const [pageSize, setPageSize] = useState(10)
-    const [columnFilters, setColumnFilters] = useState([])
+    const [globalFilter, setGlobalFilter] = useState('')
     const [storesData, setStoresData] = useState([])
-
+    const [loading, setLoading] = useState(true)
+    const [error, setError] = useState(null)
     const userRole = useSelector((state) => state.user.user.role)
-    console.log("userRole :", userRole)
-
 
     useEffect(() => {
         const fetchTableData = async () => {
             try {
-                const response = await PunchAPI.LocationTable();
+                setLoading(true)
+                const response = await PunchAPI.LocationTable()
+                
                 if (response?.data) {
-                    setStoresData(response.data);
+                    setStoresData(response.data)
                 } else {
                     console.warn("No data received from API")
+                    setError("No data available")
                 }
             } catch (error) {
-                console.error('failed to fetch table data', error)
+                console.error('Failed to fetch table data', error)
+                setError(error.message || "Failed to load data")
+            } finally {
+                setLoading(false)
             }
         }
         fetchTableData()
     }, [])
 
-    const filteredStores = useMemo(() => {
-        return storesData.filter((store) =>
-            store.storeName.toLowerCase().includes(search.toLowerCase()) ||
-            store.storeLocation.toLowerCase().includes(search.toLowerCase())
-        )
-    }, [search,storesData])
-
-
+    const handleStatusUpdate = (id, newStatus) => {
+        // Update local state to reflect the change immediately
+        setStoresData(prev => prev.map(store => 
+            store.id === id ? {...store, status: newStatus} : store
+        ))
+    }
 
     const userColumns = useMemo(() => [
         {
@@ -83,36 +100,38 @@ const StoreTable = () => {
         },
         {
             header: "Last Captured",
-            accessorKey: "lastCapturedTime"
+            accessorKey: "lastCapturedTime",
+            cell: ({ getValue }) => {
+                const value = getValue()
+                return value ? new Date(value).toLocaleString() : 'N/A'
+            }
         },
         {
             header: "Location Map",
             cell: ({ row }) => {
-                const { latitude, longitude } = row.original;
-                const mapsUrl = `https://www.google.com/maps?q=${latitude},${longitude}`;
+                const { latitude, longitude } = row.original
+                if (!latitude || !longitude) return 'N/A'
+                
+                const mapsUrl = `https://www.google.com/maps?q=${latitude},${longitude}`
                 return (
                     <a href={mapsUrl} target="_blank" rel="noopener noreferrer">
                         View on Map
                     </a>
-                );
+                )
             }
         },
         {
             header: "Status",
-            // accessorKey: 'status',
             cell: ({ row }) => {
-                const { status } = row.original;
+                const { status } = row.original
                 return (
-                    <span className={`status-badge ${status.replace(/\s+/g, '-').toLowerCase()}`}>
-                        {status}
+                    <span className={`status-badge ${status?.replace(/\s+/g, '-').toLowerCase() || 'unknown'}`}>
+                        {status || 'N/A'}
                     </span>
                 )
-            },
-            enableColumnFilter: true
-
+            }
         }
-
-    ])
+    ], [])
 
     const adminColumns = useMemo(() => [
         {
@@ -125,60 +144,85 @@ const StoreTable = () => {
         },
         {
             header: "Last Captured",
-            accessorKey: "lastCapturedTime"
+            accessorKey: "lastCapturedTime",
+            cell: ({ getValue }) => {
+                const value = getValue()
+                return value ? new Date(value).toLocaleString() : 'N/A'
+            }
         },
         {
             header: "Updated By",
-            accessorKey: "taskDoneBy"
+            accessorKey: "taskDoneBy",
+            cell: ({ getValue }) => getValue() || 'N/A'
         },
         {
             header: "Location Map",
             cell: ({ row }) => {
-                const { latitude, longitude } = row.original;
-                const mapsUrl = `https://www.google.com/maps?q=${latitude},${longitude}`;
+                const { latitude, longitude } = row.original
+                if (!latitude || !longitude) return 'N/A'
+                
+                const mapsUrl = `https://www.google.com/maps?q=${latitude},${longitude}`
                 return (
                     <a href={mapsUrl} target="_blank" rel="noopener noreferrer">
                         View on Map
                     </a>
-                );
+                )
             }
         },
         {
             header: "Status (Editable)",
             accessorKey: "status",
-            cell: ({ row }) => <StatusCell initialStatus={row.original.status} />
+            cell: ({ row }) => (
+                <StatusCell 
+                    initialStatus={row.original.status} 
+                    row={row}
+                    onStatusUpdate={handleStatusUpdate}
+                />
+            )
         },
-    ])
-
-
-    console.log(userRole)
+    ], [handleStatusUpdate])
 
     const table = useReactTable({
-        data: filteredStores,
+        data: storesData,  // Use the raw data directly
         columns: userRole === "Admin" ? adminColumns : userColumns,
+        state: {
+            globalFilter: globalFilter,
+        },
+        onGlobalFilterChange: setGlobalFilter,
         getCoreRowModel: getCoreRowModel(),
         getPaginationRowModel: getPaginationRowModel(),
+        getFilteredRowModel: getFilteredRowModel(), // Let react-table handle filtering
         initialState: {
-            pagination: { pageSize }
-        },
-        onColumnFiltersChange: setColumnFilters,
-        getFilteredRowModel: getFilteredRowModel()
+            pagination: { pageSize: 10 }
+        }
     })
+
+    if (loading) {
+        return <div className="loading">Loading store data...</div>
+    }
+
+    if (error) {
+        return <div className="error">Error: {error}</div>
+    }
 
     return (
         <div className='table_section'>
-
             {/* Search Section */}
             <div className="search_section">
                 <GoSearch className="search_icon" />
                 <input
                     type="text"
-                    placeholder="Search by store name..."
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
+                    placeholder="Search by store name or location..."
+                    value={globalFilter}
+                    onChange={(e) => setGlobalFilter(e.target.value)}
                     className="search_input"
                 />
             </div>
+
+            {/* Results count */}
+            {/* <div className="results_count">
+                Showing {table.getFilteredRowModel().rows.length} results
+            </div> */}
 
             {/* Table Container */}
             <div className="table_container">
@@ -196,43 +240,56 @@ const StoreTable = () => {
                                 ))}
                             </tr>
                         ))}
-
                     </thead>
                     <tbody>
-                        {table.getRowModel().rows.map((row) => (
-                            <tr key={row.id}>
-                                {row.getVisibleCells().map((cell) => (
-                                    <td
-                                        key={cell.id}
-                                        data-label={cell.column.columnDef.header} // 🔹 mobile label
-                                    >
-                                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                                    </td>
-                                ))}
+                        {table.getRowModel().rows.length > 0 ? (
+                            table.getRowModel().rows.map((row) => (
+                                <tr key={row.id}>
+                                    {row.getVisibleCells().map((cell) => (
+                                        <td
+                                            key={cell.id}
+                                            data-label={cell.column.columnDef.header}
+                                        >
+                                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                                        </td>
+                                    ))}
+                                </tr>
+                            ))
+                        ) : (
+                            <tr>
+                                <td colSpan={userRole === "Admin" ? 6 : 5} className="no-data">
+                                    No stores found matching your search criteria
+                                </td>
                             </tr>
-                        ))}
+                        )}
                     </tbody>
                 </table>
             </div>
-            <div className="pagination_controls">
-                <button onClick={() => table.previousPage()} disabled={!table.getCanPreviousPage()} >
-                    Prev
-                </button>
-                <span>
-                    Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount()}
-                </span>
-                <button onClick={() => table.nextPage()} disabled={!table.getCanNextPage()}>
-                    Next
-                </button>
-                <select value={table.getState().pagination.pageSize}
-                    onChange={(e) => table.setPageSize(Number(e.target.value))} >
-                    {[5, 10, 20].map((size) => (
-                        <option key={size} value={size}>
-                            Show {size}
-                        </option>
-                    ))}
-                </select>
-            </div>
+            
+            {/* Pagination controls */}
+            {table.getPageCount() > 1 && (
+                <div className="pagination_controls">
+                    <button onClick={() => table.previousPage()} disabled={!table.getCanPreviousPage()}>
+                        Previous
+                    </button>
+                    <span>
+                        Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount()}
+                    </span>
+                    <button onClick={() => table.nextPage()} disabled={!table.getCanNextPage()}>
+                        Next
+                    </button>
+                    <select 
+                        value={table.getState().pagination.pageSize}
+                        onChange={(e) => table.setPageSize(Number(e.target.value))}
+                    >
+                        {[5, 10, 20].map((size) => (
+                            <option key={size} value={size}>
+                                Show {size}
+                            </option>
+                        ))}
+                    </select>
+                </div>
+            )}
         </div>
     )
 }

@@ -86,7 +86,7 @@
                 opacity: 0.9;
             }
 
-            &.pending-verification {
+            &.pending {
                 background-color: #fff3cd; // light yellow
                 border-color: #ffeeba;
                 color: #856404; // dark gold text
@@ -114,7 +114,7 @@
             text-align: center;
             white-space: nowrap;
 
-            &.pending-verification {
+            &.pending {
                 background-color: #fff3cd; // light yellow
                 border: 1px solid #ffeeba;
                 color: #856404;

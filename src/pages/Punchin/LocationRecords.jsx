@@ -32,7 +32,7 @@ const LocationCapture = () => {
                         </div>)
                     }
                 </div>
-                <div className="table_section">
+                <div className="">
                     <StoreTable />
                 </div>
 

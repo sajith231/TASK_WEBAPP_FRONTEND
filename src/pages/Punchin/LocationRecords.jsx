@@ -18,12 +18,17 @@ const LocationCapture = () => {
         <div className="all-body">
             <div className='location_capture'>
                 <div className="header_section">
-                    <div className="header_title">Managed Store Locations</div>
+                    <div className="header-tit">
+                        <div className="header_title">Managed Store Locations</div>
+                        <div className="header_sub">Track and manage your store locations </div>
+
+                    </div>
                     {userRole !== "Admin" &&
                         (<div className="add_new_button" onClick={() => {
                             navigate("/punch-in/capture")
                         }}>
                             <AiOutlinePlus className='icon' />
+                            <span className='add-loc-label'>Add Location</span>
                         </div>)
                     }
                 </div>

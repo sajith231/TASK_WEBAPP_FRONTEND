@@ -236,11 +236,11 @@ const Navbar = () => {
                     </li> */}
 
                     {/* Bank & Cash Menu with Dropdown */}
-                    <li className={`menu-item ${isBankCashOpen ? 'active' : ''}`}>
+                    <li className={`menu-item ${isPuchOpen ? 'active' : ''}`}>
                         <div className="menu-main" onClick={() => setIsPunchOpen(!isPuchOpen)}>
                             <FaFingerprint className='icon' />
                             <span>Punch In</span>
-                            {isBankCashOpen ? (
+                            {isPuchOpen ? (
                                 <FaChevronDown className="chevron" />
                             ) : (
                                 <FaChevronRight className="chevron" />

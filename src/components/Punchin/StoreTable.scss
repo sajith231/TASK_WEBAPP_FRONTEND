@@ -12,7 +12,6 @@ $shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.05);
 
 .table_section {
     // Mobile-first base styles (320px and up)
-    // padding: 16px;
     background: white;
     border-radius: 12px;
     margin: 0;
@@ -76,7 +75,7 @@ $shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.05);
         margin-top: 16px;
         border-radius: 8px;
         border: 1px solid $border-light;
-        -webkit-overflow-scrolling: touch; // Smooth scrolling on iOS
+        -webkit-overflow-scrolling: touch;
         
         // Custom scrollbar for mobile
         &::-webkit-scrollbar {
@@ -101,19 +100,36 @@ $shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.05);
             width: 100%;
             border-collapse: collapse;
             font-family: 'Inter', sans-serif;
-            font-size: 13px;
             background: #fff;
-            min-width: 800px; // Increased for better mobile table display
-            table-layout: fixed; // Helps control column widths
+            table-layout: fixed;
 
-            // Define column widths for mobile
+            // Admin view has 6 columns, user view has 5
+            // Use more flexible column widths
             colgroup {
-                col:nth-child(1) { width: 140px; } // Store Name
-                col:nth-child(2) { width: 160px; } // Store Location  
-                col:nth-child(3) { width: 140px; } // Last Captured
-                col:nth-child(4) { width: 120px; } // Updated By / Map
-                col:nth-child(5) { width: 100px; } // Map / Status
-                col:nth-child(6) { width: 140px; } // Status (Admin)
+                // Store Name
+                col:nth-child(1) { 
+                    width: min(160px, 20vw); 
+                }
+                // Store Location
+                col:nth-child(2) { 
+                    width: min(180px, 25vw); 
+                }
+                // Last Captured
+                col:nth-child(3) { 
+                    width: min(150px, 20vw); 
+                }
+                // Updated By (Admin) / Map (User)
+                col:nth-child(4) { 
+                    width: min(130px, 15vw); 
+                }
+                // Map (Admin) / Status (User)
+                col:nth-child(5) { 
+                    width: min(110px, 15vw); 
+                }
+                // Status (Admin) - only for admin view
+                col:nth-child(6) { 
+                    width: min(150px, 20vw); 
+                }
             }
 
             thead {
@@ -361,15 +377,14 @@ $shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.05);
     .table_section {
         .table_container table {
             font-size: 13px;
-            min-width: 820px;
             
             colgroup {
-                col:nth-child(1) { width: 150px; }
-                col:nth-child(2) { width: 170px; }
-                col:nth-child(3) { width: 145px; }
-                col:nth-child(4) { width: 125px; }
-                col:nth-child(5) { width: 105px; }
-                col:nth-child(6) { width: 145px; }
+                col:nth-child(1) { width: min(170px, 22vw); }
+                col:nth-child(2) { width: min(190px, 27vw); }
+                col:nth-child(3) { width: min(160px, 22vw); }
+                col:nth-child(4) { width: min(140px, 17vw); }
+                col:nth-child(5) { width: min(120px, 17vw); }
+                col:nth-child(6) { width: min(160px, 22vw); }
             }
             
             thead th {
@@ -422,15 +437,14 @@ $shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.05);
             
             table {
                 font-size: 14px;
-                min-width: 900px;
                 
                 colgroup {
-                    col:nth-child(1) { width: 160px; }
-                    col:nth-child(2) { width: 180px; }
-                    col:nth-child(3) { width: 150px; }
-                    col:nth-child(4) { width: 130px; }
-                    col:nth-child(5) { width: 110px; }
-                    col:nth-child(6) { width: 150px; }
+                    col:nth-child(1) { width: min(180px, 20vw); }
+                    col:nth-child(2) { width: min(200px, 25vw); }
+                    col:nth-child(3) { width: min(170px, 20vw); }
+                    col:nth-child(4) { width: min(150px, 15vw); }
+                    col:nth-child(5) { width: min(130px, 15vw); }
+                    col:nth-child(6) { width: min(170px, 20vw); }
                 }
                 
                 thead th {
@@ -464,27 +478,12 @@ $shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.05);
     }
 }
 
-/* Large Mobile: 576px and up */
-@media (min-width: 576px) {
-    .table_section {
-        .table_container table {
-            tbody td {
-                &[data-label="Store Name"],
-                &[data-label="Store Location"] {
-                    max-width: 250px;
-                }
-            }
-        }
-    }
-}
-
 /* Tablets: 640px and up */
 @media (min-width: 640px) {
     .table_section {
         .table_container {
             table {
                 font-size: 15px;
-                min-width: 1000px;
                 table-layout: auto; // Allow more natural column sizing
                 
                 thead th {
@@ -519,12 +518,6 @@ $shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.05);
 /* Small Desktop: 768px and up */
 @media (min-width: 768px) {
     .table_section {
-        // padding: 24px;
-
-        .search_section {
-            margin-bottom: 24px;
-        }
-
         .table_container {
             margin-top: 24px;
             
@@ -567,8 +560,6 @@ $shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.05);
 /* Desktop: 1024px and up */
 @media (min-width: 1024px) {
     .table_section {
-        // padding: 28px;
-
         .table_container {
             table {
                 thead th {
@@ -587,29 +578,6 @@ $shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.05);
 
         .pagination_controls {
             margin-top: 28px;
-        }
-    }
-}
-
-/* Large Desktop: 1280px and up */
-@media (min-width: 1280px) {
-    .table_section {
-        // padding: 32px;
-
-        .table_container {
-            table {
-                thead th {
-                    padding: 20px 18px;
-                }
-
-                tbody td {
-                    padding: 20px 18px;
-                }
-            }
-        }
-
-        .pagination_controls {
-            margin-top: 32px;
         }
     }
 }
@@ -646,4 +614,4 @@ $shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.05);
             transition: none;
         }
     }
-}
+}   

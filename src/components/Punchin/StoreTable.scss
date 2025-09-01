@@ -12,6 +12,7 @@ $shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.05);
 
 .table_section {
     // Mobile-first base styles (320px and up)
+    padding: 16px;
     background: white;
     border-radius: 12px;
     margin: 0;
@@ -71,83 +72,33 @@ $shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.05);
     .table_container {
         width: 100%;
         overflow-x: auto;
-        overflow-y: visible;
         margin-top: 16px;
         border-radius: 8px;
         border: 1px solid $border-light;
-        -webkit-overflow-scrolling: touch;
         
-        // Custom scrollbar for mobile
-        &::-webkit-scrollbar {
-            height: 4px;
-        }
-        
-        &::-webkit-scrollbar-track {
-            background: #f1f5f9;
-            border-radius: 2px;
-        }
-        
-        &::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 2px;
-            
-            &:hover {
-                background: #94a3b8;
-            }
-        }
-        
+        // Mobile-first: Card-based layout
         table {
             width: 100%;
             border-collapse: collapse;
             font-family: 'Inter', sans-serif;
+            font-size: 14px;
             background: #fff;
-            table-layout: fixed;
-
-            // Admin view has 6 columns, user view has 5
-            // Use more flexible column widths
-            colgroup {
-                // Store Name
-                col:nth-child(1) { 
-                    width: min(160px, 20vw); 
-                }
-                // Store Location
-                col:nth-child(2) { 
-                    width: min(180px, 25vw); 
-                }
-                // Last Captured
-                col:nth-child(3) { 
-                    width: min(150px, 20vw); 
-                }
-                // Updated By (Admin) / Map (User)
-                col:nth-child(4) { 
-                    width: min(130px, 15vw); 
-                }
-                // Map (Admin) / Status (User)
-                col:nth-child(5) { 
-                    width: min(110px, 15vw); 
-                }
-                // Status (Admin) - only for admin view
-                col:nth-child(6) { 
-                    width: min(150px, 20vw); 
-                }
-            }
+            min-width: 600px; // Ensures horizontal scroll on small screens
 
             thead {
                 background: #f8fafc;
                 position: sticky;
                 top: 0;
-                z-index: 10;
+                z-index: 2;
 
                 th {
                     text-align: left;
-                    padding: 10px 6px;
+                    padding: 12px 8px;
                     font-weight: 600;
                     color: $text-primary;
                     border-bottom: 2px solid $border-light;
                     white-space: nowrap;
-                    font-size: 12px;
-                    overflow: hidden;
-                    text-overflow: ellipsis;
+                    font-size: 13px;
                     
                     &:first-child {
                         padding-left: 12px;
@@ -174,14 +125,11 @@ $shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.05);
                 }
 
                 td {
-                    padding: 10px 6px;
+                    padding: 12px 8px;
                     color: $text-primary;
                     vertical-align: middle;
-                    font-size: 13px;
+                    font-size: 14px;
                     line-height: 1.4;
-                    overflow: hidden;
-                    text-overflow: ellipsis;
-                    white-space: nowrap;
                     
                     &:first-child {
                         padding-left: 12px;
@@ -191,19 +139,20 @@ $shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.05);
                         padding-right: 12px;
                     }
 
-                    // Allow wrapping for certain columns on mobile
-                    &[data-label="Last Captured"] {
-                        white-space: normal;
-                        font-size: 12px;
-                        line-height: 1.3;
+                    // Mobile: Handle long text
+                    &[data-label="Store Name"],
+                    &[data-label="Store Location"] {
+                        max-width: 150px;
+                        white-space: nowrap;
+                        overflow: hidden;
+                        text-overflow: ellipsis;
                     }
 
                     // Map links
                     a {
                         color: $primary-blue;
                         text-decoration: none;
-                        font-size: 12px;
-                        display: inline-block;
+                        font-size: 13px;
                         
                         &:hover {
                             text-decoration: underline;
@@ -213,27 +162,25 @@ $shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.05);
 
                 .no-data {
                     text-align: center;
-                    padding: 30px 15px;
+                    padding: 40px 20px;
                     color: $text-secondary;
                     font-style: italic;
-                    white-space: normal;
                 }
             }
         }
 
         // Status components
         .status-select {
-            padding: 4px 6px;
-            border-radius: 4px;
-            font-size: 11px;
+            padding: 6px 8px;
+            border-radius: 6px;
+            font-size: 12px;
             font-weight: 500;
             border: 1px solid #ccc;
             outline: none;
             cursor: pointer;
             transition: all 0.2s ease;
             width: 100%;
-            max-width: 90px;
-            min-width: 80px;
+            max-width: 120px;
 
             &:hover {
                 opacity: 0.9;
@@ -260,16 +207,13 @@ $shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.05);
 
         .status-badge {
             display: inline-block;
-            padding: 3px 6px;
-            border-radius: 8px;
-            font-size: 10px;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 11px;
             font-weight: 600;
             text-align: center;
             white-space: nowrap;
-            min-width: 50px;
-            max-width: 80px;
-            overflow: hidden;
-            text-overflow: ellipsis;
+            min-width: 60px;
 
             &.pending {
                 background-color: #fff3cd;
@@ -299,16 +243,12 @@ $shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.05);
         .status-cell-container {
             display: flex;
             flex-direction: column;
-            gap: 2px;
-            min-width: 90px;
+            gap: 4px;
 
             .status-updating-indicator {
-                font-size: 9px;
+                font-size: 10px;
                 color: $text-secondary;
                 font-style: italic;
-                white-space: nowrap;
-                overflow: hidden;
-                text-overflow: ellipsis;
             }
         }
     }
@@ -375,37 +315,27 @@ $shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.05);
 /* Small Mobile: 375px and up */
 @media (min-width: 375px) {
     .table_section {
-        .table_container table {
-            font-size: 13px;
+        .search_section .search_input {
+            font-size: 15px;
             
-            colgroup {
-                col:nth-child(1) { width: min(170px, 22vw); }
-                col:nth-child(2) { width: min(190px, 27vw); }
-                col:nth-child(3) { width: min(160px, 22vw); }
-                col:nth-child(4) { width: min(140px, 17vw); }
-                col:nth-child(5) { width: min(120px, 17vw); }
-                col:nth-child(6) { width: min(160px, 22vw); }
+            &::placeholder {
+                font-size: 15px;
             }
+        }
+
+        .table_container table {
+            font-size: 14px;
             
             thead th {
-                font-size: 12px;
-                padding: 11px 7px;
+                font-size: 14px;
             }
             
             tbody td {
-                font-size: 13px;
-                padding: 11px 7px;
+                &[data-label="Store Name"],
+                &[data-label="Store Location"] {
+                    max-width: 180px;
+                }
             }
-        }
-
-        .status-select {
-            font-size: 11px;
-            max-width: 95px;
-        }
-
-        .status-badge {
-            font-size: 10px;
-            max-width: 85px;
         }
     }
 }
@@ -436,39 +366,13 @@ $shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.05);
             margin-top: 20px;
             
             table {
-                font-size: 14px;
-                
-                colgroup {
-                    col:nth-child(1) { width: min(180px, 20vw); }
-                    col:nth-child(2) { width: min(200px, 25vw); }
-                    col:nth-child(3) { width: min(170px, 20vw); }
-                    col:nth-child(4) { width: min(150px, 15vw); }
-                    col:nth-child(5) { width: min(130px, 15vw); }
-                    col:nth-child(6) { width: min(170px, 20vw); }
-                }
-                
-                thead th {
-                    font-size: 13px;
-                    padding: 12px 8px;
-                }
-                
                 tbody td {
-                    font-size: 14px;
-                    padding: 12px 8px;
+                    &[data-label="Store Name"],
+                    &[data-label="Store Location"] {
+                        max-width: 200px;
+                    }
                 }
             }
-        }
-
-        .status-select {
-            font-size: 12px;
-            max-width: 110px;
-            padding: 5px 7px;
-        }
-
-        .status-badge {
-            font-size: 11px;
-            max-width: 95px;
-            padding: 4px 7px;
         }
 
         .pagination_controls {
@@ -478,13 +382,26 @@ $shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.05);
     }
 }
 
+/* Large Mobile: 576px and up */
+@media (min-width: 576px) {
+    .table_section {
+        .table_container table {
+            tbody td {
+                &[data-label="Store Name"],
+                &[data-label="Store Location"] {
+                    max-width: 250px;
+                }
+            }
+        }
+    }
+}
+
 /* Tablets: 640px and up */
 @media (min-width: 640px) {
     .table_section {
         .table_container {
             table {
-                font-size: 15px;
-                table-layout: auto; // Allow more natural column sizing
+                font-size: 12px;
                 
                 thead th {
                     padding: 14px 12px;
@@ -493,10 +410,15 @@ $shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.05);
 
                 tbody td {
                     padding: 14px 12px;
-                    font-size: 15px;
-                    white-space: normal; // Allow text wrapping
-                    overflow: visible;
-                    text-overflow: initial;
+                    font-size: 10px;
+                    
+                    &[data-label="Store Name"],
+                    &[data-label="Store Location"] {
+                        max-width: none;
+                        white-space: normal;
+                        overflow: visible;
+                        text-overflow: initial;
+                    }
                 }
             }
         }
@@ -504,13 +426,11 @@ $shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.05);
         .status-select {
             font-size: 13px;
             padding: 7px 10px;
-            max-width: 130px;
         }
 
         .status-badge {
             font-size: 12px;
             padding: 5px 10px;
-            max-width: 110px;
         }
     }
 }
@@ -518,12 +438,17 @@ $shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.05);
 /* Small Desktop: 768px and up */
 @media (min-width: 768px) {
     .table_section {
+        padding: 24px;
+
+        .search_section {
+            margin-bottom: 24px;
+        }
+
         .table_container {
             margin-top: 24px;
             
             table {
                 min-width: auto; // Remove forced horizontal scroll
-                table-layout: auto; // Natural column sizing
                 
                 thead th {
                     padding: 16px 14px;
@@ -532,7 +457,7 @@ $shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.05);
 
                 tbody td {
                     padding: 16px 14px;
-                    font-size: 16px;
+                    font-size: 13px;
                 }
             }
         }
@@ -540,13 +465,12 @@ $shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.05);
         .status-select {
             font-size: 14px;
             padding: 8px 12px;
-            max-width: 150px;
+            max-width: 140px;
         }
 
         .status-badge {
             font-size: 13px;
             padding: 6px 12px;
-            max-width: 120px;
         }
 
         .pagination_controls {
@@ -560,6 +484,8 @@ $shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.05);
 /* Desktop: 1024px and up */
 @media (min-width: 1024px) {
     .table_section {
+        padding: 28px;
+
         .table_container {
             table {
                 thead th {
@@ -578,6 +504,29 @@ $shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.05);
 
         .pagination_controls {
             margin-top: 28px;
+        }
+    }
+}
+
+/* Large Desktop: 1280px and up */
+@media (min-width: 1280px) {
+    .table_section {
+        padding: 32px;
+
+        .table_container {
+            table {
+                thead th {
+                    padding: 20px 18px;
+                }
+
+                tbody td {
+                    padding: 20px 18px;
+                }
+            }
+        }
+
+        .pagination_controls {
+            margin-top: 32px;
         }
     }
 }
@@ -614,4 +563,4 @@ $shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.05);
             transition: none;
         }
     }
-}   
+}

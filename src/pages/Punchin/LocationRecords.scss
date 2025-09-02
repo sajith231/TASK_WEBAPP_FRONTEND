@@ -1,5 +1,8 @@
 // Mobile-First: location capture - Enhanced Responsive Design
 
+/* Import color functions for modern Sass */
+@use "sass:color";
+
 /* Variables */
 $bg: rgb(249 250 251);
 $text: #1e293b;
@@ -55,7 +58,7 @@ $shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
 
     .add_new_button {
         padding: 10px 16px;
-        background: linear-gradient(135deg, $accent 0%, lighten($accent, 5%) 100%);
+        background: linear-gradient(135deg, $accent 0%, color.adjust($accent, $lightness: 5%) 100%);
         color: white;
         font-size: 0.85rem;
         font-weight: 600;

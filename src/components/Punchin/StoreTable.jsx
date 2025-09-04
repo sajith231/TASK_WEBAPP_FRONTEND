@@ -91,11 +91,11 @@ const StoreTable = () => {
 
     const userColumns = useMemo(() => [
         {
-            header: "Store Name",
+            header: "Store",
             accessorKey: "storeName"
         },
         {
-            header: "Store Location",
+            header: "Address",
             accessorKey: "storeLocation"
         },
         {
@@ -107,7 +107,7 @@ const StoreTable = () => {
             }
         },
         {
-            header: "Location Map",
+            header: "View Location",
             cell: ({ row }) => {
                 const { latitude, longitude } = row.original
                 if (!latitude || !longitude) return 'N/A'
@@ -121,7 +121,7 @@ const StoreTable = () => {
             }
         },
         {
-            header: "Status",
+            header: " Status",
             cell: ({ row }) => {
                 const { status } = row.original
                 return (
@@ -135,11 +135,11 @@ const StoreTable = () => {
 
     const adminColumns = useMemo(() => [
         {
-            header: "Store Name",
+            header: "Store",
             accessorKey: "storeName"
         },
         {
-            header: "Store Location",
+            header: "Address",
             accessorKey: "storeLocation"
         },
         {
@@ -156,7 +156,7 @@ const StoreTable = () => {
             cell: ({ getValue }) => getValue() || 'N/A'
         },
         {
-            header: "Location Map",
+            header: "View Location",
             cell: ({ row }) => {
                 const { latitude, longitude } = row.original
                 if (!latitude || !longitude) return 'N/A'
@@ -170,7 +170,7 @@ const StoreTable = () => {
             }
         },
         {
-            header: "Status (Editable)",
+            header: "Approval Status",
             accessorKey: "status",
             cell: ({ row }) => (
                 <StatusCell 

@@ -37,36 +37,60 @@ const useDebounce = (value, delay) => {
   return debouncedValue;
 };
 
+// Memoized customer item component
+const CustomerItem = React.memo(({ customer, onSelect, itemHeight }) => {
+  const handleClick = useCallback(() => {
+    onSelect(customer);
+  }, [customer, onSelect]);
+
+  return (
+    <div
+      className="customer"
+      onClick={handleClick}
+      style={{ height: itemHeight }}
+    >
+      {customer.firm_name || customer.customerName || "Unnamed Customer"}
+      <div className="list_icons">
+        {customer.latitude ? (
+          <IoLocation style={{ color: "#0bb838" }} />
+        ) : (
+          <MdNotListedLocation style={{ color: "red" }} />
+        )}
+      </div>
+    </div>
+  );
+});
+
 // Virtualized list component for rendering only visible items
-const VirtualizedCustomerList = ({ customers, onSelect, searchTerm }) => {
+const VirtualizedCustomerList = React.memo(({ customers, onSelect, searchTerm }) => {
   const containerRef = useRef(null);
   const [visibleRange, setVisibleRange] = useState({ start: 0, end: 20 });
   const itemHeight = 50; // Approximate height of each customer item
 
-  useEffect(() => {
-    const calculateVisibleRange = () => {
-      if (!containerRef.current) return;
-      
-      const scrollTop = containerRef.current.scrollTop;
-      const clientHeight = containerRef.current.clientHeight;
-      
-      const start = Math.max(0, Math.floor(scrollTop / itemHeight) - 5);
-      const end = Math.min(
-        customers.length,
-        start + Math.ceil(clientHeight / itemHeight) + 10
-      );
-      
-      setVisibleRange({ start, end });
-    };
+  const calculateVisibleRange = useCallback(() => {
+    if (!containerRef.current) return;
+    
+    const scrollTop = containerRef.current.scrollTop;
+    const clientHeight = containerRef.current.clientHeight;
+    
+    const start = Math.max(0, Math.floor(scrollTop / itemHeight) - 5);
+    const end = Math.min(
+      customers.length,
+      start + Math.ceil(clientHeight / itemHeight) + 10
+    );
+    
+    setVisibleRange({ start, end });
+  }, [customers.length, itemHeight]);
 
+  useEffect(() => {
     const container = containerRef.current;
     if (container) {
-      container.addEventListener('scroll', calculateVisibleRange);
+      container.addEventListener('scroll', calculateVisibleRange, { passive: true });
       calculateVisibleRange(); // Initial calculation
       
       return () => container.removeEventListener('scroll', calculateVisibleRange);
     }
-  }, [customers.length, itemHeight]);
+  }, [calculateVisibleRange]);
 
   // Calculate padding to maintain scroll height
   const topPadding = visibleRange.start * itemHeight;
@@ -80,28 +104,19 @@ const VirtualizedCustomerList = ({ customers, onSelect, searchTerm }) => {
     >
       <div style={{ height: topPadding }} />
       {customers.slice(visibleRange.start, visibleRange.end).map((customer) => (
-        <div
+        <CustomerItem
           key={customer.id}
-          className="customer"
-          onClick={() => onSelect(customer)}
-          style={{ height: itemHeight }}
-        >
-          {customer.firm_name || customer.customerName || "Unnamed Customer"}
-          <div className="list_icons">
-            {customer.latitude ? (
-              <IoLocation style={{ color: "#0bb838" }} />
-            ) : (
-              <MdNotListedLocation style={{ color: "red" }} />
-            )}
-          </div>
-        </div>
+          customer={customer}
+          onSelect={onSelect}
+          itemHeight={itemHeight}
+        />
       ))}
       <div style={{ height: bottomPadding }} />
     </div>
   );
-};
+});
 
-const StoreLocationCapture = () => {
+const StoreLocationCapture = React.memo(() => {
   // ------------------ State ------------------
   const [customers, setCustomers] = useState([]);
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -110,13 +125,34 @@ const StoreLocationCapture = () => {
   const [isLoading, setIsLoading] = useState(false);
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
 
-  // ------------------ Fetch Customers ------------------
+  // ------------------ Fetch Customers with caching ------------------
   useEffect(() => {
     const fetchCustomers = async () => {
       try {
         setIsLoading(true);
+        // Check if data is already cached
+        const cachedData = sessionStorage.getItem('customers_data');
+        if (cachedData) {
+          const parsedData = JSON.parse(cachedData);
+          const cacheTime = parsedData.timestamp;
+          const now = Date.now();
+          // Cache for 5 minutes
+          if (now - cacheTime < 5 * 60 * 1000) {
+            setCustomers(parsedData.firms || []);
+            setIsLoading(false);
+            return;
+          }
+        }
+        
         const response = await PunchAPI.getFirms();
-        setCustomers(response.firms || []);
+        const firms = response.firms || [];
+        setCustomers(firms);
+        
+        // Cache the data
+        sessionStorage.setItem('customers_data', JSON.stringify({
+          firms,
+          timestamp: Date.now()
+        }));
       } catch (err) {
         console.error("Failed to fetch firms", err);
       } finally {
@@ -203,7 +239,6 @@ const StoreLocationCapture = () => {
         )}
       </div>
     </div>
-  );
-};
-
+  )
+})
 export default StoreLocationCapture;

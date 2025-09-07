@@ -1,7 +1,6 @@
 // utils/geoDis.js
 
 export function distanceKm(lat1, lon1, lat2, lon2) {
-    console.log(lat1, lon1, lat2, lon2)
     const toRad = (deg) => (deg * Math.PI) / 180;
     const R = 6371; // Earth radius in km
 

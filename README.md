@@ -22,6 +22,12 @@ A React + Vite frontend for a punch-in / task-tracking application. This README 
 - Tests & next steps
 - Troubleshooting
 
+## 📚 Documentation
+
+- **[Project Structure](docs/PROJECT_STRUCTURE.md)** - Detailed breakdown of the feature-based architecture
+- **[API Consolidation](docs/API_CONSOLIDATION.md)** - API client documentation and usage guide
+- **[Production Checklist](docs/PRODUCTION_CHECKLIST.md)** - Pre-deployment verification checklist
+
 ## Scripts & dev commands
 
 All scripts come from `package.json`:
@@ -56,7 +62,28 @@ Recommended Node: 18+ (use the same Node major across CI/dev machines).
 
 DevDeps include ESLint, types for React, and Vite tooling.
 
-## Project layout (actual)
+## Project layout (current structure)
+
+The project now uses a **feature-based architecture** for better scalability and maintainability:
+
+```
+src/
+├── app/                    # App-level configuration
+│   └── config.js          # Environment and API configuration
+├── components/             # Shared/reusable components
+│   ├── ui/                # UI components (modals, dropdowns, etc.)
+│   └── layout/            # Layout components (navbar, etc.)
+├── features/              # Feature-based modules
+│   ├── auth/              # Authentication feature
+│   ├── dashboard/         # Dashboard functionality
+│   ├── finance/           # Financial features (bank, cash, debtors)
+│   └── punchin/           # Punch-in related features
+├── services/              # API clients and HTTP services
+├── store/                 # Redux store configuration
+└── utils/                 # Utility functions and helpers
+```
+
+📖 **For detailed breakdown:** See [docs/PROJECT_STRUCTURE.md](docs/PROJECT_STRUCTURE.md)
 
 - src/
   - api/ (PunchAPI client exists)

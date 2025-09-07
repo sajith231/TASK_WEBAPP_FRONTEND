@@ -69,7 +69,6 @@ export function initHybridMap(
     // If Google responds (even one tile), mark as working
     const markGoogleWorking = () => {
         if (!googleResponded) {
-            console.log("Google tiles responded, keeping Google.");
             googleResponded = true;
             clearTimeout(fallbackTimeout);
         }

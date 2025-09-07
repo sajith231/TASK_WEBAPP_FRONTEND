@@ -1,0 +1,85 @@
+import { Routes, Route, useLocation } from 'react-router-dom';
+import Login from '../features/auth/pages/Login';
+import DashboardAdmin from '../features/dashboard/pages/Dashboard_admin';
+import DashboardUser from '../features/dashboard/pages/Dashboard_user';
+import ProtectedRoute from '../features/auth/components/ProtectedRoute';
+import Navbar from '../components/layout/Navbar';
+import Debtors from '../features/finance/pages/Debtors';
+import BankBook from "../features/finance/pages/BankBook";
+import CashBook from "../features/finance/pages/CashBook";
+import CashBookLedger from "../features/finance/pages/CashBookLedger";
+import BankBookLedger from "../features/finance/pages/BankBookLedger";
+import PunchIn from '../features/punchin/pages/PunchIn';
+import NotFound from '../components/ui/NotFound';
+import LocationCapture from '../features/punchin/pages/LocationRecords';
+import StoreLocationCapture from '../features/punchin/pages/StoreLocationCapture';
+
+const AppLayout = () => {
+    const location = useLocation();
+    const hideNavbarRoutes = ['/', '/login'];
+
+    return (
+        <>
+            {!hideNavbarRoutes.includes(location.pathname) && <Navbar />}
+
+            <Routes>
+                <Route path="/" element={<Login />} />
+
+                <Route
+                    path="/dashboard/admin"
+                    element={
+                        <ProtectedRoute>
+                            <DashboardAdmin />
+                        </ProtectedRoute>
+                    }
+                />
+
+                <Route
+                    path="/dashboard/user"
+                    element={
+                        <ProtectedRoute>
+                            <DashboardUser />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/debtors"
+                    element={<ProtectedRoute><Debtors /></ProtectedRoute>}
+                />
+                <Route
+                    path="/cash-book"
+                    element={<ProtectedRoute><CashBook /></ProtectedRoute>}
+                />
+                <Route
+                    path="/cash-book-ledger"
+                    element={<ProtectedRoute><CashBookLedger /></ProtectedRoute>}
+                />
+                <Route
+                    path="/bank-book"
+                    element={<ProtectedRoute><BankBook /></ProtectedRoute>}
+                />
+                <Route
+                    path="/bank-book-ledger"
+                    element={<ProtectedRoute><BankBookLedger /></ProtectedRoute>}
+                />
+
+                <Route
+                    path="/punch-in"
+                    element={<LocationCapture />}
+                />
+                <Route path='/punch-in/capture' element={<StoreLocationCapture />} />
+
+                <Route
+                    path='/*'
+                    element={<NotFound />}
+                />
+            </Routes>
+        </>
+    );
+};
+
+function App() {
+    return <AppLayout />;
+}
+
+export default App;

@@ -64,10 +64,10 @@ const AppLayout = () => {
                 />
 
                 <Route
-                    path="/punch-in"
+                    path="/punch-in/location"
                     element={<LocationCapture />}
                 />
-                <Route path='/punch-in/capture' element={<StoreLocationCapture />} />
+                <Route path='/punch-in/location/capture' element={<StoreLocationCapture />} />
 
                 <Route
                     path='/*'

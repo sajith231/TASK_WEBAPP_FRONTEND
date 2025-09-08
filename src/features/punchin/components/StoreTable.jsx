@@ -21,10 +21,10 @@ const StatusCell = ({ initialStatus, row, onStatusUpdate }) => {
         const newStatus = e.target.value;
         setStatus(newStatus);
         setIsUpdating(true);
-        
+
         try {
             // Call API to update status
-            await PunchAPI.updateStatus({"shop_id":row.original.firm_code,"status": newStatus});
+            await PunchAPI.updateStatus({ "shop_id": row.original.firm_code, "status": newStatus });
             onStatusUpdate?.(row.original.id, newStatus);
         } catch (error) {
             console.error("Failed to update status", error);
@@ -64,7 +64,7 @@ const StoreTable = () => {
             try {
                 setLoading(true)
                 const response = await PunchAPI.LocationTable()
-                
+
                 if (response?.data) {
                     setStoresData(response.data)
                 } else {
@@ -83,8 +83,8 @@ const StoreTable = () => {
 
     const handleStatusUpdate = (id, newStatus) => {
         // Update local state to reflect the change immediately
-        setStoresData(prev => prev.map(store => 
-            store.id === id ? {...store, status: newStatus} : store
+        setStoresData(prev => prev.map(store =>
+            store.id === id ? { ...store, status: newStatus } : store
         ))
     }
 
@@ -110,7 +110,7 @@ const StoreTable = () => {
             cell: ({ row }) => {
                 const { latitude, longitude } = row.original
                 if (!latitude || !longitude) return 'N/A'
-                
+
                 const mapsUrl = `https://www.google.com/maps?q=${latitude},${longitude}`
                 return (
                     <a href={mapsUrl} target="_blank" rel="noopener noreferrer">
@@ -159,7 +159,7 @@ const StoreTable = () => {
             cell: ({ row }) => {
                 const { latitude, longitude } = row.original
                 if (!latitude || !longitude) return 'N/A'
-                
+
                 const mapsUrl = `https://www.google.com/maps?q=${latitude},${longitude}`
                 return (
                     <a href={mapsUrl} target="_blank" rel="noopener noreferrer">
@@ -172,8 +172,8 @@ const StoreTable = () => {
             header: "Approval Status",
             accessorKey: "status",
             cell: ({ row }) => (
-                <StatusCell 
-                    initialStatus={row.original.status} 
+                <StatusCell
+                    initialStatus={row.original.status}
                     row={row}
                     onStatusUpdate={handleStatusUpdate}
                 />
@@ -206,6 +206,7 @@ const StoreTable = () => {
 
     return (
         <div className='table_section'>
+            <h4 className="table_title">Recently Added Store Locations</h4>
             {/* Search Section */}
             <div className="search_section">
                 <GoSearch className="search_icon" />
@@ -264,7 +265,7 @@ const StoreTable = () => {
                     </tbody>
                 </table>
             </div>
-            
+
             {/* Pagination controls */}
             {table.getPageCount() > 1 && (
                 <div className="pagination_controls">
@@ -277,7 +278,7 @@ const StoreTable = () => {
                     <button onClick={() => table.nextPage()} disabled={!table.getCanNextPage()}>
                         Next
                     </button>
-                    <select 
+                    <select
                         value={table.getState().pagination.pageSize}
                         onChange={(e) => table.setPageSize(Number(e.target.value))}
                     >

@@ -11,8 +11,11 @@ import CashBookLedger from "../features/finance/pages/CashBookLedger";
 import BankBookLedger from "../features/finance/pages/BankBookLedger";
 import PunchIn from '../features/punchin/pages/PunchIn';
 import NotFound from '../components/ui/NotFound';
-import LocationCapture from '../features/punchin/pages/LocationRecords';
+// import LocationCapture from '../features/punchin/pages/LocationRecords';
 import StoreLocationCapture from '../features/punchin/pages/StoreLocationCapture';
+import LocationRecords from '../features/punchin/pages/LocationRecords';
+import PunchinRecords from '../features/punchin/pages/PunchinRecords';
+import PunchInCapture from '../features/punchin/pages/PunchInCapture';
 
 const AppLayout = () => {
     const location = useLocation();
@@ -65,9 +68,15 @@ const AppLayout = () => {
 
                 <Route
                     path="/punch-in/location"
-                    element={<LocationCapture />}
+                    element={<LocationRecords />}
                 />
                 <Route path='/punch-in/location/capture' element={<StoreLocationCapture />} />
+
+                <Route
+                    path="/punch-in"
+                    element={<PunchinRecords />}
+                />
+                <Route path='/punch-in/capture' element={<PunchInCapture />} />
 
                 <Route
                     path='/*'

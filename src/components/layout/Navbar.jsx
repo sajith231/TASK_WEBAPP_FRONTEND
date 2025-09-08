@@ -255,7 +255,7 @@ const Navbar = () => {
                                     <FaMoneyBillWave style={{ marginRight: '8px' }} />
                                     <span>Location Capture</span>
                                 </li>
-                                <li onClick={() => handleNavigation('/bank-book')}>
+                                <li onClick={() => handleNavigation('/punch-in')}>
                                     <FaUniversity style={{ marginRight: '8px' }} />
                                     <span>PunchIn Details  </span>
                                 </li>

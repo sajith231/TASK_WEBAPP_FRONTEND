@@ -8,7 +8,7 @@ import { div } from 'framer-motion/client';
 import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 
-const LocationRecords = () => {
+const PunchinRecords = () => {
     const [isConfirmOpen, setIsConfirmOpen] = useState(false);
     const navigate = useNavigate();
     const userRole = useSelector((state) => state.auth?.user?.role)
@@ -25,7 +25,7 @@ const LocationRecords = () => {
                     </div>
                     {userRole !== "Admin" &&
                         (<div className="add_new_button" onClick={() => {
-                            navigate("/punch-in/location/capture")
+                            navigate("/punch-in/capture")
                         }}>
                             <AiOutlinePlus className='icon' />
                             <span className='add-loc-label'>Add Location</span>
@@ -35,15 +35,10 @@ const LocationRecords = () => {
                 <div className="">
                     <StoreTable />
                 </div>
-
-
-                {/* <BaseModal isOpen={isConfirmOpen} onClose={() => setIsConfirmOpen(false)}>
-                    <PunchIn />
-                </BaseModal> */}
             </div>
         </div>
 
     )
 }
 
-export default LocationRecords
+export default PunchinRecords

@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import '../styles/LocationRecords.scss'
+import '../styles/PunchinRecords.scss'
 import { AiOutlinePlus } from 'react-icons/ai'
 import BaseModal from '../../../components/ui/Modal/BaseModal';
 import PunchIn from './PunchIn';
@@ -19,8 +19,8 @@ const PunchinRecords = () => {
             <div className='location_capture'>
                 <div className="header_section">
                     <div className="header-tit">
-                        <div className="header_title">Manage Store Locations</div>
-                        <div className="header_sub">Track and manage your store locations </div>
+                        <div className="header_title">Select Store To punchin</div>
+                        <div className="header_sub">select store to puchin  </div>
 
                     </div>
                     {userRole !== "Admin" &&
@@ -28,16 +28,16 @@ const PunchinRecords = () => {
                             navigate("/punch-in/capture")
                         }}>
                             <AiOutlinePlus className='icon' />
-                            <span className='add-loc-label'>Add Location</span>
+                            <span className='add-loc-label'>Punch in</span>
                         </div>)
                     }
                 </div>
                 <div className="">
-                    <StoreTable />
+                    {/* this section for showing recent punch in records ,limit 5 */}
+                    {/* <StoreTable /> */}
                 </div>
             </div>
         </div>
-
     )
 }
 

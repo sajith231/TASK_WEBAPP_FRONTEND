@@ -1,9 +1,8 @@
 import React, { useEffect, useRef, useState } from "react";
 import "../styles/punchin.scss";
-
 // Components
 import ConfirmModal from "../../../components/ui/Modal/ConfirmModal";
-
+import 'leaflet/dist/leaflet.css';
 // Icons
 import {
     IoCameraReverse,
@@ -22,14 +21,12 @@ import { RiDeleteBinLine } from "react-icons/ri";
 import { FaRegClock } from "react-icons/fa";
 
 // Utils
-import { initHybridMap, setViewAndMarker } from "../../../utils/mapHelpers";
+import { addAccuracyCircle, initHybridMap, setViewAndMarker } from "../../../utils/mapHelpers";
 import { getCurrentPosition } from "../../../hooks/useGeolocation";
 import { distanceKm } from "../../../utils/geoDis";
 import { PunchAPI } from "../services/punchService";
 
-const Punchin = ({ selectedCustomer: customerProp }) => {
-    const [selectedCustomer, setSelectedCustomer] = useState(customerProp || null);
-
+const Punchin = ({ selectedCustomer }) => {
     const [showCamera, setShowCamera] = useState(false);
     const [capturedImage, setCapturedImage] = useState(null);
     const [capturedLocation, setCapturedLocation] = useState(null);
@@ -44,6 +41,7 @@ const Punchin = ({ selectedCustomer: customerProp }) => {
     const markerRef = useRef(null);
     const mapContainerRef = useRef(null);
 
+ 
     // Camera lifecycle
     useEffect(() => {
         if (showCamera) {
@@ -117,30 +115,49 @@ const Punchin = ({ selectedCustomer: customerProp }) => {
     // ------------------ Location & Map ------------------
     const getLocation = async () => {
         try {
+            console.log('Getting location...');
             const pos = await getCurrentPosition();
             const newLoc = {
                 latitude: pos.coords.latitude,
                 longitude: pos.coords.longitude,
             };
+            console.log('Location obtained:', newLoc);
             setCapturedLocation(newLoc);
 
             if (mapRef.current) {
+                console.log('Setting view and marker on map...');
                 setViewAndMarker(mapRef.current, markerRef, newLoc.latitude, newLoc.longitude, 19);
+                addAccuracyCircle(mapRef.current, newLoc.latitude, newLoc.longitude, pos.coords.accuracy);
+
+            } else {
+                console.error('Map ref is null when trying to set location');
             }
         } catch (err) {
             console.error("Error fetching location:", err.message || err);
         }
     };
 
-    // Init map when container is ready
+    // Better map initialization - adopting AddLocation pattern
     useEffect(() => {
-        if (!mapContainerRef.current || mapRef.current) return;
-        mapRef.current = initHybridMap(mapContainerRef.current, {
-            center: [11.618044, 76.081180],
-            zoom: 18,
-        });
-        getLocation();
-    }, [mapContainerRef]);
+        // Only initialize if we have the container, no existing map, selected customer with location, and captured image
+        if (mapContainerRef.current && !mapRef.current && selectedCustomer?.latitude && capturedImage) {
+            console.log('Initializing map...');
+            mapRef.current = initHybridMap(mapContainerRef.current, {
+                center: [11.618044, 76.081180],
+                zoom: 18,
+            });
+            console.log('Map initialized:', mapRef.current);
+            getLocation(); // Auto-fetch location when map initializes
+        }
+
+        return () => {
+            if (mapRef.current) {
+                console.log('Cleaning up map...');
+                mapRef.current.remove();
+                mapRef.current = null;
+            }
+        };
+    }, [capturedImage, selectedCustomer]);
 
     // Calculate distance
     useEffect(() => {
@@ -158,8 +175,6 @@ const Punchin = ({ selectedCustomer: customerProp }) => {
 
     return (
         <div>
-            Punchin
-
             {selectedCustomer && selectedCustomer.latitude && (
                 <div className="section_punchin">
                     {/* Location Label */}
@@ -195,6 +210,13 @@ const Punchin = ({ selectedCustomer: customerProp }) => {
                                     onClick={() => {
                                         if (capturedImage.url) URL.revokeObjectURL(capturedImage.url);
                                         setCapturedImage(null);
+                                        // Clean up map when image is discarded
+                                        if (mapRef.current) {
+                                            mapRef.current.remove();
+                                            mapRef.current = null;
+                                        }
+                                        setCapturedLocation(null);
+                                        setDistance("");
                                     }}
                                 >
                                     <RiDeleteBinLine className="icon" /> Discard

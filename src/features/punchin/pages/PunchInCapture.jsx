@@ -237,7 +237,7 @@ const PunchInCapture = React.memo(() => {
 
         {/* Location Handling */}
         {selectedCustomer && (
-          <Punchin customer={selectedCustomer} />
+          <Punchin selectedCustomer={selectedCustomer} />
         )}
       </div>
     </div>

@@ -584,10 +584,28 @@
                         gap: 8px;
                         font-weight: 600;
                         color: #374151;
+                        transition: all 0.3s ease;
 
                         .icon {
                             font-size: 1.2rem;
                             color: #3b82f6;
+                            transition: color 0.3s ease;
+                            
+                            &.error {
+                                color: #ef4444;
+                            }
+                        }
+
+                        &.loading {
+                            color: #6b7280;
+                            
+                            .icon {
+                                color: #6b7280;
+                            }
+                        }
+
+                        &.error {
+                            color: #ef4444;
                         }
                     }
 
@@ -599,19 +617,122 @@
                         padding: 8px;
                         cursor: pointer;
                         transition: all 0.2s ease;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
 
-                        &:hover {
+                        &:hover:not(:disabled) {
                             background: #2563eb;
-                            transform: rotate(180deg);
+                        }
+
+                        &:disabled {
+                            background: #9ca3af;
+                            cursor: not-allowed;
+                        }
+
+                        &.loading {
+                            .rotating {
+                                animation: rotate 1s linear infinite;
+                            }
                         }
                     }
                 }
 
-                .location_map {
-                    border-radius: 8px;
-                    overflow: hidden;
-                    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+                .location_map_wrapper {
+                    position: relative;
                     margin-bottom: 15px;
+                    height: 300px; /* Fixed height to prevent layout shifts */
+
+                    .location_placeholder {
+                        position: absolute;
+                        top: 0;
+                        left: 0;
+                        right: 0;
+                        bottom: 0;
+                        background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+                        border-radius: 8px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        border: 2px dashed #d1d5db;
+                        z-index: 1;
+
+                        .placeholder_content {
+                            text-align: center;
+                            color: #6b7280;
+
+                            .placeholder_icon {
+                                font-size: 3rem;
+                                margin-bottom: 12px;
+                                opacity: 0.6;
+                                color: #9ca3af;
+                            }
+
+                            .placeholder_text {
+                                font-size: 1.1rem;
+                                margin-bottom: 16px;
+                                font-weight: 500;
+                            }
+
+                            .retry_btn {
+                                background: #3b82f6;
+                                color: white;
+                                border: none;
+                                border-radius: 6px;
+                                padding: 8px 16px;
+                                cursor: pointer;
+                                font-weight: 500;
+                                transition: background 0.2s ease;
+
+                                &:hover {
+                                    background: #2563eb;
+                                }
+                            }
+                        }
+                    }
+
+                    .location_map {
+                        position: absolute;
+                        top: 0;
+                        left: 0;
+                        right: 0;
+                        bottom: 0;
+                        width: 100%;
+                        height: 100%;
+                        border-radius: 8px;
+                        overflow: hidden;
+                        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+                        transition: opacity 0.3s ease;
+                        z-index: 2;
+
+                        &.hidden {
+                            opacity: 0;
+                            pointer-events: none;
+                        }
+                    }
+
+                    .location_loading_overlay {
+                        position: absolute;
+                        top: 0;
+                        left: 0;
+                        right: 0;
+                        bottom: 0;
+                        background: rgba(255, 255, 255, 0.9);
+                        display: flex;
+                        flex-direction: column;
+                        align-items: center;
+                        justify-content: center;
+                        border-radius: 8px;
+                        z-index: 10;
+                        backdrop-filter: blur(2px);
+
+                        p {
+                            margin-top: 12px;
+                            color: #4b5563;
+                            font-weight: 500;
+                            font-size: 1rem;
+                        }
+                    }
                 }
 
                 .km_container {
@@ -622,6 +743,7 @@
                     padding: 12px 16px;
                     border-radius: 8px;
                     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+                    margin-bottom: 15px;
 
                     .mdOutline {
                         display: flex;
@@ -641,7 +763,56 @@
                         font-size: 1.1rem;
                     }
                 }
+
+                .error_message {
+                    background: #fef2f2;
+                    border: 1px solid #fecaca;
+                    border-radius: 8px;
+                    padding: 12px 16px;
+                    color: #991b1b;
+
+                    p {
+                        margin: 0;
+                        font-weight: 500;
+
+                        &.error_help {
+                            font-weight: 400;
+                            color: #dc2626;
+                            font-size: 0.9rem;
+                            margin-top: 4px;
+                        }
+                    }
+                }
             }
+        }
+
+        // Animations
+        @keyframes rotate {
+            from {
+                transform: rotate(0deg);
+            }
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4);
+            }
+            70% {
+                box-shadow: 0 0 0 10px rgba(59, 130, 246, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(59, 130, 246, 0);
+            }
+        }
+    }
+
+    // Custom location marker styles
+    .custom-location-marker {
+        .location-marker-pulse {
+            animation: pulse 2s infinite;
         }
     }
 }
@@ -1221,6 +1392,72 @@
 
 
 
+}
+
+// Mobile responsiveness for location capture
+@media (max-width: 480px) {
+    .wizard_container {
+        .location_capture_step {
+            .capture_location {
+                .location_container {
+                    padding: 15px;
+
+                    .location_header {
+                        .your_location {
+                            font-size: 0.9rem;
+
+                            .icon {
+                                font-size: 1rem;
+                            }
+                        }
+
+                        .fetch_btn {
+                            padding: 6px;
+                        }
+                    }
+
+                    .location_map_wrapper {
+                        height: 250px; /* Reduced height for mobile */
+
+                        .location_placeholder {
+                            .placeholder_content {
+                                .placeholder_icon {
+                                    font-size: 2.5rem;
+                                }
+
+                                .placeholder_text {
+                                    font-size: 1rem;
+                                }
+                            }
+                        }
+
+                        .location_loading_overlay {
+                            p {
+                                font-size: 0.9rem;
+                            }
+                        }
+                    }
+
+                    .km_container {
+                        padding: 10px 14px;
+
+                        .mdOutline {
+                            font-size: 0.9rem;
+                        }
+
+                        .km_span {
+                            font-size: 1rem;
+                        }
+                    }
+
+                    .error_message {
+                        padding: 10px 14px;
+                        font-size: 0.9rem;
+                    }
+                }
+            }
+        }
+    }
 }
 
 // Tablet

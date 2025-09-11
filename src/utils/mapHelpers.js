@@ -1,5 +1,19 @@
 // src/utils/mapHelpers.js
 import L from "leaflet";
+import 'leaflet/dist/leaflet.css';
+
+// Fix for default markers
+import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
+import markerIcon from 'leaflet/dist/images/marker-icon.png';
+import markerShadow from 'leaflet/dist/images/marker-shadow.png';
+
+// Configure default marker icons
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+    iconRetinaUrl: markerIcon2x,
+    iconUrl: markerIcon,
+    shadowUrl: markerShadow,
+});
 
 // export function initHybridMap(container, { center = [11.618044, 76.081180], zoom = 16 } = {}) {
 //     const map = L.map(container, { attributionControl: false, zoomControl: true }).setView(center, zoom);
@@ -87,6 +101,11 @@ export function initHybridMap(
     // Start with Google
     google.addTo(map);
 
+    // Wait for map to be fully loaded
+    map.whenReady(() => {
+        console.log('Map is ready for use');
+    });
+
     return map;
 }
 
@@ -95,23 +114,84 @@ export function initHybridMap(
 export function setViewAndMarker(map, markerRef, lat, lng, zoom = 19) {
     const latLng = [parseFloat(lat), parseFloat(lng)];
     map.setView(latLng, zoom);
+    
+    // Custom marker icon for better visibility
+    const customIcon = L.divIcon({
+        className: 'custom-location-marker',
+        html: `
+            <div class="location-marker-pulse" style="
+                width: 24px;
+                height: 24px;
+                background: #3b82f6;
+                border: 3px solid white;
+                border-radius: 50%;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+                position: relative;
+            ">
+                <div style="
+                    width: 8px;
+                    height: 8px;
+                    background: white;
+                    border-radius: 50%;
+                    position: absolute;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                "></div>
+            </div>
+        `,
+        iconSize: [24, 24],
+        iconAnchor: [12, 12]
+    });
+    
     if (markerRef.current) {
         markerRef.current.setLatLng(latLng);
+        markerRef.current.setIcon(customIcon);
     } else {
-        markerRef.current = L.marker(latLng).addTo(map);
+        markerRef.current = L.marker(latLng, { icon: customIcon }).addTo(map);
     }
     return markerRef.current;
 }
 
 export function addAccuracyCircle(map, lat, lng, accuracy) {
-    // if (!accuracy) return null;
+    console.log('addAccuracyCircle called with:', { lat, lng, accuracy, map: !!map });
+    
+    if (!map) {
+        console.error('Map is not available');
+        return null;
+    }
+    
+    // Ensure we have a valid accuracy value
+    const actualAccuracy = accuracy > 0 ? accuracy : 10; // Default to 10m if invalid
+    
     const latLng = [parseFloat(lat), parseFloat(lng)];
-    return L.circle(latLng, {
-        radius: accuracy > 20 ? 10 : accuracy ,
-        color: "#0004ffff",
-        fillColor: "transparent",
-        fillOpacity: 0,
-        weight: 2,
-        dashArray: "5, 5",
-    }).addTo(map);
+    const radius = Math.max(Math.min(actualAccuracy, 100), 8); // Min 8m, max 100m
+    
+    console.log('Creating accuracy circle:', { 
+        latLng, 
+        radius, 
+        originalAccuracy: accuracy,
+        adjustedAccuracy: actualAccuracy 
+    });
+    
+    try {
+        const circle = L.circle(latLng, {
+            radius: radius,
+            color: "#ef4444",
+            fillColor: "#ef4444", 
+            fillOpacity: 0.2,
+            weight: 2,
+            opacity: 0.8,
+            dashArray: "8, 4",
+        });
+        
+        console.log('Circle created, adding to map...');
+        circle.addTo(map);
+        console.log('Circle successfully added to map');
+        
+        return circle;
+    } catch (error) {
+        console.error('Error in addAccuracyCircle:', error);
+        return null;
+    }
 }

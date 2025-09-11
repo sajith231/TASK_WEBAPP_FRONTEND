@@ -105,6 +105,7 @@ const useLocationMap = (selectedCustomer, capturedImage) => {
   const [isGettingLocation, setIsGettingLocation] = useState(false);
   const mapRef = useRef(null);
   const markerRef = useRef(null);
+  const accuracyCircleRef = useRef(null);
   const mapContainerRef = useRef(null);
   const initializationTimeoutRef = useRef(null);
 
@@ -131,8 +132,38 @@ const useLocationMap = (selectedCustomer, capturedImage) => {
       setCapturedLocation(newLoc);
 
       if (mapRef.current) {
+        // Remove existing accuracy circle if it exists
+        if (accuracyCircleRef.current) {
+          try {
+            mapRef.current.removeLayer(accuracyCircleRef.current);
+            accuracyCircleRef.current = null;
+          } catch (error) {
+            logger.warn('Error removing accuracy circle:', error);
+          }
+        }
+
+        // Set marker and view
         setViewAndMarker(mapRef.current, markerRef, newLoc.latitude, newLoc.longitude, 19);
-        addAccuracyCircle(mapRef.current, newLoc.latitude, newLoc.longitude, pos.coords.accuracy);
+        
+        // Add accuracy circle with a small delay to ensure map is ready
+        setTimeout(() => {
+          if (mapRef.current) {
+            try {
+              accuracyCircleRef.current = addAccuracyCircle(
+                mapRef.current, 
+                newLoc.latitude, 
+                newLoc.longitude, 
+                pos.coords.accuracy
+              );
+              logger.info('Accuracy circle added', { 
+                accuracy: pos.coords.accuracy, 
+                circleAdded: !!accuracyCircleRef.current 
+              });
+            } catch (error) {
+              logger.error('Error adding accuracy circle:', error);
+            }
+          }
+        }, 100);
       }
       
       logger.info('Location captured successfully', { location: newLoc });
@@ -158,14 +189,23 @@ const useLocationMap = (selectedCustomer, capturedImage) => {
             center: [selectedCustomer.latitude, selectedCustomer.longitude],
             zoom: 18,
           });
-          getLocation();
+          
+          // Wait for map to be ready before fetching location
+          if (mapRef.current) {
+            mapRef.current.whenReady(() => {
+              console.log('Map ready, now fetching location');
+              if (!capturedLocation && !isGettingLocation) {
+                getLocation();
+              }
+            });
+          }
         } catch (error) {
           logger.error('Failed to initialize map:', error);
           setLocationError('Failed to initialize map');
         }
       }
     }, 100); // Small delay to prevent rapid re-initialization
-  }, [selectedCustomer?.latitude, selectedCustomer?.longitude, capturedImage, getLocation]);
+  }, [selectedCustomer?.latitude, selectedCustomer?.longitude, capturedImage, getLocation, capturedLocation, isGettingLocation]);
 
   useEffect(() => {
     initializeMap();
@@ -176,6 +216,10 @@ const useLocationMap = (selectedCustomer, capturedImage) => {
       }
       if (mapRef.current) {
         try {
+          // Clean up marker and accuracy circle references
+          markerRef.current = null;
+          accuracyCircleRef.current = null;
+          
           mapRef.current.remove();
           mapRef.current = null;
         } catch (error) {
@@ -585,9 +629,31 @@ const LocationCaptureStep = ({
   distance,
   mapContainerRef,
   getLocation,
+  isGettingLocation,
+  locationError,
   onNext,
   onPrev
 }) => {
+  // Auto-fetch location when component mounts
+  useEffect(() => {
+    if (!capturedLocation && !isGettingLocation && !locationError) {
+      getLocation();
+    }
+  }, [capturedLocation, isGettingLocation, locationError, getLocation]);
+
+  const getLocationStatusText = () => {
+    if (isGettingLocation) return "Fetching...";
+    if (locationError) return "Location Failed";
+    if (capturedLocation) return "Your Location";
+    return "Get Location";
+  };
+
+  const getLocationIcon = () => {
+    if (isGettingLocation) return <LoadingSpinner size="small" />;
+    if (locationError) return <MdNotListedLocation className="icon error" />;
+    return <MdOutlineNotListedLocation className="icon" />;
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, x: 50 }}
@@ -600,26 +666,63 @@ const LocationCaptureStep = ({
       <div className="capture_location">
         <div className="location_container">
           <div className="location_header">
-            <div className="your_location">
-              <MdOutlineNotListedLocation className="icon" /> Your Location
+            <div className={`your_location ${isGettingLocation ? 'loading' : ''} ${locationError ? 'error' : ''}`}>
+              {getLocationIcon()} {getLocationStatusText()}
             </div>
-            <div className="fetch_btn" onClick={getLocation}>
-              <IoRefreshCircle />
-            </div>
+            <button 
+              className={`fetch_btn ${isGettingLocation ? 'loading' : ''}`}
+              onClick={getLocation}
+              disabled={isGettingLocation}
+              title={isGettingLocation ? "Getting location..." : "Refresh location"}
+            >
+              <IoRefreshCircle className={isGettingLocation ? 'rotating' : ''} />
+            </button>
           </div>
 
-          <div
-            className="location_map"
-            ref={mapContainerRef}
-            style={{ height: "300px", width: "100%" }}
-          />
+          <div className="location_map_wrapper">
+            {/* Show placeholder only when no location AND not loading AND has error */}
+            {!capturedLocation && !isGettingLocation && locationError && (
+              <div className="location_placeholder">
+                <div className="placeholder_content">
+                  <IoLocation className="placeholder_icon" />
+                  <p className="placeholder_text">Unable to get your location</p>
+                  <button className="retry_btn" onClick={getLocation}>
+                    Try Again
+                  </button>
+                </div>
+              </div>
+            )}
+            
+            {/* Map container - always present but conditionally visible */}
+            <div
+              className={`location_map ${!capturedLocation && !isGettingLocation ? 'hidden' : ''}`}
+              ref={mapContainerRef}
+            />
+
+            {/* Loading overlay - only when getting location */}
+            {isGettingLocation && (
+              <div className="location_loading_overlay">
+                <LoadingSpinner size="medium" />
+                <p>Getting your current location...</p>
+              </div>
+            )}
+          </div>
 
           <div className="km_container">
             <div className="mdOutline">
               <MdOutlineSocialDistance className="icon" /> Distance from shop
             </div>
-            <div className="km_span">{distance} Km</div>
+            <div className="km_span">
+              {distance ? `${distance} Km` : (isGettingLocation ? "Calculating..." : "N/A")}
+            </div>
           </div>
+
+          {locationError && !isGettingLocation && (
+            <div className="error_message">
+              <p>⚠️ {locationError}</p>
+              <p className="error_help">Please check your location permissions and try again.</p>
+            </div>
+          )}
         </div>
       </div>
 
@@ -716,6 +819,8 @@ const Punchin = () => {
   const {
     capturedLocation,
     distance,
+    locationError,
+    isGettingLocation,
     mapContainerRef,
     getLocation,
   } = useLocationMap(debouncedSelectedCustomer, capturedImage);
@@ -828,6 +933,8 @@ const Punchin = () => {
             distance={distance}
             mapContainerRef={mapContainerRef}
             getLocation={getLocation}
+            isGettingLocation={isGettingLocation}
+            locationError={locationError}
             onNext={handleNext}
             onPrev={handlePrev}
           />

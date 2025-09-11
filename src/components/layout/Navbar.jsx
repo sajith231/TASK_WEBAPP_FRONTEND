@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FaBars, FaBox, FaBuilding, FaCog, FaTimes, FaUniversity, FaChevronDown, FaChevronRight, FaFingerprint } from 'react-icons/fa';
+import { FaBars, FaBox, FaBuilding, FaCog, FaTimes, FaUniversity, FaChevronDown, FaChevronRight, FaFingerprint, FaStore, FaMapMarkerAlt, FaTable } from 'react-icons/fa';
 import { FaMoneyBillWave } from 'react-icons/fa';
 import './Navbar.scss';
 import { useDispatch } from 'react-redux';
@@ -252,12 +252,14 @@ const Navbar = () => {
                         {isPuchOpen && (
                             <ul className="submenu">
                                 <li onClick={() => handleNavigation('/punch-in/location')}>
-                                    <FaMoneyBillWave style={{ marginRight: '8px' }} />
+                                <>
+                                    <FaMapMarkerAlt style={{ marginRight: '4px' }} />
+                                </>
                                     <span>Location Capture</span>
                                 </li>
                                 <li onClick={() => handleNavigation('/punch-in')}>
-                                    <FaUniversity style={{ marginRight: '8px' }} />
-                                    <span>PunchIn Details  </span>
+                                    <FaFingerprint style={{ marginRight: '8px' }} />
+                                    <span>Punch In  </span>
                                 </li>
 
 

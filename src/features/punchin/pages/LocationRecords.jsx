@@ -1,15 +1,11 @@
-import React, { useState } from 'react'
+import React from 'react'
 import '../styles/LocationRecords.scss'
 import { AiOutlinePlus } from 'react-icons/ai'
-import BaseModal from '../../../components/ui/Modal/BaseModal';
-import PunchIn from './PunchIn';
 import StoreTable from '../components/StoreTable';
-import { div } from 'framer-motion/client';
 import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 
 const LocationRecords = () => {
-    const [isConfirmOpen, setIsConfirmOpen] = useState(false);
     const navigate = useNavigate();
     const userRole = useSelector((state) => state.auth?.user?.role)
 
@@ -35,11 +31,6 @@ const LocationRecords = () => {
                 <div className="">
                     <StoreTable />
                 </div>
-
-
-                {/* <BaseModal isOpen={isConfirmOpen} onClose={() => setIsConfirmOpen(false)}>
-                    <PunchIn />
-                </BaseModal> */}
             </div>
         </div>
 

@@ -9,7 +9,6 @@ import BankBook from "../features/finance/pages/BankBook";
 import CashBook from "../features/finance/pages/CashBook";
 import CashBookLedger from "../features/finance/pages/CashBookLedger";
 import BankBookLedger from "../features/finance/pages/BankBookLedger";
-import PunchIn from '../features/punchin/pages/PunchIn';
 import NotFound from '../components/ui/NotFound';
 // import LocationCapture from '../features/punchin/pages/LocationRecords';
 import StoreLocationCapture from '../features/punchin/pages/StoreLocationCapture';
@@ -87,8 +86,8 @@ const AppLayout = () => {
     );
 };
 
-function App() {
+const App = () => {
     return <AppLayout />;
-}
+};
 
 export default App;

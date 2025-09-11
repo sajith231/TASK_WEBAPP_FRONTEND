@@ -24,6 +24,7 @@ const PunchinRecords = () => {
                     {userRole !== "Admin" && (
                         <div
                             className={styles['add_new_button']}
+                            //PunchIn Capture Page
                             onClick={() => navigate("/punch-in/capture")}
                         >
                             <AiOutlinePlus className="icon" />

@@ -22,7 +22,7 @@ const StepProgress = memo(({ currentStep, totalSteps, stepTitles }) => {
               className={`step_indicator ${isActive ? 'active' : ''} ${isCompleted ? 'completed' : ''}`}
               aria-current={isActive ? 'step' : undefined}
             >
-              <div className="step_circle">
+              <div className={`step_circle`}>
                 {isCompleted ? <FaCheck aria-label="Completed" /> : stepNumber}
               </div>
               <div className="step_label">{stepTitles[stepNumber]}</div>

@@ -99,12 +99,9 @@ const CustomerSelectionStep = memo(({
     });
   }, [customers, debouncedSearchTerm]);
 
-  // Limit displayed customers for performance (virtual scrolling concept)
-  const displayedCustomers = useMemo(() => {
-    return filteredCustomers.slice(0, 50); // Show max 50 customers at once
-  }, [filteredCustomers]);
+  const displayedCustomers = filteredCustomers;
 
-  const hasMoreCustomers = filteredCustomers.length > displayedCustomers.length;
+  const hasMoreCustomers = false;
 
   const handleCustomerSelect = useCallback((customer) => {
     // Immediate UI feedback
@@ -207,23 +204,13 @@ const CustomerSelectionStep = memo(({
                   <span>Loading customers...</span>
                 </div>
               ) : displayedCustomers.length > 0 ? (
-                <>
-                  {displayedCustomers.map((customer) => (
-                    <CustomerItem
-                      key={customer.id}
-                      customer={customer}
-                      onSelect={handleCustomerSelect}
-                    />
-                  ))}
-                  {hasMoreCustomers && (
-                    <div className="more-customers-info">
-                      Showing {displayedCustomers.length} of {filteredCustomers.length} customers
-                      {searchTerm && (
-                        <small>Try searching to narrow results</small>
-                      )}
-                    </div>
-                  )}
-                </>
+                displayedCustomers.map((customer) => (
+                  <CustomerItem
+                    key={customer.id}
+                    customer={customer}
+                    onSelect={handleCustomerSelect}
+                  />
+                ))
               ) : (
                 <div className="no-customers">
                   {searchTerm ? 'No matching customers found' : 'No customers available'}

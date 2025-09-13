@@ -6,7 +6,6 @@ import { useSelector } from 'react-redux'
 // import StoreTable from '../components/StoreTable'
 
 const PunchinRecords = () => {
-    const [isConfirmOpen, setIsConfirmOpen] = useState(false)
     const navigate = useNavigate()
     const userRole = useSelector((state) => state.auth?.user?.role)
 

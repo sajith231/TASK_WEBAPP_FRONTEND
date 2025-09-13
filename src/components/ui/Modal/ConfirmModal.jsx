@@ -1,5 +1,6 @@
 // src/components/common/ConfirmModal.jsx
 import { AnimatePresence, motion } from "framer-motion";
+import './ConfirmModal.scss'
 
 export default function ConfirmModal({
     open,

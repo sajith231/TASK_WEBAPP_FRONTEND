@@ -58,12 +58,12 @@ const Punchin = () => {
     const fetchCustomers = async () => {
       setCustomersLoading(true);
       setCustomersError(null);
-      
+
       try {
         const response = await PunchAPI.getFirms();
         const customerData = response.firms || [];
         setCustomers(customerData);
-        
+
         logger.info('Customers fetched successfully', { count: customerData.length });
       } catch (err) {
         const errorMessage = 'Failed to fetch customers. Please try again.';
@@ -164,7 +164,9 @@ const Punchin = () => {
             capturedImage={capturedImage}
             capturedLocation={capturedLocation}
             distance={distance}
-            onPunchIn={handlePunchIn}
+            onPunchIn={() => {
+              setOpenConfirmPunchIn(true)
+            }}
             onPrev={handlePrev}
             isLoading={isLoading}
           />
@@ -201,12 +203,12 @@ const Punchin = () => {
 
   return (
     <div className="punchin_wizard">
-      <StepProgress 
-        currentStep={currentStep} 
-        totalSteps={Object.keys(WIZARD_STEPS).length} 
+      <StepProgress
+        currentStep={currentStep}
+        totalSteps={Object.keys(WIZARD_STEPS).length}
         stepTitles={STEP_TITLES}
       />
-      
+
       <div className="wizard_container">
         <AnimatePresence mode="wait">
           {renderCurrentStep()}
@@ -223,7 +225,7 @@ const Punchin = () => {
       />
 
       <ConfirmModal
-        isOpen={openConfirmPunchIn}
+        open={openConfirmPunchIn}
         title="Confirm Punch In"
         message="Are you sure you want to punch in?"
         onConfirm={handlePunchIn}

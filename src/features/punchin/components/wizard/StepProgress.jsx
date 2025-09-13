@@ -4,10 +4,12 @@ import { FaCheck } from 'react-icons/fa';
 
 // Step Progress Component
 const StepProgress = memo(({ currentStep, totalSteps, stepTitles }) => {
+
   const progressPercentage = useMemo(() => 
     ((currentStep - 1) / (totalSteps - 1)) * 100
   , [currentStep, totalSteps]);
 
+ 
   return (
     <div className="wizard_progress" role="progressbar" aria-valuenow={currentStep} aria-valuemax={totalSteps}>
       <div className="step_indicators">
@@ -33,7 +35,7 @@ const StepProgress = memo(({ currentStep, totalSteps, stepTitles }) => {
       <div className="progress_bar">
         <div 
           className="progress_fill" 
-          style={{ width: `${progressPercentage}%` }}
+          style={{ width: `${progressPercentage }%` }}
           aria-hidden="true"
         />
       </div>

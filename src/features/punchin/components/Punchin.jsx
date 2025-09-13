@@ -14,7 +14,6 @@ import ConfirmationStep from "./wizard/ConfirmationStep";
 // Hooks
 import { useCamera, useDebounce } from "../../../hooks";
 import useLocationMap from "../hooks/useLocationMap";
-import useCustomerCache from "../hooks/useCustomerCache";
 
 // Services & Utils
 import { PunchAPI } from "../services/punchService";
@@ -54,28 +53,16 @@ const Punchin = () => {
     getLocation,
   } = useLocationMap(debouncedSelectedCustomer, capturedImage);
 
-  // Memoized customer cache
-  const { getCachedCustomers, setCachedCustomers } = useCustomerCache();
-
-  // Fetch customers on component mount with caching
+  // Fetch customers on component mount
   useEffect(() => {
     const fetchCustomers = async () => {
       setCustomersLoading(true);
       setCustomersError(null);
       
       try {
-        // Check cache first
-        const cached = getCachedCustomers();
-        if (cached) {
-          setCustomers(cached);
-          setCustomersLoading(false);
-          return;
-        }
-
         const response = await PunchAPI.getFirms();
         const customerData = response.firms || [];
         setCustomers(customerData);
-        setCachedCustomers(customerData);
         
         logger.info('Customers fetched successfully', { count: customerData.length });
       } catch (err) {
@@ -88,8 +75,10 @@ const Punchin = () => {
     };
 
     fetchCustomers();
-  }, [getCachedCustomers, setCachedCustomers]);
+  }, []);
 
+
+  //WIZARD ACTIONS
   const handleNext = useCallback(() => {
     if (currentStep < Object.keys(WIZARD_STEPS).length) {
       setCurrentStep(currentStep + 1);

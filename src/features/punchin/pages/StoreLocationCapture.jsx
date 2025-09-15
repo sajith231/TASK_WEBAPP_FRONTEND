@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useMemo, useCallback, useRef } from "react";
 import "../styles/StoreLocationCapture.scss";
+import VirtualizedCustomerList from "../components/VirtualizedCustomer";
 
 // Components
 import AddLocation from "../components/AddLocation";
@@ -38,83 +39,83 @@ const useDebounce = (value, delay) => {
 };
 
 // Memoized customer item component
-const CustomerItem = React.memo(({ customer, onSelect, itemHeight }) => {
-  const handleClick = useCallback(() => {
-    onSelect(customer);
-  }, [customer, onSelect]);
+// const CustomerItem = React.memo(({ customer, onSelect, itemHeight }) => {
+//   const handleClick = useCallback(() => {
+//     onSelect(customer);
+//   }, [customer, onSelect]);
 
-  return (
-    <div
-      className="customer"
-      onClick={handleClick}
-      style={{ height: itemHeight }}
-    >
-      {customer.firm_name || customer.customerName || "Unnamed Customer"}
-      <div className="list_icons">
-        {customer.latitude ? (
-          <IoLocation style={{ color: "#0bb838" }} />
-        ) : (
-          <MdNotListedLocation style={{ color: "red" }} />
-        )}
-      </div>
-    </div>
-  );
-});
+//   return (
+//     <div
+//       className="customer"
+//       onClick={handleClick}
+//       style={{ height: itemHeight }}
+//     >
+//       {customer.firm_name || customer.customerName || "Unnamed Customer"}
+//       <div className="list_icons">
+//         {customer.latitude ? (
+//           <IoLocation style={{ color: "#0bb838" }} />
+//         ) : (
+//           <MdNotListedLocation style={{ color: "red" }} />
+//         )}
+//       </div>
+//     </div>
+//   );
+// });
 
 // Virtualized list component for rendering only visible items
-const VirtualizedCustomerList = React.memo(({ customers, onSelect, searchTerm }) => {
-  const containerRef = useRef(null);
-  const [visibleRange, setVisibleRange] = useState({ start: 0, end: 20 });
-  const itemHeight = 50; // Approximate height of each customer item
+// const VirtualizedCustomerList = React.memo(({ customers, onSelect, searchTerm }) => {
+//   const containerRef = useRef(null);
+//   const [visibleRange, setVisibleRange] = useState({ start: 0, end: 20 });
+//   const itemHeight = 50; // Approximate height of each customer item
 
-  const calculateVisibleRange = useCallback(() => {
-    if (!containerRef.current) return;
+//   const calculateVisibleRange = useCallback(() => {
+//     if (!containerRef.current) return;
     
-    const scrollTop = containerRef.current.scrollTop;
-    const clientHeight = containerRef.current.clientHeight;
+//     const scrollTop = containerRef.current.scrollTop;
+//     const clientHeight = containerRef.current.clientHeight;
     
-    const start = Math.max(0, Math.floor(scrollTop / itemHeight) - 5);
-    const end = Math.min(
-      customers.length,
-      start + Math.ceil(clientHeight / itemHeight) + 10
-    );
+//     const start = Math.max(0, Math.floor(scrollTop / itemHeight) - 5);
+//     const end = Math.min(
+//       customers.length,
+//       start + Math.ceil(clientHeight / itemHeight) + 10
+//     );
     
-    setVisibleRange({ start, end });
-  }, [customers.length, itemHeight]);
+//     setVisibleRange({ start, end });
+//   }, [customers.length, itemHeight]);
 
-  useEffect(() => {
-    const container = containerRef.current;
-    if (container) {
-      container.addEventListener('scroll', calculateVisibleRange, { passive: true });
-      calculateVisibleRange(); // Initial calculation
+//   useEffect(() => {
+//     const container = containerRef.current;
+//     if (container) {
+//       container.addEventListener('scroll', calculateVisibleRange, { passive: true });
+//       calculateVisibleRange(); // Initial calculation
       
-      return () => container.removeEventListener('scroll', calculateVisibleRange);
-    }
-  }, [calculateVisibleRange]);
+//       return () => container.removeEventListener('scroll', calculateVisibleRange);
+//     }
+//   }, [calculateVisibleRange]);
 
-  // Calculate padding to maintain scroll height
-  const topPadding = visibleRange.start * itemHeight;
-  const bottomPadding = Math.max(0, (customers.length - visibleRange.end) * itemHeight);
+//   // Calculate padding to maintain scroll height
+//   const topPadding = visibleRange.start * itemHeight;
+//   const bottomPadding = Math.max(0, (customers.length - visibleRange.end) * itemHeight);
 
-  return (
-    <div 
-      ref={containerRef} 
-      className="customer-list virtualized"
-      style={{ overflow: 'auto' }}
-    >
-      <div style={{ height: topPadding }} />
-      {customers.slice(visibleRange.start, visibleRange.end).map((customer) => (
-        <CustomerItem
-          key={customer.id}
-          customer={customer}
-          onSelect={onSelect}
-          itemHeight={itemHeight}
-        />
-      ))}
-      <div style={{ height: bottomPadding }} />
-    </div>
-  );
-});
+//   return (
+//     <div 
+//       ref={containerRef} 
+//       className="customer-list virtualized"
+//       style={{ overflow: 'auto' }}
+//     >
+//       <div style={{ height: topPadding }} />
+//       {customers.slice(visibleRange.start, visibleRange.end).map((customer) => (
+//         <CustomerItem
+//           key={customer.id}
+//           customer={customer}
+//           onSelect={onSelect}
+//           itemHeight={itemHeight}
+//         />
+//       ))}
+//       <div style={{ height: bottomPadding }} />
+//     </div>
+//   );
+// });
 
 const StoreLocationCapture = React.memo(() => {
   // ------------------ State ------------------
@@ -132,27 +133,27 @@ const StoreLocationCapture = React.memo(() => {
         setIsLoading(true);
         // Check if data is already cached
         const cachedData = sessionStorage.getItem('customers_data');
-        if (cachedData) {
-          const parsedData = JSON.parse(cachedData);
-          const cacheTime = parsedData.timestamp;
-          const now = Date.now();
-          // Cache for 5 minutes
-          if (now - cacheTime < 5 * 60 * 1000) {
-            setCustomers(parsedData.firms || []);
-            setIsLoading(false);
-            return;
-          }
-        }
+        // if (cachedData) {
+        //   const parsedData = JSON.parse(cachedData);
+        //   const cacheTime = parsedData.timestamp;
+        //   const now = Date.now();
+        //   // Cache for 5 minutes
+        //   if (now - cacheTime < 5 * 60 * 1000) {
+        //     setCustomers(parsedData.firms || []);
+        //     setIsLoading(false);
+        //     return;
+        //   }
+        // }
         
         const response = await PunchAPI.getFirms();
         const firms = response.firms || [];
         setCustomers(firms);
         
         // Cache the data
-        sessionStorage.setItem('customers_data', JSON.stringify({
-          firms,
-          timestamp: Date.now()
-        }));
+        // sessionStorage.setItem('customers_data', JSON.stringify({
+        //   firms,
+        //   timestamp: Date.now()
+        // }));
       } catch (err) {
         console.error("Failed to fetch firms", err);
       } finally {

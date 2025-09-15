@@ -115,43 +115,19 @@ export function setViewAndMarker(map, markerRef, lat, lng, zoom = 19) {
     const latLng = [parseFloat(lat), parseFloat(lng)];
     map.setView(latLng, zoom);
     
-    // Custom marker icon for better visibility
-    const customIcon = L.divIcon({
-        className: 'custom-location-marker',
-        html: `
-            <div class="location-marker-pulse" style="
-                width: 24px;
-                height: 24px;
-                background: #3b82f6;
-                border: 3px solid white;
-                border-radius: 50%;
-                box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-                position: relative;
-            ">
-                <div style="
-                    width: 8px;
-                    height: 8px;
-                    background: white;
-                    border-radius: 50%;
-                    position: absolute;
-                    top: 50%;
-                    left: 50%;
-                    transform: translate(-50%, -50%);
-                "></div>
-            </div>
-        `,
-        iconSize: [24, 24],
-        iconAnchor: [12, 12]
-    });
-    
+    // Clear existing marker if it exists
     if (markerRef.current) {
-        markerRef.current.setLatLng(latLng);
-        markerRef.current.setIcon(customIcon);
-    } else {
-        markerRef.current = L.marker(latLng, { icon: customIcon }).addTo(map);
+        map.removeLayer(markerRef.current);
+        markerRef.current = null;
     }
+    
+    // Add new marker
+    markerRef.current = L.marker(latLng).addTo(map);
     return markerRef.current;
 }
+
+// Store reference to current accuracy circle
+let currentAccuracyCircle = null;
 
 export function addAccuracyCircle(map, lat, lng, accuracy) {
     console.log('addAccuracyCircle called with:', { lat, lng, accuracy, map: !!map });
@@ -159,6 +135,12 @@ export function addAccuracyCircle(map, lat, lng, accuracy) {
     if (!map) {
         console.error('Map is not available');
         return null;
+    }
+    
+    // Clear existing accuracy circle
+    if (currentAccuracyCircle) {
+        map.removeLayer(currentAccuracyCircle);
+        currentAccuracyCircle = null;
     }
     
     // Ensure we have a valid accuracy value
@@ -175,23 +157,29 @@ export function addAccuracyCircle(map, lat, lng, accuracy) {
     });
     
     try {
+        // Use default Leaflet circle styles
         const circle = L.circle(latLng, {
-            radius: radius,
-            color: "#ef4444",
-            fillColor: "#ef4444", 
-            fillOpacity: 0.2,
-            weight: 2,
-            opacity: 0.8,
-            dashArray: "8, 4",
+            radius: radius
         });
         
         console.log('Circle created, adding to map...');
         circle.addTo(map);
         console.log('Circle successfully added to map');
         
+        // Store reference for future cleanup
+        currentAccuracyCircle = circle;
+        
         return circle;
     } catch (error) {
         console.error('Error in addAccuracyCircle:', error);
         return null;
+    }
+}
+
+// Function to clear all map overlays
+export function clearMapOverlays(map) {
+    if (currentAccuracyCircle) {
+        map.removeLayer(currentAccuracyCircle);
+        currentAccuracyCircle = null;
     }
 }

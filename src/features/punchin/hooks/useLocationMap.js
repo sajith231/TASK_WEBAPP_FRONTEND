@@ -1,7 +1,7 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { getCurrentPosition } from '../../../hooks';
 import { distanceKm } from '../../../utils/geoDis';
-import { addAccuracyCircle, initHybridMap, setViewAndMarker } from '../../../utils/mapHelpers';
+import { addAccuracyCircle, initHybridMap, setViewAndMarker, clearMapOverlays } from '../../../utils/mapHelpers';
 import { logger } from '../../../utils/logger';
 
 // Simple location map hook - only shows user location
@@ -98,6 +98,8 @@ const useLocationMap = (targetLocation = null) => {
       clearTimeout(timer);
       if (mapRef.current?._map) {
         try {
+          // Clear overlays before removing map
+          clearMapOverlays(mapRef.current._map);
           mapRef.current._map.remove();
           mapRef.current._map = null;
         } catch (error) {

@@ -1,5 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { MdNotListedLocation, BiCurrentLocation } from "react-icons/md";
+import React, { useState } from 'react';
+import { MdNotListedLocation } from "react-icons/md";
+import { BiCurrentLocation } from "react-icons/bi";
 import '../styles/AddLocation.scss';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
@@ -7,35 +8,44 @@ import { PunchAPI } from '../services/punchService';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
 import ConfirmModal from '../../../components/ui/Modal/ConfirmModal';
-import { initHybridMap, setViewAndMarker, addAccuracyCircle } from "../../../utils/mapHelpers";
-import { getCurrentPosition, toFixed6 } from "../../../hooks/useGeolocation";
+import useLocationMap from '../hooks/useLocationMap';
+
+// Import Leaflet marker images
+import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
+import markerIcon from 'leaflet/dist/images/marker-icon.png';
+import markerShadow from 'leaflet/dist/images/marker-shadow.png';
 
 // Fix Leaflet default icons
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
-  iconRetinaUrl: require('leaflet/dist/images/marker-icon-2x.png'),
-  iconUrl: require('leaflet/dist/images/marker-icon.png'),
-  shadowUrl: require('leaflet/dist/images/marker-shadow.png'),
+  iconRetinaUrl: markerIcon2x,
+  iconUrl: markerIcon,
+  shadowUrl: markerShadow,
 });
 
 const AddLocation = ({ customer }) => {
-  const [location, setLocation] = useState({ latitude: "00.000", longitude: "00.000" });
-  const [loading, setLoading] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
-  const [locationSet, setLocationSet] = useState(false);
+  
+  // Use the unified location hook
+  const {
+    userLocation,
+    locationError,
+    isGettingLocation,
+    mapRef,
+    getLocation,
+  } = useLocationMap();
 
-  const mapRef = useRef(null);
   const navigate = useNavigate();
 
   const saveLocation = async () => {
-    if (!locationSet) return toast.error("❌ Please fetch location first");
+    if (!userLocation) return toast.error("❌ Please fetch location first");
     
     setShowConfirm(false);
     try {
       await PunchAPI.AddShopLocation({
         firm_name: customer.firm_name || customer.customerName,
-        latitude: parseFloat(location.latitude),
-        longitude: parseFloat(location.longitude),
+        latitude: parseFloat(userLocation.latitude),
+        longitude: parseFloat(userLocation.longitude),
       });
       toast.success("✅ Location saved!");
       navigate('/punch-in');
@@ -43,37 +53,6 @@ const AddLocation = ({ customer }) => {
       toast.error(`❌ Save failed: ${err.message}`);
     }
   };
-
-  const getLocation = async () => {
-    setLoading(true);
-    try {
-      const pos = await getCurrentPosition();
-      const coords = toFixed6(pos.coords);
-      
-      setLocation(coords);
-      setLocationSet(true);
-      
-      if (mapRef.current?._map) {
-        setViewAndMarker(mapRef.current._map, null, coords.latitude, coords.longitude, 19);
-        addAccuracyCircle(mapRef.current._map, coords.latitude, coords.longitude, pos.coords.accuracy);
-      }
-    } catch (err) {
-      toast.error(`❌ Location error: ${err.message}`);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    if (mapRef.current && !mapRef.current._leaflet_id) {
-      const map = initHybridMap(mapRef.current, {
-        center: [11.618044, 76.081180],
-        zoom: 16,
-      });
-      mapRef.current._map = map;
-    }
-    return () => mapRef.current?._map?.remove();
-  }, []);
 
   return (
     <div className='add-location-container'>
@@ -86,19 +65,23 @@ const AddLocation = ({ customer }) => {
 
       <div className="location-status">
         {!customer.latitude ? (
-          <div className="location-warning">
-            <MdNotListedLocation className="icon" />
-            <div>
-              <h5>Store location unavailable</h5>
-              <p>Move closer to the store to set its location accurately.</p>
+          <div className="add-location">
+            <div className="location-warning">
+              <MdNotListedLocation className="icon" />
+              <div className="message">
+                <h5 className="title">Store location unavailable</h5>
+                <p className="description">Move closer to the store to set its location accurately.</p>
+              </div>
             </div>
           </div>
         ) : (
-          <div className="location-success">
-            <BiCurrentLocation className="icon" />
-            <div>
-              <h5>Location Available</h5>
-              <p>This store has a saved location. You can update if needed.</p>
+          <div className="location-available-">
+            <div className="location-success">
+              <BiCurrentLocation className="icon" />
+              <div className="message">
+                <h5 className="title">Location Available</h5>
+                <p className="description">This store has a saved location. You can update if needed.</p>
+              </div>
             </div>
           </div>
         )}
@@ -115,29 +98,35 @@ const AddLocation = ({ customer }) => {
         <button
           className="fetch-current-btn"
           onClick={getLocation}
-          disabled={loading}
+          disabled={isGettingLocation}
         >
           <BiCurrentLocation className='icon' />
-          {loading ? "Fetching..." : "Fetch Current Location"}
+          {isGettingLocation ? "Fetching..." : "Fetch Current Location"}
         </button>
+
+        {locationError && (
+          <div className="location-error" style={{ color: 'red', margin: '10px 0' }}>
+            ❌ {locationError}
+          </div>
+        )}
 
         <div className="coordinates">
           <div className="coordinate">
             <label>Latitude:</label>
             <input
               type="text"
-              value={location.latitude}
+              value={userLocation ? userLocation.latitude.toFixed(6) : "00.000000"}
               readOnly
-              style={{ backgroundColor: locationSet ? '#e8f5e8' : '#f5f5f5' }}
+              style={{ backgroundColor: userLocation ? '#e8f5e8' : '#f5f5f5' }}
             />
           </div>
           <div className="coordinate">
             <label>Longitude:</label>
             <input
               type="text"
-              value={location.longitude}
+              value={userLocation ? userLocation.longitude.toFixed(6) : "00.000000"}
               readOnly
-              style={{ backgroundColor: locationSet ? '#e8f5e8' : '#f5f5f5' }}
+              style={{ backgroundColor: userLocation ? '#e8f5e8' : '#f5f5f5' }}
             />
           </div>
         </div>
@@ -149,7 +138,7 @@ const AddLocation = ({ customer }) => {
           <button
             className="btn save"
             onClick={() => setShowConfirm(true)}
-            disabled={!locationSet}
+            disabled={!userLocation}
           >
             Save
           </button>
@@ -159,7 +148,7 @@ const AddLocation = ({ customer }) => {
       <ConfirmModal
         open={showConfirm}
         title="Location Confirmation"
-        message={`Set (${location.latitude}, ${location.longitude}) as store location? Ensure you're at the store entrance.`}
+        message={userLocation ? `Set (${userLocation.latitude.toFixed(6)}, ${userLocation.longitude.toFixed(6)}) as store location? Ensure you're at the store entrance.` : "No location available"}
         confirmText="Yes, Confirm"
         cancelText="Cancel"
         onCancel={() => setShowConfirm(false)}

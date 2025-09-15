@@ -45,13 +45,14 @@ const Punchin = () => {
   } = useCamera(facingMode);
 
   const {
-    capturedLocation,
+    punchInLocation: capturedLocation,
     distance,
     locationError,
     isGettingLocation,
-    mapContainerRef,
+    mapRef,
     getLocation,
-  } = useLocationMap(debouncedSelectedCustomer, capturedImage);
+    initializeMap,
+  } = useLocationMap(debouncedSelectedCustomer);
 
   // Fetch customers on component mount
   useEffect(() => {
@@ -149,8 +150,9 @@ const Punchin = () => {
             selectedCustomer={selectedCustomer}
             capturedLocation={capturedLocation}
             distance={distance}
-            mapContainerRef={mapContainerRef}
+            mapRef={mapRef}
             getLocation={getLocation}
+            initializeMap={initializeMap}
             isGettingLocation={isGettingLocation}
             locationError={locationError}
             onNext={handleNext}
@@ -193,7 +195,7 @@ const Punchin = () => {
     handlePrev,
     capturedLocation,
     distance,
-    mapContainerRef,
+    mapRef,
     getLocation,
     isGettingLocation,
     locationError,

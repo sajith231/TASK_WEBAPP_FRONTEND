@@ -5,13 +5,14 @@ import { IoChevronBack, IoChevronForward, IoRefreshCircle, IoLocation } from 're
 import { MdOutlineNotListedLocation, MdOutlineSocialDistance, MdNotListedLocation } from 'react-icons/md';
 import LoadingSpinner from '../../../../components/ui/LoadingSpinner';
 
-// Location Capture Step Component
-const LocationCaptureStep = ({ 
+//Punch In  Location Capture Step Component
+const LocationCaptureStep = ({
   selectedCustomer,
   capturedLocation,
   distance,
-  mapContainerRef,
+  mapRef,
   getLocation,
+  initializeMap,
   isGettingLocation,
   locationError,
   onNext,
@@ -23,6 +24,13 @@ const LocationCaptureStep = ({
       getLocation();
     }
   }, [capturedLocation, isGettingLocation, locationError, getLocation]);
+
+  // Initialize map when component mounts
+  useEffect(() => {
+    if (selectedCustomer?.latitude && initializeMap) {
+      initializeMap();
+    }
+  }, [selectedCustomer?.latitude, initializeMap]);
 
   const getLocationStatusText = () => {
     if (isGettingLocation) return "Fetching...";
@@ -36,6 +44,71 @@ const LocationCaptureStep = ({
     return <MdOutlineNotListedLocation className="icon" />;
   };
 
+  useEffect(() => {
+    const ts = new Date().toISOString();
+
+    const summarizeRef = (ref) => {
+      if (!ref || typeof ref !== 'object' || !('current' in ref)) return ref;
+      const node = ref.current;
+      if (!node) return { current: null };
+      if (node instanceof HTMLElement) {
+        const cls = node.className ? `.${String(node.className).trim().replace(/\s+/g, '.')}` : '';
+        const id = node.id ? `#${node.id}` : '';
+        return { current: `<${node.nodeName.toLowerCase()}${id}${cls}>` };
+      }
+      return { current: node };
+    };
+
+    const fmt = (v) => {
+      if (typeof v === 'function') return `[fn] ${v.name || 'anonymous'}`;
+      if (v && typeof v === 'object' && 'current' in v) return summarizeRef(v);
+      return v;
+    };
+
+    console.groupCollapsed(
+      `%c[LocationCaptureStep]%c props @ ${ts}`,
+      'color:#6c5ce7;font-weight:bold;',
+      'color:#0984e3;'
+    );
+    console.log('%cselectedCustomer:', 'color:#636e72;', fmt(selectedCustomer));
+    console.log('%ccapturedLocation:', 'color:#636e72;', fmt(capturedLocation));
+    console.log('%cdistance:', 'color:#636e72;', fmt(distance));
+    console.log('%cmapRef:', 'color:#636e72;', fmt(mapRef));
+    console.log('%cgetLocation:', 'color:#636e72;', fmt(getLocation));
+    console.log('%cisGettingLocation:', 'color:#636e72;', fmt(isGettingLocation));
+    console.log('%clocationError:', 'color:#636e72;', fmt(locationError));
+    console.log('%conNext:', 'color:#636e72;', fmt(onNext));
+    console.log('%conPrev:', 'color:#636e72;', fmt(onPrev));
+
+    if (selectedCustomer && typeof selectedCustomer === 'object') {
+      try {
+        console.groupCollapsed('%cselectedCustomer details', 'color:#00b894;');
+        console.table(selectedCustomer);
+        console.groupEnd();
+      } catch {}
+    }
+
+    if (capturedLocation && typeof capturedLocation === 'object') {
+      try {
+        console.groupCollapsed('%ccapturedLocation details', 'color:#00b894;');
+        console.table(capturedLocation);
+        console.groupEnd();
+      } catch {}
+    }
+
+    console.groupEnd();
+  }, [
+    selectedCustomer,
+    capturedLocation,
+    distance,
+    mapRef,
+    getLocation,
+    isGettingLocation,
+    locationError,
+    onNext,
+    onPrev
+  ]);
+
   return (
     <motion.div
       initial={{ opacity: 0, x: 50 }}
@@ -44,14 +117,14 @@ const LocationCaptureStep = ({
       className="wizard_step location_capture_step"
     >
       <h2>Capture Location</h2>
-      
+
       <div className="capture_location">
         <div className="location_container">
           <div className="location_header">
             <div className={`your_location ${isGettingLocation ? 'loading' : ''} ${locationError ? 'error' : ''}`}>
               {getLocationIcon()} {getLocationStatusText()}
             </div>
-            <button 
+            <button
               className={`fetch_btn ${isGettingLocation ? 'loading' : ''}`}
               onClick={getLocation}
               disabled={isGettingLocation}
@@ -74,11 +147,11 @@ const LocationCaptureStep = ({
                 </div>
               </div>
             )}
-            
+
             {/* Map container - always present but conditionally visible */}
             <div
               className={`location_map ${!capturedLocation && !isGettingLocation ? 'hidden' : ''}`}
-              ref={mapContainerRef}
+              ref={mapRef}
             />
 
             {/* Loading overlay - only when getting location */}
@@ -126,8 +199,9 @@ LocationCaptureStep.propTypes = {
   selectedCustomer: PropTypes.object,
   capturedLocation: PropTypes.object,
   distance: PropTypes.string,
-  mapContainerRef: PropTypes.object.isRequired,
+  mapRef: PropTypes.object.isRequired,
   getLocation: PropTypes.func.isRequired,
+  initializeMap: PropTypes.func.isRequired,
   isGettingLocation: PropTypes.bool.isRequired,
   locationError: PropTypes.string,
   onNext: PropTypes.func.isRequired,

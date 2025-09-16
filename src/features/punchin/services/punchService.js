@@ -43,9 +43,11 @@ export const PunchAPI = {
             throw error;
         }
     },
-    PunchIN: async (locationData) => {
+    punchIn: async ({ customerId, image, location }) => {
+        console.log(customerId, image, location)
+        window.alert(image.size)
         try {
-            const response = await apiClient.post("/location", locationData);
+            const response = await apiClient.post("/punchin", location);
             return response;
         } catch (error) {
             console.error("Error saving user location:", error);

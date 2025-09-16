@@ -95,7 +95,7 @@ const Punchin = () => {
   const handlePunchIn = useCallback(async () => {
     setIsLoading(true);
     try {
-      await PunchAPI.punchIn({
+      await PunchAPI.punchIn ({
         customerId: debouncedSelectedCustomer?.id,
         image: capturedImage?.file,
         location: capturedLocation,

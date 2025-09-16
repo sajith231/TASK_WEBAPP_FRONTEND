@@ -12,7 +12,7 @@ jobs:
       startsWith(github.event.head_commit.message, 'Merge')
 
     runs-on: ubuntu-latest
-
+ 
     steps:
       - name: Login to VPS and Build App
         uses: appleboy/ssh-action@v0.1.10

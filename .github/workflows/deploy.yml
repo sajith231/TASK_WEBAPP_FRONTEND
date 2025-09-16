@@ -1,28 +1,28 @@
-name: CI/CD for React App
+# name: CI/CD for React App
 
-on:
-  push:
-    branches:
-      - main
+# on:
+#   push:
+#     branches:
+#       - main
 
-jobs:
-  build-and-deploy:
-    if: |
-      contains(github.event.head_commit.message, '[deploy]') ||
-      startsWith(github.event.head_commit.message, 'Merge')
+# jobs:
+#   build-and-deploy:
+#     if: |
+#       contains(github.event.head_commit.message, '[deploy]') ||
+#       startsWith(github.event.head_commit.message, 'Merge')
 
-    runs-on: ubuntu-latest
+#     runs-on: ubuntu-latest
  
-    steps:
-      - name: Login to VPS and Build App
-        uses: appleboy/ssh-action@v0.1.10
-        with:
-          host: ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.VPS_USER }}
-          key: ${{ secrets.VPS_PRIVATE_KEY }}
-          script: |
-            cd /var/www/TASKWEB_FRONTEND/
-            git pull origin main
-            npm ci
-            npm run build
-            echo "✅ Build completed at $(date)"
+#     steps:
+#       - name: Login to VPS and Build App
+#         uses: appleboy/ssh-action@v0.1.10
+#         with:
+#           host: ${{ secrets.VPS_HOST }}
+#           username: ${{ secrets.VPS_USER }}
+#           key: ${{ secrets.VPS_PRIVATE_KEY }}
+#           script: |
+#             cd /var/www/TASKWEB_FRONTEND/
+#             git pull origin main
+#             npm ci
+#             npm run build
+#             echo "✅ Build completed at $(date)"

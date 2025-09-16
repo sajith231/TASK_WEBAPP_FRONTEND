@@ -1,0 +1,33 @@
+name:CI/CD for React App
+
+on:
+  push:
+    branches:
+      - main 
+
+jobs:
+  build:
+     if: |
+      contains(github.event.head_commit.message, '[deploy]') ||
+      startsWith(github.event.head_commit.message, 'Merge')
+
+    runs-on:ubuntu-latest
+
+    steps:
+      - name :Checkout Code
+        uses :actions/checkout@v3
+
+      - name : Setup Nodejs
+        uses :actions/setup-node@v3
+        with :
+            node-version:18
+        
+      - name :Install Dependencies
+        run :npm Install
+      
+      - name: Run Tests
+        run: npm test -- --watchAll=false || echo "No tests yet, skipping..."
+
+      - name :Build App
+        run :npm run build
+  

@@ -3,10 +3,10 @@ name: CI/CD for React App
 on:
   push:
     branches:
-      - main 
+      - main
 
 jobs:
-  build:
+  build-and-deploy:
     if: |
       contains(github.event.head_commit.message, '[deploy]') ||
       startsWith(github.event.head_commit.message, 'Merge')
@@ -14,20 +14,15 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v3
-
-      - name: Setup Nodejs
-        uses: actions/setup-node@v3
+      - name: Login to VPS and Build App
+        uses: appleboy/ssh-action@v0.1.10
         with:
-          node-version: 18
-        
-      - name: Install Dependencies
-        run: npm install
-      
-      - name: Run Tests
-        run: npm test -- --watchAll=false || echo "No tests yet, skipping..."
-
-      - name: Build App
-        run: npm run build
-  
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_PRIVATE_KEY }}
+          script: |
+            cd /var/www/TASKWEB_FRONTEND/
+            git pull origin main
+            npm ci
+            npm run build
+            echo "✅ Build completed at $(date)"

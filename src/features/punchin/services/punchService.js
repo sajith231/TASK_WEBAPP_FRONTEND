@@ -57,13 +57,13 @@ export const PunchAPI = {
         }
     },
 
-    // Upload image directly to Cloudinary
+    // Upload image directly to Cloudinary - Production Ready
     uploadImageToCloudinary: async (imageFile, progressCallback = null) => {
         try {
-            // ✅ Client-side validation first
+            // Client-side validation
             const maxFileSize = 5 * 1024 * 1024; // 5MB
             if (imageFile.size > maxFileSize) {
-                throw new Error(`File size too large. Maximum size is ${maxFileSize / 1024 / 1024}MB`);
+                throw new Error('File size too large. Maximum size is 5MB');
             }
 
             const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
@@ -71,109 +71,92 @@ export const PunchAPI = {
                 throw new Error('Invalid file type. Only JPG, JPEG, and PNG are allowed.');
             }
 
-            // Get upload signature from your backend
+            progressCallback?.(10);
+
+            // Get upload signature from backend
             const signatureData = await PunchAPI.getUploadSignature();
-            console.log("signatureData", signatureData);
             
-            // Check if API key is available
+            // Check API key
             const apiKey = import.meta.env.VITE_CLOUDINARY_API_KEY;
             if (!apiKey) {
-                throw new Error('Cloudinary API key not found. Please set VITE_CLOUDINARY_API_KEY in your .env file');
+                throw new Error('Cloudinary configuration missing');
             }
             
-            console.log('API Key available:', !!apiKey);
-            console.log('Using cloud name:', signatureData.cloudName);
+            progressCallback?.(30);
 
-            // Prepare form data for Cloudinary - EXACT order matters for signature
+            // Prepare form data for Cloudinary
             const formData = new FormData();
             formData.append('file', imageFile);
             formData.append('api_key', apiKey);
             formData.append('timestamp', signatureData.timestamp);
             formData.append('signature', signatureData.signature);
             
-            // Add ONLY parameters that were included in signature generation
-            // Based on Cloudinary error: 'allowed_formats=jpg,png,jpeg&folder=punch_images/SYSMAC/ARUN&tags=client_SYSMAC,user_ARUN&timestamp=1758194850'
-            if (signatureData.folder) {
-                formData.append('folder', signatureData.folder);
-            }
-            if (signatureData.allowed_formats) {
-                formData.append('allowed_formats', signatureData.allowed_formats);
-            }
-            if (signatureData.tags) {
-                formData.append('tags', signatureData.tags);
-            }
+            // Add signed parameters
+            if (signatureData.folder) formData.append('folder', signatureData.folder);
+            if (signatureData.allowed_formats) formData.append('allowed_formats', signatureData.allowed_formats);
+            if (signatureData.tags) formData.append('tags', signatureData.tags);
+            if (signatureData.public_id) formData.append('public_id', signatureData.public_id);
             
-            // ❌ DON'T include max_file_size - it wasn't in the signature!
-            // The backend signature was generated without max_file_size
+            progressCallback?.(50);
 
-            // Debug: Log what we're sending
-            console.log('FormData entries:');
-            for (let [key, value] of formData.entries()) {
-                if (key !== 'file') {
-                    console.log(`${key}: ${value}`);
-                }
-            }
+            // Upload to Cloudinary with timeout
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 30000); // 30s timeout
 
-            // Upload directly to Cloudinary
             const uploadResponse = await fetch(
                 `https://api.cloudinary.com/v1_1/${signatureData.cloudName}/image/upload`,
                 {
                     method: 'POST',
-                    body: formData
-                    // Note: Don't set Content-Type header when using FormData
+                    body: formData,
+                    signal: controller.signal
                 }
             );
 
-            console.log('Upload response status:', uploadResponse.status);
+            clearTimeout(timeoutId);
+            progressCallback?.(80);
 
             if (!uploadResponse.ok) {
                 const errorText = await uploadResponse.text();
-                console.error('Cloudinary error response:', errorText);
-                throw new Error(`Cloudinary upload failed (${uploadResponse.status}): ${errorText}`);
+                throw new Error(`Upload failed: ${uploadResponse.status}`);
             }
 
             const result = await uploadResponse.json();
+            progressCallback?.(100);
             
             return {
                 success: true,
                 url: result.secure_url,
                 public_id: result.public_id,
                 format: result.format,
-                width: result.width,
-                height: result.height,
-                bytes: result.bytes,
-                created_at: result.created_at
+                bytes: result.bytes
             };
 
         } catch (error) {
-            console.error("Error uploading to Cloudinary:", error);
+            progressCallback?.(0);
+            if (error.name === 'AbortError') {
+                throw new Error('Upload timeout - please try again');
+            }
             throw error;
         }
     },
 
     // Enhanced punch-in with Cloudinary upload
-    punchIn: async ({ firm_name, image, location, onProgress = null }) => {
-            console.log('punchin service')
+    punchIn: async ({ customerCode, image, location, onProgress = null }) => {
         try {
             let photoUrl = null;
 
             // Upload image to Cloudinary if provided
             if (image) {
-                console.log('Uploading image to Cloudinary...', { size: image.size, type: image.type });
-                
                 const uploadResult = await PunchAPI.uploadImageToCloudinary(image, onProgress);
                 photoUrl = uploadResult.url;
-                console.log(photoUrl)
-                
-                console.log('Image uploaded successfully:', { url: photoUrl });
             }
 
-            // Send punch-in data to your backend (matching Django model)
+            // Send punch-in data to backend
             const punchData = {
-                firm_name,                          // Match Django view expectation
-                latitude: location?.latitude,       // Optional location data
-                longitude: location?.longitude,     // Optional location data  
-                photo_url: photoUrl                 // Cloudinary URL for PunchIn.photo_url field
+                customerCode,
+                latitude: location?.latitude,
+                longitude: location?.longitude,
+                photo_url: photoUrl
             };
 
             const response = await apiClient.post("/punch-in/", punchData);
@@ -185,7 +168,6 @@ export const PunchAPI = {
             };
 
         } catch (error) {
-            console.error("Error in punchIn:", error);
             throw error;
         }
     },

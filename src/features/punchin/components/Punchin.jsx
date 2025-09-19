@@ -95,8 +95,10 @@ const Punchin = () => {
   const handlePunchIn = useCallback(async () => {
     setIsLoading(true);
     try {
+      //         firm_name: customer.firm_name || customer.customerName,
+
       await PunchAPI.punchIn ({
-        customerId: debouncedSelectedCustomer?.id,
+        customerCode: debouncedSelectedCustomer?.id,
         image: capturedImage?.file,
         location: capturedLocation,
       });

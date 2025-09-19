@@ -99,6 +99,7 @@ const Punchin = () => {
 
       await PunchAPI.punchIn ({
         customerCode: debouncedSelectedCustomer?.id,
+        customerName:  debouncedSelectedCustomer?.firm_name || debouncedSelectedCustomer.customerName,
         image: capturedImage?.file,
         location: capturedLocation,
       });

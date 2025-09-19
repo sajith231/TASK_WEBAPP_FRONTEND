@@ -47,9 +47,10 @@ export const PunchAPI = {
     },
 
     //PUNCHIN Get Cloudinary upload signature
-    getUploadSignature: async () => {
+    getUploadSignature: async ({customerName}) => {
         try {
-            const response = await apiClient.get("/punch-in/cloudinary-signature/");
+            const response = await apiClient.get(`/punch-in/cloudinary-signature/?customerName=${encodeURIComponent(customerName)}`)
+;
             return response.data;
         } catch (error) {
             console.error("Error getting upload signature:", error);
@@ -58,7 +59,7 @@ export const PunchAPI = {
     },
 
     // Upload image directly to Cloudinary - Production Ready
-    uploadImageToCloudinary: async (imageFile, progressCallback = null) => {
+    uploadImageToCloudinary: async (imageFile,customerName, progressCallback = null) => {
         try {
             // Client-side validation
             const maxFileSize = 5 * 1024 * 1024; // 5MB
@@ -74,7 +75,7 @@ export const PunchAPI = {
             progressCallback?.(10);
 
             // Get upload signature from backend
-            const signatureData = await PunchAPI.getUploadSignature();
+            const signatureData = await PunchAPI.getUploadSignature({customerName});
             
             // Check API key
             const apiKey = import.meta.env.VITE_CLOUDINARY_API_KEY;
@@ -141,13 +142,13 @@ export const PunchAPI = {
     },
 
     // Enhanced punch-in with Cloudinary upload
-    punchIn: async ({ customerCode, image, location, onProgress = null }) => {
+    punchIn: async ({ customerCode,customerName, image, location, onProgress = null }) => {
         try {
             let photoUrl = null;
 
             // Upload image to Cloudinary if provided
             if (image) {
-                const uploadResult = await PunchAPI.uploadImageToCloudinary(image, onProgress);
+                const uploadResult = await PunchAPI.uploadImageToCloudinary(image, customerName,onProgress);
                 photoUrl = uploadResult.url;
             }
 

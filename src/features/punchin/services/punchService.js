@@ -47,10 +47,10 @@ export const PunchAPI = {
     },
 
     //PUNCHIN Get Cloudinary upload signature
-    getUploadSignature: async ({customerName}) => {
+    getUploadSignature: async ({ customerName }) => {
         try {
             const response = await apiClient.get(`/punch-in/cloudinary-signature/?customerName=${encodeURIComponent(customerName)}`)
-;
+                ;
             return response.data;
         } catch (error) {
             console.error("Error getting upload signature:", error);
@@ -59,7 +59,7 @@ export const PunchAPI = {
     },
 
     // Upload image directly to Cloudinary - Production Ready
-    uploadImageToCloudinary: async (imageFile,customerName, progressCallback = null) => {
+    uploadImageToCloudinary: async (imageFile, customerName, progressCallback = null) => {
         try {
             // Client-side validation
             const maxFileSize = 5 * 1024 * 1024; // 5MB
@@ -75,14 +75,14 @@ export const PunchAPI = {
             progressCallback?.(10);
 
             // Get upload signature from backend
-            const signatureData = await PunchAPI.getUploadSignature({customerName});
-            
+            const signatureData = await PunchAPI.getUploadSignature({ customerName });
+
             // Check API key
             const apiKey = import.meta.env.VITE_CLOUDINARY_API_KEY;
             if (!apiKey) {
                 throw new Error('Cloudinary configuration missing');
             }
-            
+
             progressCallback?.(30);
 
             // Prepare form data for Cloudinary
@@ -91,13 +91,13 @@ export const PunchAPI = {
             formData.append('api_key', apiKey);
             formData.append('timestamp', signatureData.timestamp);
             formData.append('signature', signatureData.signature);
-            
+
             // Add signed parameters
             if (signatureData.folder) formData.append('folder', signatureData.folder);
             if (signatureData.allowed_formats) formData.append('allowed_formats', signatureData.allowed_formats);
             if (signatureData.tags) formData.append('tags', signatureData.tags);
             if (signatureData.public_id) formData.append('public_id', signatureData.public_id);
-            
+
             progressCallback?.(50);
 
             // Upload to Cloudinary with timeout
@@ -123,7 +123,7 @@ export const PunchAPI = {
 
             const result = await uploadResponse.json();
             progressCallback?.(100);
-            
+
             return {
                 success: true,
                 url: result.secure_url,
@@ -142,13 +142,13 @@ export const PunchAPI = {
     },
 
     // Enhanced punch-in with Cloudinary upload
-    punchIn: async ({ customerCode,customerName, image, location, onProgress = null }) => {
+    punchIn: async ({ customerCode, customerName, image, location, onProgress = null }) => {
         try {
             let photoUrl = null;
 
             // Upload image to Cloudinary if provided
             if (image) {
-                const uploadResult = await PunchAPI.uploadImageToCloudinary(image, customerName,onProgress);
+                const uploadResult = await PunchAPI.uploadImageToCloudinary(image, customerName, onProgress);
                 photoUrl = uploadResult.url;
             }
 
@@ -161,7 +161,7 @@ export const PunchAPI = {
             };
 
             const response = await apiClient.post("/punch-in/", punchData);
-            
+
             return {
                 success: true,
                 data: response.data,
@@ -173,13 +173,21 @@ export const PunchAPI = {
         }
     },
 
-    // // Punch-out functionality
+    // // Punch-out functionality   
+    punchOut: async (punchinId) => {
+        try {
+            const response = await apiClient.get('')
+
+        } catch (error) {
+
+        }
+    },
     // punchOut: async (punchinId) => {
     //     try {
     //         const response = await apiClient.post("/punchout/", {
     //             punchin_id: punchinId
     //         });
-            
+
     //         return {
     //             success: true,
     //             data: response.data
@@ -201,14 +209,22 @@ export const PunchAPI = {
     //     }
     // },
 
-    // // Get active punch-ins (not punched out yet)
-    // getActivePunchIns: async () => {
+    // Get active punch-ins (not punched out yet)
+    getActivePunchIns: async () => {
+        try {
+            const response = await apiClient.get('punch-status/');
+            return response.data;
+        } catch (error) {
+            console.error("Error Get active punch-ins:", error);
+            throw error;
+        }
+    }
     //     try {
     //         const response = await apiClient.get("/punch-records/");
-            
+
     //         // Filter for active punch-ins (no punchout_time)
     //         const activePunchIns = response.data.filter(record => !record.punchout_time);
-            
+
     //         return {
     //             ...response,
     //             data: activePunchIns
@@ -250,7 +266,7 @@ export const PunchAPI = {
 
     //             // Draw and compress
     //             ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                
+
     //             canvas.toBlob(resolve, 'image/jpeg', quality);
     //         };
 

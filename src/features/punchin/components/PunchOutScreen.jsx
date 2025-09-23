@@ -7,7 +7,7 @@ import { PunchAPI } from '../services/punchService'
 import { toast } from 'react-toastify'
 import '../styles/PunchOutScreen.scss'
 
-const PunchOutScreen = ({ activePunchIn, onPunchOut, onRefresh }) => {
+const PunchOutScreen = ({ activePunchIn, onPunchOut }) => {
     const [currentTime, setCurrentTime] = useState(new Date());
     const [showConfirmModal, setShowConfirmModal] = useState(false);
     const [loading, setLoading] = useState(false);
@@ -91,17 +91,7 @@ const PunchOutScreen = ({ activePunchIn, onPunchOut, onRefresh }) => {
                         </div>
                     </div>
 
-                    {(activePunchIn?.latitude && activePunchIn?.longitude) && (
-                        <div className="info-card">
-                            <FaMapMarkerAlt className='info-icon' />
-                            <div>
-                                <label>Location</label>
-                                <p>
-                                    {activePunchIn.latitude.toFixed(4)}, {activePunchIn.longitude.toFixed(4)}
-                                </p>
-                            </div>
-                        </div>
-                    )}
+                    
                 </div>
 
                 {/* Current Time Display */}
@@ -110,16 +100,7 @@ const PunchOutScreen = ({ activePunchIn, onPunchOut, onRefresh }) => {
                     <p>{currentTime.toLocaleDateString()}</p>
                 </div>
 
-                {/* Punch-In Photo */}
-                {activePunchIn?.photo_url && (
-                    <div className="photo-section">
-                        <label>Punch-In Photo</label>
-                        <div className="photo-thumbnail">
-                            <img src={activePunchIn.photo_url} alt="Punch-in verification" />
-                            <FaCamera className="photo-icon" />
-                        </div>
-                    </div>
-                )}
+              
 
                 {/* Action Buttons */}
                 <div className="punchout-actions">
@@ -133,16 +114,6 @@ const PunchOutScreen = ({ activePunchIn, onPunchOut, onRefresh }) => {
                         <FaRegClock />
                         Punch Out
                     </motion.button>
-
-                    {onRefresh && (
-                        <button
-                            className="refresh-btn secondary"
-                            onClick={onRefresh}
-                            disabled={loading}
-                        >
-                            Refresh Status
-                        </button>
-                    )}
                 </div>
             </motion.div>
 

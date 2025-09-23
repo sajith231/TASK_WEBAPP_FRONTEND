@@ -15,7 +15,8 @@ const Punchin = React.lazy(() => import("../components/Punchin"));
  * Handles error boundaries and loading states
  */
 const PunchInCapture = () => {
-  const [activePunchIn, setActivePunchIn] = useState(false)
+  const [activePunchIn, setActivePunchIn] = useState('')
+  const [isPunched, setIsPucnhed] = useState(false)
 
 
   const fallbackComponent = (
@@ -44,11 +45,11 @@ const PunchInCapture = () => {
       //   setActivePunchIn(true);
       // }
 
-      const activePunchIn =await PunchAPI.getActivePunchIns()
+      const currentPunchIn = await PunchAPI.getActivePunchIns()
 
-      if (activePunchIn.status == 'pending' || activePunchIn.status == 'Punching') {
-        setActivePunchIn(true);
-
+      if (currentPunchIn.status == 'pending' || currentPunchIn.status == 'Punching') {
+        setIsPucnhed(true);
+        setActivePunchIn(currentPunchIn)
       }
 
     } catch (error) {
@@ -56,13 +57,16 @@ const PunchInCapture = () => {
     }
   }
 
+  const handlePunchOut = () => {
+    setIsPucnhed(false)
+  }
 
   useEffect(() => {
     // PunchApi.getActivePunchIns
     checkActivePunchins()
   }, [])
 
-  
+
 
 
   return (
@@ -70,7 +74,7 @@ const PunchInCapture = () => {
       <div className="punchin-capture-page">
         <ErrorBoundary fallback={fallbackComponent}>
           <Suspense fallback={loadingComponent}>
-           {activePunchIn?<PunchOutScreen/>:<Punchin />}
+            {isPunched ? <PunchOutScreen activePunchIn={activePunchIn} onPunchOut={handlePunchOut} /> : <Punchin />}
           </Suspense>
         </ErrorBoundary>
       </div>

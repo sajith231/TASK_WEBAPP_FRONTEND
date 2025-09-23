@@ -21,6 +21,7 @@ import { logger } from "../../../utils/logger";
 
 // Constants
 import { WIZARD_STEPS, STEP_TITLES } from "../constants/wizardConstants";
+import { toast } from "react-toastify";
 
 const Punchin = ({ onPunchIn }) => {
   const [currentStep, setCurrentStep] = useState(WIZARD_STEPS.CUSTOMER_SELECTION);
@@ -125,8 +126,7 @@ const Punchin = ({ onPunchIn }) => {
           distance: distance?.formattedDistance || 'N/A'
         });
       }
-      
-      alert("Punched in successfully!");
+      toast.success("Punched in successfully!");
       
       // Reset wizard to first step
       setCurrentStep(WIZARD_STEPS.CUSTOMER_SELECTION);

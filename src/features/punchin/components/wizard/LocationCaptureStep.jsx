@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { motion } from 'framer-motion';
-import { IoChevronBack, IoChevronForward, IoRefreshCircle, IoLocation } from 'react-icons/io5';
+import { IoChevronBack, IoChevronForward, IoRefreshCircle, IoLocation, IoCheckmarkCircle, IoCloseCircle } from 'react-icons/io5';
 import { MdOutlineNotListedLocation, MdOutlineSocialDistance, MdNotListedLocation } from 'react-icons/md';
 import LoadingSpinner from '../../../../components/ui/LoadingSpinner';
 
@@ -43,6 +43,32 @@ const LocationCaptureStep = ({
     if (locationError) return <MdNotListedLocation className="icon error" />;
     return <MdOutlineNotListedLocation className="icon" />;
   };
+
+  // Distance validation helper
+  const getDistanceStatus = () => {
+    if (!selectedCustomer?.latitude) {
+      return {
+        isValid: true, // Allow punch-in if no customer location is set
+        distance: 'No location data',
+        message: 'Customer location not configured - punch-in allowed'
+      };
+    }
+    
+    if (!distance || !capturedLocation) return null;
+    
+    const isWithinRadius = distance?.isWithinRadius;
+    const formattedDistance = distance?.formattedDistance;
+    
+    return {
+      isValid: isWithinRadius,
+      distance: formattedDistance,
+      message: isWithinRadius 
+        ? `✓ Within range (${formattedDistance})` 
+        : `⚠ Outside range (${formattedDistance}) - Must be within 100m`
+    };
+  };
+
+  const distanceStatus = getDistanceStatus();
 
   useEffect(() => {
     const ts = new Date().toISOString();
@@ -134,6 +160,38 @@ const LocationCaptureStep = ({
             </button>
           </div>
 
+          {/* Distance Status Display */}
+          {capturedLocation && distanceStatus && (
+            <div className={`distance_status ${distanceStatus.isValid ? 'valid' : 'invalid'}`}>
+              <div className="distance_info">
+                <MdOutlineSocialDistance className="distance_icon" />
+                <div className="distance_text">
+                  <span className="distance_label">
+                    Distance to {selectedCustomer?.firm_name || 'Customer'}:
+                  </span>
+                  <span className={`distance_value ${distanceStatus.isValid ? 'valid' : 'invalid'}`}>
+                    {distanceStatus.distance}
+                  </span>
+                </div>
+                <div className={`status_indicator ${distanceStatus.isValid ? 'valid' : 'invalid'}`}>
+                  {distanceStatus.isValid ? (
+                    <IoCheckmarkCircle className="status_icon valid" />
+                  ) : (
+                    <IoCloseCircle className="status_icon invalid" />
+                  )}
+                </div>
+              </div>
+              <div className={`status_message ${distanceStatus.isValid ? 'valid' : 'invalid'}`}>
+                {distanceStatus.message}
+              </div>
+              {!distanceStatus.isValid && selectedCustomer?.latitude && (
+                <div className="radius_help">
+                  <small>📍 Move closer to the customer location to enable punch-in</small>
+                </div>
+              )}
+            </div>
+          )}
+
           <div className="location_map_wrapper">
             {/* Show placeholder only when no location AND not loading AND has error */}
             {!capturedLocation && !isGettingLocation && locationError && (
@@ -168,7 +226,7 @@ const LocationCaptureStep = ({
               <MdOutlineSocialDistance className="icon" /> Distance from shop
             </div>
             <div className="km_span">
-              {distance ? `${distance} Km` : (isGettingLocation ? "Calculating..." : "N/A")}
+              {distance?.formattedDistance || (isGettingLocation ? "Calculating..." : "N/A")}
             </div>
           </div>
 
@@ -185,7 +243,17 @@ const LocationCaptureStep = ({
         <button className="wizard_btn secondary" onClick={onPrev}>
           <IoChevronBack /> Previous
         </button>
-        {capturedLocation && (
+        {capturedLocation && distanceStatus?.isValid && (
+          <button className="wizard_btn primary" onClick={onNext}>
+            Next <IoChevronForward />
+          </button>
+        )}
+        {capturedLocation && !distanceStatus?.isValid && selectedCustomer?.latitude && (
+          <button className="wizard_btn primary disabled" disabled title="You must be within 100m to continue">
+            Next <IoChevronForward />
+          </button>
+        )}
+        {capturedLocation && !selectedCustomer?.latitude && (
           <button className="wizard_btn primary" onClick={onNext}>
             Next <IoChevronForward />
           </button>

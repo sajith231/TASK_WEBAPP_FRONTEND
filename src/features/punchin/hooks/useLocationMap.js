@@ -71,20 +71,52 @@ const useLocationMap = (targetLocation = null) => {
     }
   }, []);
 
-  // Calculate distance only if target location exists
+  // Calculate distance and check if within allowed radius (100 meters)
   useEffect(() => {
     if (targetLocation?.latitude && userLocation?.latitude) {
       try {
-        const dist = distanceKm(
-          targetLocation.latitude,
-          targetLocation.longitude,
-          userLocation.latitude,
-          userLocation.longitude
-        );
-        setDistance(dist);
+        // Validate coordinates
+        const targetLat = parseFloat(targetLocation.latitude);
+        const targetLng = parseFloat(targetLocation.longitude);
+        const userLat = parseFloat(userLocation.latitude);
+        const userLng = parseFloat(userLocation.longitude);
+        
+        if (isNaN(targetLat) || isNaN(targetLng) || isNaN(userLat) || isNaN(userLng)) {
+          console.error('Invalid coordinates detected:', {
+            targetLat, targetLng, userLat, userLng
+          });
+          setDistance({
+            km: 'Invalid',
+            meters: 'Invalid',
+            isWithinRadius: false,
+            formattedDistance: 'Invalid coordinates'
+          });
+          return;
+        }
+        
+        const distKm = distanceKm(targetLat, targetLng, userLat, userLng);
+        
+        // Convert km to meters for more precise radius checking
+        const distanceInMeters = parseFloat(distKm) * 1000;
+        
+        const distanceData = {
+          km: distKm,
+          meters: distanceInMeters.toFixed(0),
+          isWithinRadius: distanceInMeters <= 100, // 100 meter radius
+          formattedDistance: distanceInMeters < 1000 
+            ? `${distanceInMeters.toFixed(0)}m`
+            : `${distKm}km`
+        };
+        
+        setDistance(distanceData);
       } catch (error) {
         logger.error('Error calculating distance:', error);
-        setDistance('N/A');
+        setDistance({
+          km: 'Error',
+          meters: 'Error',
+          isWithinRadius: false,
+          formattedDistance: 'Calculation error'
+        });
       }
     } else {
       setDistance("");

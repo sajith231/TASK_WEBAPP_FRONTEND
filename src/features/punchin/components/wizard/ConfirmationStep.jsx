@@ -1,8 +1,9 @@
     import React from 'react';
     import PropTypes from 'prop-types';
     import { motion } from 'framer-motion';
-    import { IoChevronBack } from 'react-icons/io5';
+    import { IoChevronBack, IoCheckmarkCircle, IoCloseCircle } from 'react-icons/io5';
     import { FaRegClock } from 'react-icons/fa';
+    import { MdOutlineSocialDistance } from 'react-icons/md';
 
     // Confirmation Step Component
     const ConfirmationStep = ({ 
@@ -14,6 +15,12 @@
     onPrev,
     isLoading
     }) => {
+    
+    // Check if distance validation passes
+    const isWithinRadius = distance?.isWithinRadius || false;
+    const hasCustomerLocation = selectedCustomer?.latitude;
+    const canPunchIn = !hasCustomerLocation || isWithinRadius; // Allow punch-in if no customer location set
+    
     return (
         <motion.div
         initial={{ opacity: 0, x: 50 }}
@@ -38,7 +45,37 @@
             
             <div className="summary_item">
             <h4>Distance from store:</h4>
-            <p>{distance} Km</p>
+            {hasCustomerLocation ? (
+                <div className={`distance_summary ${isWithinRadius ? 'valid' : 'invalid'}`}>
+                <div className="distance_info">
+                    <MdOutlineSocialDistance className="distance_icon" />
+                    <span className="distance_text">{distance?.formattedDistance || 'N/A'}</span>
+                    {isWithinRadius ? (
+                    <IoCheckmarkCircle className="status_icon valid" />
+                    ) : (
+                    <IoCloseCircle className="status_icon invalid" />
+                    )}
+                </div>
+                <div className={`validation_message ${isWithinRadius ? 'valid' : 'invalid'}`}>
+                    {isWithinRadius ? (
+                    <span className="success_text">✓ Within 100m radius</span>
+                    ) : (
+                    <span className="error_text">⚠ Outside 100m radius - Cannot punch in</span>
+                    )}
+                </div>
+                </div>
+            ) : (
+                <div className="distance_summary valid">
+                <div className="distance_info">
+                    <MdOutlineSocialDistance className="distance_icon" />
+                    <span className="distance_text">No location configured</span>
+                    <IoCheckmarkCircle className="status_icon valid" />
+                </div>
+                <div className="validation_message valid">
+                    <span className="success_text">✓ Location validation not required</span>
+                </div>
+                </div>
+            )}
             </div>
         </div>
 
@@ -47,9 +84,10 @@
             <IoChevronBack /> Previous
             </button>
             <button 
-            className="wizard_btn success" 
+            className={`wizard_btn ${canPunchIn ? 'success' : 'disabled'}`}
             onClick={onPunchIn}
-            disabled={isLoading}
+            disabled={isLoading || !canPunchIn}
+            title={!canPunchIn ? 'You must be within 100 meters to punch in' : ''}
             >
             {isLoading ? "Processing..." : <><FaRegClock /> Punch In</>}
             </button>
@@ -62,7 +100,7 @@
     selectedCustomer: PropTypes.object,
     capturedImage: PropTypes.object,
     capturedLocation: PropTypes.object,
-    distance: PropTypes.string,
+    distance: PropTypes.oneOfType([PropTypes.string, PropTypes.object]),
     onPunchIn: PropTypes.func.isRequired,
     onPrev: PropTypes.func.isRequired,
     isLoading: PropTypes.bool.isRequired

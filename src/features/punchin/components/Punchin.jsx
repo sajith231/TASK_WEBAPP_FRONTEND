@@ -22,7 +22,7 @@ import { logger } from "../../../utils/logger";
 // Constants
 import { WIZARD_STEPS, STEP_TITLES } from "../constants/wizardConstants";
 
-const Punchin = () => {
+const Punchin = ({ onPunchIn }) => {
   const [currentStep, setCurrentStep] = useState(WIZARD_STEPS.CUSTOMER_SELECTION);
   const [customers, setCustomers] = useState([]);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
@@ -93,20 +93,41 @@ const Punchin = () => {
   }, [currentStep]);
 
   const handlePunchIn = useCallback(async () => {
+    // Validate location radius before punch-in (only if customer has location data)
+    if (debouncedSelectedCustomer?.latitude && capturedLocation) {
+      const isWithinRadius = distance?.isWithinRadius;
+      
+      if (!isWithinRadius) {
+        alert(`You must be within 100 meters of ${debouncedSelectedCustomer.firm_name} to punch in. Current distance: ${distance?.formattedDistance || 'Unknown'}`);
+        return;
+      }
+    }
+
     setIsLoading(true);
     try {
-      //         firm_name: customer.firm_name || customer.customerName,
-
       const ResponsePunch = await PunchAPI.punchIn({
         customerCode: debouncedSelectedCustomer?.id,
         customerName: debouncedSelectedCustomer?.firm_name || debouncedSelectedCustomer.customerName,
         image: capturedImage?.file,
         location: capturedLocation,
+        distance: distance?.formattedDistance || 'N/A'
       });
-      localStorage.setItem("activePunchIn", JSON.stringify(
-        ResponsePunch.data
-      ))
+      
+      localStorage.setItem("activePunchIn", JSON.stringify(ResponsePunch.data));
+      
+      // Call parent callback if provided
+      if (onPunchIn) {
+        await onPunchIn({
+          customerCode: debouncedSelectedCustomer?.id,
+          customerName: debouncedSelectedCustomer?.firm_name || debouncedSelectedCustomer.customerName,
+          image: capturedImage?.file,
+          location: capturedLocation,
+          distance: distance?.formattedDistance || 'N/A'
+        });
+      }
+      
       alert("Punched in successfully!");
+      
       // Reset wizard to first step
       setCurrentStep(WIZARD_STEPS.CUSTOMER_SELECTION);
       setSelectedCustomer(null);
@@ -120,7 +141,7 @@ const Punchin = () => {
       setIsLoading(false);
       setOpenConfirmPunchIn(false);
     }
-  }, [debouncedSelectedCustomer, capturedImage, capturedLocation, setCapturedImage]);
+  }, [debouncedSelectedCustomer, capturedImage, capturedLocation, distance, setCapturedImage, onPunchIn]);
 
   const renderCurrentStep = useCallback(() => {
     switch (currentStep) {

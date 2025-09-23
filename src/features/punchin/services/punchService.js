@@ -173,14 +173,21 @@ export const PunchAPI = {
         }
     },
 
-    // // Punch-out functionality   
+    // Punch-out functionality   
     punchOut: async (punchinId) => {
         try {
-            const response = await apiClient.post(`/punch-out/${punchinId}/`)
-            return response;
+            if (!punchinId) {
+                throw new Error('Punch ID is required');
+            }
+
+            const response = await apiClient.post(`/punch-out/${punchinId}/`);
+            return {
+                success: true,
+                data: response.data || {}
+            };
         } catch (error) {
             console.error("Error in punchOut:", error);
-            throw error;
+            throw new Error('Failed to punch out');
         }
     },
 
@@ -199,10 +206,70 @@ export const PunchAPI = {
     getActivePunchIns: async () => {
         try {
             const response = await apiClient.get('punch-status/');
-            return response.data;
+            return {
+                success: true,
+                data: response.data || []
+            };
         } catch (error) {
             console.error("Error Get active punch-ins:", error);
-            throw error;
+            throw new Error('Failed to check punch-in status');
+        }
+    },
+
+    // Check current punch-in status (localStorage + API verification)
+    checkPunchInStatus: async () => {
+        try {
+            // Check localStorage first for immediate feedback
+            const stored = localStorage.getItem('activePunchIn');
+            let localData = null;
+            
+            if (stored) {
+                try {
+                    localData = JSON.parse(stored);
+                } catch (e) {
+                    localStorage.removeItem('activePunchIn');
+                }
+            }
+
+            // Verify with backend (source of truth)
+            const response = await PunchAPI.getActivePunchIns();
+            const activePunch = response.data.find(punch => !punch.punchout_time);
+            
+            if (activePunch) {
+                // Update localStorage with fresh data
+                localStorage.setItem('activePunchIn', JSON.stringify(activePunch));
+                return {
+                    isActive: true,
+                    activePunchIn: activePunch,
+                    source: 'api'
+                };
+            } else if (localData) {
+                // Clear stale localStorage data
+                localStorage.removeItem('activePunchIn');
+            }
+            
+            return {
+                isActive: false,
+                activePunchIn: null,
+                source: 'api'
+            };
+        } catch (error) {
+            console.error('Failed to check punch-in status:', error);
+            
+            // Fallback to localStorage if API fails
+            if (localData) {
+                return {
+                    isActive: true,
+                    activePunchIn: localData,
+                    source: 'localStorage'
+                };
+            }
+            
+            return {
+                isActive: false,
+                activePunchIn: null,
+                source: 'fallback'
+            };
         }
     }
     //     try {

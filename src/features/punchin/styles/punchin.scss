@@ -1589,3 +1589,167 @@
         }
     }
 }
+
+// Distance Validation Styles
+.distance_status {
+    margin: 1rem 0;
+    padding: 1rem;
+    border-radius: 8px;
+    border: 1px solid;
+    background: rgba(255, 255, 255, 0.8);
+    
+    &.valid {
+        border-color: #10b981;
+        background-color: #ecfdf5;
+    }
+    
+    &.invalid {
+        border-color: #ef4444;
+        background-color: #fef2f2;
+    }
+    
+    .distance_info {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 0.5rem;
+        
+        .distance_icon {
+            font-size: 1.2rem;
+            color: #6b7280;
+        }
+        
+        .distance_text {
+            flex: 1;
+            
+            .distance_label {
+                display: block;
+                font-size: 0.875rem;
+                color: #6b7280;
+                margin-bottom: 0.25rem;
+            }
+            
+            .distance_value {
+                display: block;
+                font-size: 1.1rem;
+                font-weight: 600;
+                
+                &.valid {
+                    color: #059669;
+                }
+                
+                &.invalid {
+                    color: #dc2626;
+                }
+            }
+        }
+        
+        .status_indicator {
+            .status_icon {
+                font-size: 1.5rem;
+                
+                &.valid {
+                    color: #10b981;
+                }
+                
+                &.invalid {
+                    color: #ef4444;
+                }
+            }
+        }
+    }
+    
+    .status_message {
+        font-size: 0.875rem;
+        font-weight: 500;
+        
+        &.valid {
+            color: #059669;
+        }
+        
+        &.invalid {
+            color: #dc2626;
+        }
+    }
+    
+    .radius_help {
+        margin-top: 0.5rem;
+        padding: 0.5rem;
+        background: rgba(239, 68, 68, 0.1);
+        border-radius: 4px;
+        
+        small {
+            color: #b91c1c;
+            font-size: 0.8rem;
+        }
+    }
+}
+
+// Confirmation Step Distance Summary
+.distance_summary {
+    &.valid {
+        .distance_info {
+            color: #059669;
+        }
+    }
+    
+    &.invalid {
+        .distance_info {
+            color: #dc2626;
+        }
+    }
+    
+    .distance_info {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 0.5rem;
+        
+        .distance_icon {
+            font-size: 1rem;
+        }
+        
+        .distance_text {
+            font-weight: 600;
+            font-size: 1rem;
+        }
+        
+        .status_icon {
+            font-size: 1.2rem;
+            
+            &.valid {
+                color: #10b981;
+            }
+            
+            &.invalid {
+                color: #ef4444;
+            }
+        }
+    }
+    
+    .validation_message {
+        font-size: 0.875rem;
+        
+        .success_text {
+            color: #059669;
+            font-weight: 500;
+        }
+        
+        .error_text {
+            color: #dc2626;
+            font-weight: 500;
+        }
+    }
+}
+
+// Disabled button styles
+.wizard_btn.disabled {
+    background-color: #e5e7eb !important;
+    color: #9ca3af !important;
+    cursor: not-allowed !important;
+    
+    &:hover {
+        background-color: #e5e7eb !important;
+        transform: none !important;
+    }
+}

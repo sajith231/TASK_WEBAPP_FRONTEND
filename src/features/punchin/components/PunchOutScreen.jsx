@@ -35,7 +35,7 @@ const PunchOutScreen = ({ activePunchIn, onPunchOut }) => {
     const handlePunchOut = async () => {
         setLoading(true)
         try {
-            await onPunchOut()
+            await onPunchOut(activePunchIn.punchin_id)
             setShowConfirmModal(false)
             toast.success('Successfully punched out!')
         } catch (error) {

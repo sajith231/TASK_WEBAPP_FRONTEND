@@ -176,27 +176,13 @@ export const PunchAPI = {
     // // Punch-out functionality   
     punchOut: async (punchinId) => {
         try {
-            const response = await apiClient.get('')
-
+            const response = await apiClient.post(`/punch-out/${punchinId}/`)
+            return response;
         } catch (error) {
-
+            console.error("Error in punchOut:", error);
+            throw error;
         }
     },
-    // punchOut: async (punchinId) => {
-    //     try {
-    //         const response = await apiClient.post("/punchout/", {
-    //             punchin_id: punchinId
-    //         });
-
-    //         return {
-    //             success: true,
-    //             data: response.data
-    //         };
-    //     } catch (error) {
-    //         console.error("Error in punchOut:", error);
-    //         throw error;
-    //     }
-    // },
 
     // // Get punch-in/out records
     // getPunchRecords: async () => {

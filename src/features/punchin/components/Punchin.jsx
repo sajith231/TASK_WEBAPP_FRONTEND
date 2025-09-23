@@ -97,19 +97,15 @@ const Punchin = () => {
     try {
       //         firm_name: customer.firm_name || customer.customerName,
 
-      await PunchAPI.punchIn({
+      const ResponsePunch = await PunchAPI.punchIn({
         customerCode: debouncedSelectedCustomer?.id,
         customerName: debouncedSelectedCustomer?.firm_name || debouncedSelectedCustomer.customerName,
         image: capturedImage?.file,
         location: capturedLocation,
       });
-      localStorage.setItem("activePunchIn", JSON.stringify({
-        customerCode: debouncedSelectedCustomer?.id,
-        customerName: debouncedSelectedCustomer?.firm_name || debouncedSelectedCustomer.customerName,
-        location: capturedLocation,
-        time: new Date().toLocaleString(),
-        status:"pending"
-      }))
+      localStorage.setItem("activePunchIn", JSON.stringify(
+        ResponsePunch.data
+      ))
       alert("Punched in successfully!");
       // Reset wizard to first step
       setCurrentStep(WIZARD_STEPS.CUSTOMER_SELECTION);

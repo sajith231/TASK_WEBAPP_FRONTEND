@@ -57,8 +57,11 @@ const PunchInCapture = () => {
     }
   }
 
-  const handlePunchOut = () => {
+  const handlePunchOut = async (punchinId) => {
+    console.log("punchinId",punchinId)
+    const res = await PunchAPI.punchOut(punchinId)
     setIsPucnhed(false)
+    localStorage.removeItem('activePunchIn')
   }
 
   useEffect(() => {

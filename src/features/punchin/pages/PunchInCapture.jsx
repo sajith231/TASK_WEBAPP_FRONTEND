@@ -122,7 +122,7 @@ const checkActivePunchIn = async () => {
         const localData = JSON.parse(stored);
         
         // If valid data exists in localStorage, use it directly
-        if (localData && (localData.status === 'pending' || localData.status === 'Punching' || !localData.punchout_time)) {
+        if (localData && (localData.status === 'pending' || localData.status === 'Pending' || !localData.punchout_time)) {
           setActivePunchIn(localData);
           setIsPunchedIn(true);
           console.log('Using localStorage data for punch-in status');

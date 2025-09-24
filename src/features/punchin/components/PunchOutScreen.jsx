@@ -6,6 +6,7 @@ import ConfirmModal from '../../../components/ui/Modal/ConfirmModal'
 import { PunchAPI } from '../services/punchService'
 import { toast } from 'react-toastify'
 import '../styles/PunchOutScreen.scss'
+import BaseModal from '../../../components/ui/Modal/BaseModal'
 
 const PunchOutScreen = ({ activePunchIn, onPunchOut }) => {
     const [currentTime, setCurrentTime] = useState(new Date());
@@ -53,67 +54,74 @@ const PunchOutScreen = ({ activePunchIn, onPunchOut }) => {
                 animate={{ opacity: 1, y: 0 }}
                 className='punchout-container'
             >
-                {/* Header */}
-                <div className="punchout-header">
-                    <div className="status-indicator">
-                        <div className="pulse-dot"></div>
-                        <span>Currently Working</span>
+                {/* Left Side - Session Info */}
+                <div className="punchout-left">
+                    {/* Header */}
+                    <div className="punchout-header">
+                        <div className="status-indicator">
+                            <div className="pulse-dot"></div>
+                            <span>Currently Working</span>
+                        </div>
+                        <h1>You're Punched In</h1>
                     </div>
-                    <h1>You're Punched In</h1>
-                </div>
 
-                {/* Session Information */}
-                <div className="session-info">
-                    <div className="info-card">
-                        <FaUser className="info-icon" />
-                        <div>
-                            <label>Customer</label>
-                            <p>{activePunchIn?.firm_name || activePunchIn?.firmName || 'Unknown Customer'}</p>
+                    {/* Session Information */}
+                    <div className="session-info">
+                        <div className="info-card">
+                            <FaUser className="info-icon" />
+                            <div>
+                                <label>Customer</label>
+                                <p>{activePunchIn?.firm_name || activePunchIn?.firmName || 'Unknown Customer'}</p>
+                            </div>
+                        </div>
+
+                        <div className="info-card">
+                            <FaRegClock className='info-icon' />
+                            <div>
+                                <label>Started At</label>
+                                <p>{activePunchIn?.punchin_time ? 
+                                    new Date(activePunchIn.punchin_time).toLocaleTimeString() : 
+                                    'Unknown'
+                                }</p>
+                            </div>
+                        </div>
+
+                        <div className="info-card">
+                            <IoTimeOutline className='info-icon' />
+                            <div>
+                                <label>Duration</label>
+                                <p className="duration">{workDuration || '0h 0m'}</p>
+                            </div>
                         </div>
                     </div>
-
-                    <div className="info-card">
-                        <FaRegClock className='info-icon' />
-                        <div>
-                            <label>Started At</label>
-                            <p>{activePunchIn?.punchin_time ? 
-                                new Date(activePunchIn.punchin_time).toLocaleTimeString() : 
-                                'Unknown'
-                            }</p>
-                        </div>
-                    </div>
-
-                    <div className="info-card">
-                        <IoTimeOutline className='info-icon' />
-                        <div>
-                            <label>Duration</label>
-                            <p className="duration">{workDuration || '0h 0m'}</p>
-                        </div>
-                    </div>
-
-                    
                 </div>
 
-                {/* Current Time Display */}
-                <div className="current-time">
-                    <h2>{currentTime.toLocaleTimeString()}</h2>
-                    <p>{currentTime.toLocaleDateString()}</p>
-                </div>
-
-              
-
-                {/* Action Buttons */}
-                <div className="punchout-actions">
-                    <motion.button
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        className="punchout-btn primary"
-                        onClick={() => setShowConfirmModal(true)}
-                        disabled={loading}
+                {/* Right Side - Time & Actions */}
+                <div className="punchout-right">
+                    {/* Current Time Display */}
+                    <motion.div 
+                        className="current-time"
+                        initial={{ scale: 0.9, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        transition={{ delay: 0.2 }}
                     >
-                        <FaRegClock />
-                        Punch Out
-                    </motion.button>
+                        <h2>{currentTime.toLocaleTimeString()}</h2>
+                        <p>{currentTime.toLocaleDateString()}</p>
+                    </motion.div>
+
+                    {/* Action Buttons */}
+                    <div className="punchout-actions">
+                        <motion.button
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                            className="punchout-btn primary"
+                            onClick={() => setShowConfirmModal(true)}
+                            disabled={loading}
+                        >
+                            <FaRegClock />
+                            Punch Out
+                        </motion.button>
+                    </div>
                 </div>
             </motion.div>
 

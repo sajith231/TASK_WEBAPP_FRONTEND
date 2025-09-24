@@ -126,7 +126,7 @@ const Punchin = ({ onPunchIn }) => {
           distance: distance?.formattedDistance || 'N/A'
         });
       }
-      toast.success("Punched in successfully!");
+      // toast.success("Punched in successfully!");
       
       // Reset wizard to first step
       setCurrentStep(WIZARD_STEPS.CUSTOMER_SELECTION);

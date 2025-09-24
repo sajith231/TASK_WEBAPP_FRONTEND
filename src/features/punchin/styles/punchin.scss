@@ -647,7 +647,7 @@
                 .location_map_wrapper {
                     position: relative;
                     margin-bottom: 15px;
-                    height: 300px;
+                    height: 450px;
                     /* Fixed height to prevent layout shifts */
 
                     .location_placeholder {
@@ -1547,7 +1547,7 @@
                 font-size: 1.5rem;
             }
         }
-
+        
         .camera_modal {
             padding: 20px;
 
@@ -1587,6 +1587,8 @@
                 }
             }
         }
+
+   
     }
 }
 

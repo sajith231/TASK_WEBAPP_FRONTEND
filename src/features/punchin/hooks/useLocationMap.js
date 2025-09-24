@@ -39,7 +39,7 @@ const useLocationMap = (targetLocation = null) => {
       // Update map if it exists - show user location only
       if (mapRef.current?._map) {
         setViewAndMarker(mapRef.current._map, markerRef, newLoc.latitude, newLoc.longitude, 19);
-        addAccuracyCircle(mapRef.current._map, newLoc.latitude, newLoc.longitude, pos.coords.accuracy);
+        addAccuracyCircle(mapRef.current._map, newLoc.latitude, newLoc.longitude, 50);
       }
       
       logger.info('Location captured successfully', { location: newLoc });
@@ -58,8 +58,8 @@ const useLocationMap = (targetLocation = null) => {
       try {
         // Always start with default location (no customer markers)
         const map = initHybridMap(mapRef.current, {
-          center: [51.505, -0.09], // Default center
-          zoom: 13,
+          center: [10.7669, 75.9258], // Ponnani coordinates
+          zoom: 4,
         });
 
         mapRef.current._map = map;

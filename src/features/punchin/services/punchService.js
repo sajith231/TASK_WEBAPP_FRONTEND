@@ -179,7 +179,6 @@ export const PunchAPI = {
             if (!punchinId) {
                 throw new Error('Punch ID is required');
             }
-
             const response = await apiClient.post(`/punch-out/${punchinId}/`);
             return {
                 success: true,

@@ -1,7 +1,7 @@
 import React from 'react'
 import '../styles/LocationRecords.scss'
 import { AiOutlinePlus } from 'react-icons/ai'
-import StoreTable from '../components/StoreTable';
+import StoreTable from '../components/RecentLocatioinTable';
 import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 

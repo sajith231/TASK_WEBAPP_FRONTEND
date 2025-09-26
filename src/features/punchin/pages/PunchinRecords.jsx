@@ -3,7 +3,8 @@ import styles from '../styles/PunchinRecords.module.scss'
 import { AiOutlinePlus } from 'react-icons/ai'
 import { useNavigate } from 'react-router-dom'
 import { useSelector } from 'react-redux'
-import StoreTable from '../components/StoreTable'
+import StoreTable from '../components/RecentLocatioinTable'
+import PunchinTable from '../components/RecentPunchinTable'
 // import StoreTable from '../components/StoreTable'
 
 const PunchinRecords = () => {
@@ -35,7 +36,7 @@ const PunchinRecords = () => {
 
                 <div className="">
                     {/* This section shows your recent verifications (limit 5) */}
-                    <StoreTable/>
+                    <PunchinTable />
                 </div>
             </div>
         </div>

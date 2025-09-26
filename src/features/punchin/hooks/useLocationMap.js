@@ -102,7 +102,7 @@ const useLocationMap = (targetLocation = null) => {
         const distanceData = {
           km: distKm,
           meters: distanceInMeters.toFixed(0),
-          isWithinRadius: distanceInMeters <= 100, // 100 meter radius
+          isWithinRadius: distanceInMeters <= 500, // 100 meter radius
           formattedDistance: distanceInMeters < 1000 
             ? `${distanceInMeters.toFixed(0)}m`
             : `${distKm}km`

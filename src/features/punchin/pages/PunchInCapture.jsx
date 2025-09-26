@@ -111,11 +111,12 @@ const PunchInCapture = () => {
    * Handle punch-out action
    */
   const handlePunchOut = async () => {
+
     try {
-      if (activePunchIn?.id) {
-        await PunchAPI.punchOut(activePunchIn.id);
-        toast.success('Successfully punched out!');
-      }
+      if (activePunchIn?.punchin_id ) {
+        console.log(activePunchIn)
+        await PunchAPI.punchOut(activePunchIn.punchin_id);
+      } 
       
       // Clear state and localStorage
       setActivePunchIn(null);

@@ -63,13 +63,13 @@ const PunchinTable = () => {
         const fetchTableData = async () => {
             try {
                 setLoading(true)
-                const response = await PunchAPI.LocationTable()
+                const response = await PunchAPI.getPunchinTable()
 
                 if (response?.data) {
                     setStoresData(response.data)
                 } else {
                     console.warn("No data received from API")
-                    setError("No data available")
+                    setError("No Punch in Data  available")
                 }
             } catch (error) {
                 console.error('Failed to fetch table data', error)
@@ -91,15 +91,23 @@ const PunchinTable = () => {
     const userColumns = useMemo(() => [
         {
             header: "Store",
-            accessorKey: "storeName"
+            accessorKey: "firm_name"
         },
         {
             header: "Address",
-            accessorKey: "storeLocation"
+            accessorKey: "firm_location"
         },
         {
-            header: "Last Captured",
-            accessorKey: "lastCapturedTime",
+            header: "Punch In Time",
+            accessorKey: "punchin_time",
+            cell: ({ getValue }) => {
+                const value = getValue()
+                return value ? new Date(value).toLocaleString() : 'N/A'
+            }
+        },
+        {
+            header:"Punch Out Time",
+            accessorKey:'punchout_time',
             cell: ({ getValue }) => {
                 const value = getValue()
                 return value ? new Date(value).toLocaleString() : 'N/A'
@@ -111,7 +119,7 @@ const PunchinTable = () => {
                 const { latitude, longitude } = row.original
                 if (!latitude || !longitude) return 'N/A'
 
-                const mapsUrl = `https://www.google.com/maps?q=${latitude},${longitude}`
+                const mapsUrl = `https://www.google.com/maps?q=${latitude},${longitude}/data=!3m1!1e3`
                 return (
                     <a href={mapsUrl} target="_blank" rel="noopener noreferrer">
                         View on Map

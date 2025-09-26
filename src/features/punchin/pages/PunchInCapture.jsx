@@ -1,4 +1,5 @@
 import React, { Suspense, useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom"; // Add this import
 import { toast } from 'react-toastify';
 import "../styles/PunchinCapture.scss";
 
@@ -17,6 +18,9 @@ const PunchOutScreen = React.lazy(() => import("../components/PunchOutScreen"));
  * Enforces 100-meter radius restriction for punch-ins
  */
 const PunchInCapture = () => {
+  // Add navigation hook
+  const navigate = useNavigate();
+  
   // State management
   const [activePunchIn, setActivePunchIn] = useState(null);
   const [isPunchedIn, setIsPunchedIn] = useState(false);
@@ -28,161 +32,80 @@ const PunchInCapture = () => {
     checkActivePunchIn();
   }, []);
 
-  /**
-   * Check if user has an active punch-in session
-   * Uses hybrid approach: localStorage + API verification
-   */
-  // const checkActivePunchIn = async () => {
-  //   try {
-  //     setLoading(true);
-  //     setError(null);
-      
-  //     // Check localStorage first for immediate feedback
-  //     const stored = localStorage.getItem('activePunchIn');
-  //     let localData = null;
-      
-  //     if (stored) {
-  //       try {
-  //         localData = JSON.parse(stored);
-  //       } catch (e) {
-  //         localStorage.removeItem('activePunchIn');
-  //       }
-  //     }
-
-  //     // Verify with backend (source of truth)
-  //     try {
-  //       const response = await PunchAPI.getActivePunchIns();
-        
-  //       if (response.success && response.data && response.data.length > 0) {
-  //         const activePunch = response.data.find(punch => 
-  //           punch.status === 'pending' || punch.status === 'Punching' || !punch.punchout_time
-  //         );
-          
-  //         if (activePunch) {
-  //           // Update localStorage with fresh data
-  //           localStorage.setItem('activePunchIn', JSON.stringify(activePunch));
-  //           setActivePunchIn(activePunch);
-  //           setIsPunchedIn(true);
-  //           return;
-  //         }
-  //       }
-        
-  //       // No active punch-in found, clear localStorage
-  //       // if (localData) {
-  //       //   localStorage.removeItem('activePunchIn');
-  //       // // }
-  //       // setActivePunchIn(null);
-  //       // setIsPunchedIn(false);
-        
-  //     } catch (apiError) {
-  //       console.warn('API verification failed, using localStorage:', apiError);
-        
-  //       // Fallback to localStorage if API fails
-  //       if (localData) {
-  //         setActivePunchIn(localData);
-  //         setIsPunchedIn(true);
-  //         toast.info('Working offline - showing last known status');
-  //       } else {
-  //         setActivePunchIn(null);
-  //         setIsPunchedIn(false);
-  //       }
-  //     }
-      
-  //   } catch (error) {
-  //     console.error('Failed to check punch-in status:', error);
-  //     setError('Failed to load punch-in status. Please check your connection.');
-      
-  //     // Emergency fallback: check localStorage directly
-  //     const stored = localStorage.getItem('activePunchIn');
-  //     if (stored) {
-  //       try {
-  //         const punchData = JSON.parse(stored);
-  //         setActivePunchIn(punchData);
-  //         setIsPunchedIn(true);
-  //         toast.warning('Working offline - showing cached data');
-  //       } catch (parseError) {
-  //         localStorage.removeItem('activePunchIn');
-  //       }
-  //     }
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
-
-const checkActivePunchIn = async () => {
-  try {
-    setLoading(true);
-    setError(null);
-    
-    // First, check localStorage for existing punch-in data
-    const stored = localStorage.getItem('activePunchIn');
-    
-    if (stored) {
-      try {
-        const localData = JSON.parse(stored);
-        
-        // If valid data exists in localStorage, use it directly
-        if (localData && (localData.status === 'pending' || localData.status === 'Pending' || !localData.punchout_time)) {
-          setActivePunchIn(localData);
-          setIsPunchedIn(true);
-          console.log('Using localStorage data for punch-in status');
-          return;
-        } else {
-          // Invalid or completed punch-in data, remove it
-          localStorage.removeItem('activePunchIn');
-        }
-      } catch (parseError) {
-        // Invalid JSON in localStorage, remove it
-        localStorage.removeItem('activePunchIn');
-        console.warn('Invalid localStorage data removed:', parseError);
-      }
-    }
-    
-    // No valid localStorage data found, check with API
-    console.log('No valid localStorage data, checking API...');
-    
+  const checkActivePunchIn = async () => {
     try {
-      const response = await PunchAPI.getActivePunchIns();
+      setLoading(true);
+      setError(null);
       
-      if (response.success && response.data && response.data.length > 0) {
-        const activePunch = response.data.find(punch => 
-          punch.status === 'pending' || punch.status === 'Punching' || !punch.punchout_time
-        );
-        
-        if (activePunch) {
-          // Save to localStorage for future use
-          localStorage.setItem('activePunchIn', JSON.stringify(activePunch));
-          setActivePunchIn(activePunch);
-          setIsPunchedIn(true);
-          return;
+      // First, check localStorage for existing punch-in data
+      const stored = localStorage.getItem('activePunchIn');
+      
+      if (stored) {
+        try {
+          const localData = JSON.parse(stored);
+          
+          // If valid data exists in localStorage, use it directly
+          if (localData && (localData.status === 'pending' || localData.status === 'Pending' || !localData.punchout_time)) {
+            setActivePunchIn(localData);
+            setIsPunchedIn(true);
+            console.log('Using localStorage data for punch-in status');
+            return;
+          } else {
+            // Invalid or completed punch-in data, remove it
+            localStorage.removeItem('activePunchIn');
+          }
+        } catch (parseError) {
+          // Invalid JSON in localStorage, remove it
+          localStorage.removeItem('activePunchIn');
+          console.warn('Invalid localStorage data removed:', parseError);
         }
       }
       
-      // No active punch-in found in API
+      // No valid localStorage data found, check with API
+      console.log('No valid localStorage data, checking API...');
+      
+      try {
+        const response = await PunchAPI.getActivePunchIns();
+        
+        if (response.success && response.data && response.data.length > 0) {
+          const activePunch = response.data.find(punch => 
+            punch.status === 'pending' || punch.status === 'Punching' || !punch.punchout_time
+          );
+          
+          if (activePunch) {
+            // Save to localStorage for future use
+            localStorage.setItem('activePunchIn', JSON.stringify(activePunch));
+            setActivePunchIn(activePunch);
+            setIsPunchedIn(true);
+            return;
+          }
+        }
+        
+        // No active punch-in found in API
+        setActivePunchIn(null);
+        setIsPunchedIn(false);
+        
+      } catch (apiError) {
+        console.error('API call failed:', apiError);
+        
+        // API failed, no localStorage data available
+        setActivePunchIn(null);
+        setIsPunchedIn(false);
+        setError('Failed to load punch-in status. Please check your connection.');
+      }
+      
+    } catch (error) {
+      console.error('Failed to check punch-in status:', error);
+      setError('Failed to load punch-in status. Please try again.');
+      
+      // Set default state
       setActivePunchIn(null);
       setIsPunchedIn(false);
       
-    } catch (apiError) {
-      console.error('API call failed:', apiError);
-      
-      // API failed, no localStorage data available
-      setActivePunchIn(null);
-      setIsPunchedIn(false);
-      setError('Failed to load punch-in status. Please check your connection.');
+    } finally {
+      setLoading(false);
     }
-    
-  } catch (error) {
-    console.error('Failed to check punch-in status:', error);
-    setError('Failed to load punch-in status. Please try again.');
-    
-    // Set default state
-    setActivePunchIn(null);
-    setIsPunchedIn(false);
-    
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   /**
    * Handle punch-out action
@@ -198,6 +121,9 @@ const checkActivePunchIn = async () => {
       setActivePunchIn(null);
       setIsPunchedIn(false);
       localStorage.removeItem('activePunchIn');
+      
+      // Navigate to /punch after successful punch-out
+      navigate('/punch-in');
       
     } catch (error) {
       console.error('Punch out failed:', error);
@@ -249,16 +175,6 @@ const checkActivePunchIn = async () => {
                 className="retry-btn"
               >
                 Try Again
-              </button>
-              <button 
-                onClick={() => {
-                  setError(null);
-                  setIsPunchedIn(false);
-                  setLoading(false);
-                }} 
-                className="continue-btn"
-              >
-                Continue to Punch-In
               </button>
             </div>
           </div>

@@ -190,17 +190,6 @@ export const PunchAPI = {
         }
     },
 
-    // // Get punch-in/out records
-    // getPunchRecords: async () => {
-    //     try {
-    //         const response = await apiClient.get("/punch-records/");
-    //         return response;
-    //     } catch (error) {
-    //         console.error("Error fetching punch records:", error);
-    //         throw error;
-    //     }
-    // },
-
     // Get active punch-ins (not punched out yet)
     getActivePunchIns: async () => {
         try {
@@ -270,61 +259,19 @@ export const PunchAPI = {
                 source: 'fallback'
             };
         }
-    }
-    //     try {
-    //         const response = await apiClient.get("/punch-records/");
+    },
 
-    //         // Filter for active punch-ins (no punchout_time)
-    //         const activePunchIns = response.data.filter(record => !record.punchout_time);
-
-    //         return {
-    //             ...response,
-    //             data: activePunchIns
-    //         };
-    //     } catch (error) {
-    //         console.error("Error fetching active punch-ins:", error);
-    //         throw error;
-    //     }
-    // },
-
-    // // Utility function to validate image before upload
-    // validateImage: (file) => {
-    //     const validTypes = ['image/jpeg', 'image/png', 'image/jpg'];
-    //     const maxSize = 5 * 1024 * 1024; // 5MB
-
-    //     if (!validTypes.includes(file.type)) {
-    //         throw new Error('Invalid file type. Only JPG, JPEG, and PNG are allowed.');
-    //     }
-
-    //     if (file.size > maxSize) {
-    //         throw new Error('File size too large. Maximum size is 5MB.');
-    //     }
-
-    //     return true;
-    // },
-
-    // // Compress image before upload (optional)
-    // compressImage: (file, maxWidth = 1920, quality = 0.8) => {
-    //     return new Promise((resolve) => {
-    //         const canvas = document.createElement('canvas');
-    //         const ctx = canvas.getContext('2d');
-    //         const img = new Image();
-
-    //         img.onload = () => {
-    //             // Calculate new dimensions
-    //             const ratio = Math.min(maxWidth / img.width, maxWidth / img.height);
-    //             canvas.width = img.width * ratio;
-    //             canvas.height = img.height * ratio;
-
-    //             // Draw and compress
-    //             ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-
-    //             canvas.toBlob(resolve, 'image/jpeg', quality);
-    //         };
-
-    //         img.src = URL.createObjectURL(file);
-    //     });
-    // }
+    
+    // Table punch-in/out records
+    getPunchinTable: async () => {
+        try {
+            const response = await apiClient.get("punch-in/table/");
+            return response;
+        } catch (error) {
+            console.error("Error fetching punch records:", error);
+            throw error;
+        }
+    },
 
 
 };

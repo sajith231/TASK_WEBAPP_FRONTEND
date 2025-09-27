@@ -11,6 +11,7 @@ import {
     getFilteredRowModel
 } from '@tanstack/react-table';
 import { PunchAPI } from '../services/punchService';
+import BaseModal from '../../../components/ui/Modal/BaseModal';
 
 const StatusCell = ({ initialStatus, row, onStatusUpdate }) => {
     const [status, setStatus] = useState(initialStatus);
@@ -57,7 +58,10 @@ const PunchinTable = () => {
     const [storesData, setStoresData] = useState([])
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState(null)
+    const [showPhoto, setShowPhoto] = useState(false)
+    const [photoUrl, setPhotoUrl] = useState('')
     const userRole = useSelector((state) => state.auth?.user?.role)
+
 
     useEffect(() => {
         const fetchTableData = async () => {
@@ -132,7 +136,11 @@ const PunchinTable = () => {
             cell: ({ row }) => {
                 const { photo_url } = row.original;
                 return (
-                    <div className='punchin-image'>
+                    <div className='punchin-image' onClick={(e) => {
+                        setShowPhoto(prev => !prev)
+                        setPhotoUrl(e.target.src)
+                    }
+                    }>
                         <img src={photo_url} alt="404" />
                     </div>
                 )
@@ -331,6 +339,20 @@ const PunchinTable = () => {
                     </select>
                 </div>
             )}
+
+
+            {/* Image View Model */}
+            {
+                showPhoto && (
+                    <BaseModal
+                        isOpen={showPhoto}
+                        onClose={() => setShowPhoto(prev => !prev)}
+
+                        children={(<div className='photo-model-container' >
+                            <img src={photoUrl} alt="" srcset="" />
+                        </div>)} />
+                )
+            }
         </div>
     )
 }

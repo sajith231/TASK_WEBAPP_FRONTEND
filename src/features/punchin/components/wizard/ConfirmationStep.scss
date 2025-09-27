@@ -1,3 +1,5 @@
+@use "sass:color";
+
 // Variables
 $breakpoint-mobile: 576px;
 $breakpoint-tablet: 768px;
@@ -265,7 +267,7 @@ $shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
 .photo-container {
   position: relative;
   width: 100%;
-  aspect-ratio: 1;
+  aspect-ratio: 16/9;
   border-radius: 8px;
   overflow: hidden;
   background: $gray-100;
@@ -371,6 +373,10 @@ $shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
     grid-template-columns: 1fr 2fr;
     gap: $spacing-md;
   }
+  @include desktop(){
+display: flex;
+justify-content: space-between;
+  }
 }
 
 .btn {
@@ -420,7 +426,11 @@ $shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
   color: $white;
   
   &:hover:not(:disabled) {
-    background: linear-gradient(135deg, $primary-hover, darken($primary-hover, 5%));
+    background: linear-gradient(
+      135deg,
+      $primary-hover,
+      color.adjust($primary-hover, $lightness: -5%)
+    );
     box-shadow: $shadow-lg;
   }
 }

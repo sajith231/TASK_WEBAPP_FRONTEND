@@ -106,26 +106,38 @@ const PunchinTable = () => {
             }
         },
         {
-            header:"Punch Out Time",
-            accessorKey:'punchout_time',
+            header: "Punch Out Time",
+            accessorKey: 'punchout_time',
             cell: ({ getValue }) => {
                 const value = getValue()
                 return value ? new Date(value).toLocaleString() : 'N/A'
             }
         },
         {
-            header: "View Location",
+            header: "Punch In Location",
             cell: ({ row }) => {
                 const { latitude, longitude } = row.original
                 if (!latitude || !longitude) return 'N/A'
 
-                const mapsUrl = `https://www.google.com/maps?q=${latitude},${longitude}/data=!3m1!1e3`
+                const mapsUrl = `https://www.google.com/maps?q=${latitude},${longitude}`
                 return (
                     <a href={mapsUrl} target="_blank" rel="noopener noreferrer">
                         View on Map
                     </a>
                 )
             }
+        },
+        {
+            header: "Photo",
+            cell: ({ row }) => {
+                const { photo_url } = row.original;
+                return (
+                    <div className='punchin-image'>
+                        <img src={photo_url} alt="404" />
+                    </div>
+                )
+            }
+
         },
         {
             header: " Status",
@@ -143,24 +155,27 @@ const PunchinTable = () => {
     const adminColumns = useMemo(() => [
         {
             header: "Store",
-            accessorKey: "storeName"
+            accessorKey: "firm_name"
         },
         {
             header: "Address",
-            accessorKey: "storeLocation"
+            accessorKey: "firm_location"
         },
         {
-            header: "Last Captured",
-            accessorKey: "lastCapturedTime",
+            header: "Punch In Time",
+            accessorKey: "punchin_time",
             cell: ({ getValue }) => {
                 const value = getValue()
                 return value ? new Date(value).toLocaleString() : 'N/A'
             }
         },
         {
-            header: "Updated By",
-            accessorKey: "taskDoneBy",
-            cell: ({ getValue }) => getValue() || 'N/A'
+            header: "Punch Out Time",
+            accessorKey: 'punchout_time',
+            cell: ({ getValue }) => {
+                const value = getValue()
+                return value ? new Date(value).toLocaleString() : 'N/A'
+            }
         },
         {
             header: "View Location",
@@ -175,6 +190,24 @@ const PunchinTable = () => {
                     </a>
                 )
             }
+        },
+        {
+            header: "Photo",
+            cell: ({ row }) => {
+                const { photo_url } = row.original;
+                return (
+                    <div>
+                        <img src={photo_url} alt="" />
+                    </div>
+                )
+            }
+
+        },
+
+        {
+            header: "Updated By",
+            accessorKey: "created_by",
+            cell: ({ getValue }) => getValue() || 'N/A'
         },
         {
             header: "Approval Status",

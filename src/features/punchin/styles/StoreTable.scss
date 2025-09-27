@@ -148,7 +148,19 @@
                 background: rgba(102, 126, 234, 0.1);
                 color: #5a67d8;
               }
-            }
+            } 
+            .punchin-image{
+                height: 50px;
+                width: 50px;
+                overflow: hidden;
+                border-radius: 40%;
+                border: 2px solid rgb(230, 218, 218);
+                box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+                border-radius: 40%;
+                img{
+                  height: 100%;
+                }
+              }
           }
         }
       }

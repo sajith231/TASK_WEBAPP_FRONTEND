@@ -12,6 +12,7 @@ import {
 } from '@tanstack/react-table';
 import { PunchAPI } from '../services/punchService';
 import BaseModal from '../../../components/ui/Modal/BaseModal';
+import { formatDT } from '../../../utils';
 
 const StatusCell = ({ initialStatus, row, onStatusUpdate }) => {
     const [status, setStatus] = useState(initialStatus);
@@ -102,7 +103,7 @@ const PunchinTable = () => {
             accessorKey: "firm_location",
             cell: ({ getValue }) => {
                 const value = getValue()
-                return value && value.trim() !== "" ? value : <div style={{ "color": "red" }}>Not found</div>
+                return value && value.trim() !== "" ? value : <div style={{ "color": "red" }}>Address unavailable</div>
             }
         },
         {
@@ -110,7 +111,7 @@ const PunchinTable = () => {
             accessorKey: "punchin_time",
             cell: ({ getValue }) => {
                 const value = getValue()
-                return value ? new Date(value).toLocaleString() : 'N/A'
+                return value ? formatDT(value) : 'N/A'
             }
         },
         {
@@ -118,7 +119,7 @@ const PunchinTable = () => {
             accessorKey: 'punchout_time',
             cell: ({ getValue }) => {
                 const value = getValue()
-                return value ? new Date(value).toLocaleString() : 'N/A'
+                return value ? formatDT(value) : 'N/A'
             }
         },
         {
@@ -174,7 +175,7 @@ const PunchinTable = () => {
             accessorKey: "firm_location",
             cell: ({ getValue }) => {
                 const value = getValue()
-                return value && value.trim() !== "" ? value : <div style={{ "color": "red" }}>Not found</div>
+                return value && value.trim() !== "" ? value : <div style={{ "color": "red" }}>Address unavailable</div>
             }
         },
         {
@@ -182,7 +183,7 @@ const PunchinTable = () => {
             accessorKey: "punchin_time",
             cell: ({ getValue }) => {
                 const value = getValue()
-                return value ? new Date(value).toLocaleString() : 'N/A'
+                return value ? formatDT(value) : 'N/A'
             }
         },
         {
@@ -190,7 +191,7 @@ const PunchinTable = () => {
             accessorKey: 'punchout_time',
             cell: ({ getValue }) => {
                 const value = getValue()
-                return value ? new Date(value).toLocaleString() : 'N/A'
+                return value ? formatDT(value) : 'N/A'
             }
         },
         {

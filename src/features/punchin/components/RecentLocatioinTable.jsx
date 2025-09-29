@@ -11,6 +11,7 @@ import {
     getFilteredRowModel
 } from '@tanstack/react-table';
 import { PunchAPI } from '../services/punchService';
+import { formatDT } from '../../../utils';
 
 const StatusCell = ({ initialStatus, row, onStatusUpdate }) => {
     const [status, setStatus] = useState(initialStatus);
@@ -98,7 +99,7 @@ const StoreTable = () => {
             accessorKey: "storeLocation",
             cell: ({ getValue }) => {
                 const value = getValue()
-                return value && value.trim() !== "" ? value : <div style={{"color":"red"}}>Not found</div>
+                return value && value.trim() !== "" ? value : <div style={{ "color": "red" }}>Address unavailable</div>
             }
         },
         {
@@ -106,7 +107,7 @@ const StoreTable = () => {
             accessorKey: "lastCapturedTime",
             cell: ({ getValue }) => {
                 const value = getValue()
-                return value ? new Date(value).toLocaleString() : 'N/A'
+                return value ? formatDT(value) : 'N/A'
             }
         },
         {
@@ -141,12 +142,12 @@ const StoreTable = () => {
             header: "Store",
             accessorKey: "storeName"
         },
-            {
+        {
             header: "Address",
             accessorKey: "storeLocation",
             cell: ({ getValue }) => {
                 const value = getValue()
-                return value && value.trim() !== "" ? value : <div style={{"color":"red"}}>Not found</div>
+                return value && value.trim() !== "" ? value : <div style={{ "color": "red" }}>Address unavailable</div>
             }
         },
         {
@@ -154,7 +155,7 @@ const StoreTable = () => {
             accessorKey: "lastCapturedTime",
             cell: ({ getValue }) => {
                 const value = getValue()
-                return value ? new Date(value).toLocaleString() : 'N/A'
+                return value ? formatDT(value) : 'N/A'
             }
         },
         {

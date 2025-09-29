@@ -12,7 +12,7 @@ import {
 } from '@tanstack/react-table';
 import { PunchAPI } from '../services/punchService';
 import BaseModal from '../../../components/ui/Modal/BaseModal';
-import { formatDT } from '../../../utils';
+import { formatDT, timeDiff } from '@/utils';
 
 const StatusCell = ({ initialStatus, row, onStatusUpdate }) => {
     const [status, setStatus] = useState(initialStatus);
@@ -115,11 +115,19 @@ const PunchinTable = () => {
             }
         },
         {
-            header: "Punch Out Time",
+            header: "Punch Outf Time",
             accessorKey: 'punchout_time',
             cell: ({ getValue }) => {
                 const value = getValue()
                 return value ? formatDT(value) : 'N/A'
+            }
+        },
+        {
+            header: "Duration",
+            cell: ({ row }) => {
+                const { punchin_time, punchout_time } = row.original;
+                const duration = timeDiff(punchin_time, punchout_time)
+                return duration ? duration : "N/A"
             }
         },
         {
@@ -192,6 +200,14 @@ const PunchinTable = () => {
             cell: ({ getValue }) => {
                 const value = getValue()
                 return value ? formatDT(value) : 'N/A'
+            }
+        },
+        {
+            header: "Duration",
+            cell: ({ row }) => {
+                const { punchin_time, punchout_time } = row.original;
+                const duration = timeDiff(punchin_time, punchout_time)
+                return duration ? duration : "N/A"
             }
         },
         {

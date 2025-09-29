@@ -199,13 +199,17 @@ const PunchinTable = () => {
                 )
             }
         },
-        {
+       {
             header: "Photo",
             cell: ({ row }) => {
                 const { photo_url } = row.original;
                 return (
-                    <div>
-                        <img src={photo_url} alt="" />
+                    <div className='punchin-image' onClick={(e) => {
+                        setShowPhoto(prev => !prev)
+                        setPhotoUrl(e.target.src)
+                    }
+                    }>
+                        <img src={photo_url} alt="404" />
                     </div>
                 )
             }

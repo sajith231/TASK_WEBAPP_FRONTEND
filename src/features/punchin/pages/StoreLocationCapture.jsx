@@ -1,27 +1,19 @@
-import React, { useEffect, useState, useMemo, useCallback, useRef } from "react";
+import React, { useEffect, useState, useMemo, useCallback } from "react";
 import "../styles/StoreLocationCapture.scss";
 import VirtualizedCustomerList from "../components/VirtualizedCustomer";
 
-// Components
 import AddLocation from "../components/AddLocation";
 
-// Icons
 import {
   IoMdArrowDropdown,
   IoMdArrowDropup,
 } from "react-icons/io";
 import {
   IoSearchSharp,
-  IoLocation,
 } from "react-icons/io5";
-import {
-  MdNotListedLocation,
-} from "react-icons/md";
 
-// Utils
 import { PunchAPI } from "../services/punchService";
 
-// Custom hook for debouncing
 const useDebounce = (value, delay) => {
   const [debouncedValue, setDebouncedValue] = useState(value);
 
@@ -38,87 +30,7 @@ const useDebounce = (value, delay) => {
   return debouncedValue;
 };
 
-// Memoized customer item component
-// const CustomerItem = React.memo(({ customer, onSelect, itemHeight }) => {
-//   const handleClick = useCallback(() => {
-//     onSelect(customer);
-//   }, [customer, onSelect]);
-
-//   return (
-//     <div
-//       className="customer"
-//       onClick={handleClick}
-//       style={{ height: itemHeight }}
-//     >
-//       {customer.firm_name || customer.customerName || "Unnamed Customer"}
-//       <div className="list_icons">
-//         {customer.latitude ? (
-//           <IoLocation style={{ color: "#0bb838" }} />
-//         ) : (
-//           <MdNotListedLocation style={{ color: "red" }} />
-//         )}
-//       </div>
-//     </div>
-//   );
-// });
-
-// Virtualized list component for rendering only visible items
-// const VirtualizedCustomerList = React.memo(({ customers, onSelect, searchTerm }) => {
-//   const containerRef = useRef(null);
-//   const [visibleRange, setVisibleRange] = useState({ start: 0, end: 20 });
-//   const itemHeight = 50; // Approximate height of each customer item
-
-//   const calculateVisibleRange = useCallback(() => {
-//     if (!containerRef.current) return;
-    
-//     const scrollTop = containerRef.current.scrollTop;
-//     const clientHeight = containerRef.current.clientHeight;
-    
-//     const start = Math.max(0, Math.floor(scrollTop / itemHeight) - 5);
-//     const end = Math.min(
-//       customers.length,
-//       start + Math.ceil(clientHeight / itemHeight) + 10
-//     );
-    
-//     setVisibleRange({ start, end });
-//   }, [customers.length, itemHeight]);
-
-//   useEffect(() => {
-//     const container = containerRef.current;
-//     if (container) {
-//       container.addEventListener('scroll', calculateVisibleRange, { passive: true });
-//       calculateVisibleRange(); // Initial calculation
-      
-//       return () => container.removeEventListener('scroll', calculateVisibleRange);
-//     }
-//   }, [calculateVisibleRange]);
-
-//   // Calculate padding to maintain scroll height
-//   const topPadding = visibleRange.start * itemHeight;
-//   const bottomPadding = Math.max(0, (customers.length - visibleRange.end) * itemHeight);
-
-//   return (
-//     <div 
-//       ref={containerRef} 
-//       className="customer-list virtualized"
-//       style={{ overflow: 'auto' }}
-//     >
-//       <div style={{ height: topPadding }} />
-//       {customers.slice(visibleRange.start, visibleRange.end).map((customer) => (
-//         <CustomerItem
-//           key={customer.id}
-//           customer={customer}
-//           onSelect={onSelect}
-//           itemHeight={itemHeight}
-//         />
-//       ))}
-//       <div style={{ height: bottomPadding }} />
-//     </div>
-//   );
-// });
-
 const StoreLocationCapture = React.memo(() => {
-  // ------------------ State ------------------
   const [customers, setCustomers] = useState([]);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -126,34 +38,15 @@ const StoreLocationCapture = React.memo(() => {
   const [isLoading, setIsLoading] = useState(false);
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
 
-  // ------------------ Fetch Customers with caching ------------------
   useEffect(() => {
     const fetchCustomers = async () => {
       try {
         setIsLoading(true);
-        // Check if data is already cached
         const cachedData = sessionStorage.getItem('customers_data');
-        // if (cachedData) {
-        //   const parsedData = JSON.parse(cachedData);
-        //   const cacheTime = parsedData.timestamp;
-        //   const now = Date.now();
-        //   // Cache for 5 minutes
-        //   if (now - cacheTime < 5 * 60 * 1000) {
-        //     setCustomers(parsedData.firms || []);
-        //     setIsLoading(false);
-        //     return;
-        //   }
-        // }
         
         const response = await PunchAPI.getFirms();
         const firms = response.firms || [];
         setCustomers(firms);
-        
-        // Cache the data
-        // sessionStorage.setItem('customers_data', JSON.stringify({
-        //   firms,
-        //   timestamp: Date.now()
-        // }));
       } catch (err) {
         console.error("Failed to fetch firms", err);
       } finally {
@@ -163,7 +56,6 @@ const StoreLocationCapture = React.memo(() => {
     fetchCustomers();
   }, []);
 
-  // ------------------ Filter Customers with Memoization ------------------
   const filteredCustomers = useMemo(() => {
     if (!debouncedSearchTerm) return customers;
     
@@ -173,7 +65,6 @@ const StoreLocationCapture = React.memo(() => {
     });
   }, [customers, debouncedSearchTerm]);
 
-  // ------------------ Event Handlers with useCallback ------------------
   const handleCustomerSelect = useCallback((customer) => {
     setSelectedCustomer(customer);
     setDropdownOpen(false);
@@ -188,26 +79,22 @@ const StoreLocationCapture = React.memo(() => {
     setSearchTerm(e.target.value);
   }, []);
 
-  // ------------------ Render ------------------
   return (
     <div className="container">
-      {/* ------------------ Customer Selection ------------------ */}
       <div className="customer_section">
         <h2>Select Customer</h2>
 
-        {/* Dropdown Button */}
         <div 
           className="drop_button" 
           onClick={handleDropdownToggle}
           aria-expanded={dropdownOpen}
         >
-          {selectedCustomer?.name || selectedCustomer?.customerName || "Select a customer"}
+          {selectedCustomer?.firm_name || selectedCustomer?.customerName || "Select a customer"}
           <span style={{ marginLeft: 8, display: "inline-flex" }}>
             {dropdownOpen ? <IoMdArrowDropup /> : <IoMdArrowDropdown />}
           </span>
         </div>
 
-        {/* Dropdown Menu */}
         {dropdownOpen && (
           <div className="dropdownOpen">
             <div className="input_section">
@@ -234,12 +121,12 @@ const StoreLocationCapture = React.memo(() => {
           </div>
         )}
 
-        {/* Location Handling */}
         {selectedCustomer && (
           <AddLocation customer={selectedCustomer} />
         )}
       </div>
     </div>
-  )
-})
+  );
+});
+
 export default StoreLocationCapture;

@@ -95,7 +95,11 @@ const StoreTable = () => {
         },
         {
             header: "Address",
-            accessorKey: "storeLocation"
+            accessorKey: "storeLocation",
+            cell: ({ getValue }) => {
+                const value = getValue()
+                return value && value.trim() !== "" ? value : <div style={{"color":"red"}}>Not found</div>
+            }
         },
         {
             header: "Last Captured",
@@ -137,9 +141,13 @@ const StoreTable = () => {
             header: "Store",
             accessorKey: "storeName"
         },
-        {
+            {
             header: "Address",
-            accessorKey: "storeLocation"
+            accessorKey: "storeLocation",
+            cell: ({ getValue }) => {
+                const value = getValue()
+                return value && value.trim() !== "" ? value : <div style={{"color":"red"}}>Not found</div>
+            }
         },
         {
             header: "Last Captured",

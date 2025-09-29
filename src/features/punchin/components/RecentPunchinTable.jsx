@@ -99,7 +99,11 @@ const PunchinTable = () => {
         },
         {
             header: "Address",
-            accessorKey: "firm_location"
+            accessorKey: "firm_location",
+            cell: ({ getValue }) => {
+                const value = getValue()
+                return value && value.trim() !== "" ? value : <div style={{ "color": "red" }}>Not found</div>
+            }
         },
         {
             header: "Punch In Time",
@@ -167,7 +171,11 @@ const PunchinTable = () => {
         },
         {
             header: "Address",
-            accessorKey: "firm_location"
+            accessorKey: "firm_location",
+            cell: ({ getValue }) => {
+                const value = getValue()
+                return value && value.trim() !== "" ? value : <div style={{ "color": "red" }}>Not found</div>
+            }
         },
         {
             header: "Punch In Time",
@@ -199,7 +207,7 @@ const PunchinTable = () => {
                 )
             }
         },
-       {
+        {
             header: "Photo",
             cell: ({ row }) => {
                 const { photo_url } = row.original;

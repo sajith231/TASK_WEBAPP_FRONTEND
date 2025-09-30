@@ -11,7 +11,7 @@ import {
     getFilteredRowModel
 } from '@tanstack/react-table';
 import { PunchAPI } from '../services/punchService';
-import { formatDT } from '../../../utils';
+import { formatDT, formatDateApi } from '@/utils/';
 
 const StatusCell = ({ initialStatus, row, onStatusUpdate }) => {
     const [status, setStatus] = useState(initialStatus);
@@ -59,12 +59,17 @@ const StoreTable = () => {
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState(null)
     const userRole = useSelector((state) => state.auth?.user?.role)
+    const [calendarDates, setCalendarDates] = useState([
+        formatDateApi(new Date(new Date().setDate(new Date().getDate() - 7))),
+        formatDateApi(new Date())
+    ])
+
 
     useEffect(() => {
         const fetchTableData = async () => {
             try {
                 setLoading(true)
-                const response = await PunchAPI.LocationTable()
+                const response = await PunchAPI.LocationTable(calendarDates)
 
                 if (response?.data) {
                     setStoresData(response.data)
@@ -216,16 +221,27 @@ const StoreTable = () => {
     return (
         <div className='table_section'>
             <h4 className="table_title">Recently Added Store Locations</h4>
-            {/* Search Section */}
-            <div className="search_section">
-                <GoSearch className="search_icon" />
-                <input
-                    type="text"
-                    placeholder="Search by store name or location..."
-                    value={globalFilter}
-                    onChange={(e) => setGlobalFilter(e.target.value)}
-                    className="search_input"
-                />
+            <div className="filter_search_section">
+                {/* Search Section */}
+                <div className="search_section">
+                    <GoSearch className="search_icon" />
+                    <input
+                        type="text"
+                        placeholder="Search by store name or location..."
+                        value={globalFilter}
+                        onChange={(e) => setGlobalFilter(e.target.value)}
+                        className="search_input"
+                    />
+                </div>
+                {/* Filter Section */}
+                <div className="filters_section">
+                    <div className="fiter_status">
+                        Status
+                    </div>
+                    <div className="filter_date">
+                        Date
+                    </div>
+                </div>
             </div>
 
             {/* Results count */}

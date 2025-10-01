@@ -11,12 +11,20 @@ const DatePickerFilter = ({ value, setCalendarDates }) => {
         setTempDates(value)
     }, [value])
 
+    // Normalize dates to ensure start <= end
+    const normalizeDates = (dates) => {
+        const formattedDates = dates.map(date => date?.format?.("YYYY-MM-DD") || date)
+        return formattedDates.sort((a, b) => new Date(a) - new Date(b))
+    }
+
     const handleApply = () => {
         if (tempDates && tempDates.length === 2) {
-            setCalendarDates([
-                tempDates[1]?.format?.("YYYY-MM-DD") || tempDates[0],
-                tempDates[0]?.format?.("YYYY-MM-DD") || tempDates[1]
-            ])
+            const sortedDates = normalizeDates(tempDates)
+            setCalendarDates(sortedDates)
+        } else if (tempDates && tempDates.length == 1) {
+            tempDates[1] = tempDates[0]
+            const sortedDates = normalizeDates(tempDates)
+            setCalendarDates(sortedDates)
         }
         datePickerRef.current?.closeCalendar()
     }
@@ -62,7 +70,7 @@ const DatePickerFilter = ({ value, setCalendarDates }) => {
                     padding: '10px',
                     borderTop: '1px solid #ddd'
                 }}>
-                    <button 
+                    <button
                         onClick={handleReset}
                         className="dp_buttons"
                         style={{
@@ -75,7 +83,7 @@ const DatePickerFilter = ({ value, setCalendarDates }) => {
                     >
                         Reset
                     </button>
-                    <button 
+                    <button
                         onClick={handleApply}
                         className="dp_buttons"
                         style={{

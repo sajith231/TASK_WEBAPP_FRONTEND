@@ -29,7 +29,7 @@ export const PunchAPI = {
     LocationTable: async (calendarDates) => {
         try {
             console.log("Srivice date", calendarDates)
-            const res = await apiClient.get(`/shop-location/table/?start_date=${calendarDates[1]}&end_date=${calendarDates[0]}`)
+            const res = await apiClient.get(`/shop-location/table/?start_date=${calendarDates[0]}&end_date=${calendarDates[1]}`)
             return res
         } catch (error) {
             console.error("Error fetching Location Update Table:", error);

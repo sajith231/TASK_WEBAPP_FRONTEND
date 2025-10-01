@@ -66,32 +66,11 @@ const StoreTable = () => {
     ])
 
 
-    useEffect(() => {
-        console.log("Filter dates", calendarDates)
-    }, [calendarDates])
-
     // useEffect(() => {
-    //     const fetchTableData = async () => {
-    //         try {
-    //             setLoading(true) 
-    //             const response = await PunchAPI.LocationTable(calendarDates)
+    //     console.log("Filter dates", calendarDates)
+    // }, [calendarDates])
 
-    //             if (response?.data) {
-    //                 setStoresData(response.data)
-    //             } else {
-    //                 console.warn("No data received from API")
-    //                 setError("No data available")
-    //             }
-    //         } catch (error) {
-    //             console.error('Failed to fetch table data', error)
-    //             setError(error.message || "Failed to load data")
-    //         } finally {
-    //             setLoading(false)
-    //         }
-    //     }
-    //     fetchTableData()
-    // }, [])
-
+  
     useEffect(() => {
         const fetchTableData = async () => {
             try {
@@ -109,7 +88,7 @@ const StoreTable = () => {
         }
         fetchTableData()
     }, [calendarDates]) // Add calendarDates as dependency
-    
+
 
     const handleStatusUpdate = (id, newStatus) => {
         // Update local state to reflect the change immediately
@@ -260,7 +239,8 @@ const StoreTable = () => {
                 {/* Filter Section */}
                 <div className="filters_section">
                     <div className="fiter_status">
-                        Status
+                        Status:
+                        
                     </div>
                     <div className="filter_date">
                         Date:

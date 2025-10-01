@@ -286,17 +286,19 @@ const PunchinTable = () => {
         <div className='table_section'>
             <h4 className="table_title">Recently Added Store Locations</h4>
             {/* Search Section */}
-            <div className="search_section">
-                <GoSearch className="search_icon" />
-                <input
-                    type="text"
-                    placeholder="Search by store name or location..."
-                    value={globalFilter}
-                    onChange={(e) => setGlobalFilter(e.target.value)}
-                    className="search_input"
-                />
-            </div>
+            <div className="filter_search_section">
 
+                <div className="search_section">
+                    <GoSearch className="search_icon" />
+                    <input
+                        type="text"
+                        placeholder="Search by store name or location..."
+                        value={globalFilter}
+                        onChange={(e) => setGlobalFilter(e.target.value)}
+                        className="search_input"
+                    />
+                </div>
+            </div>
             {/* Results count */}
             {/* <div className="results_count">
                 Showing {table.getFilteredRowModel().rows.length} results

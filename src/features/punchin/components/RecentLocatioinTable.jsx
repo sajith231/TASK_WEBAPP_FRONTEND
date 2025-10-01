@@ -12,6 +12,7 @@ import {
 } from '@tanstack/react-table';
 import { PunchAPI } from '../services/punchService';
 import { formatDT, formatDateApi } from '@/utils/';
+import DatePickerFilter from './DatePickerFilter';
 
 const StatusCell = ({ initialStatus, row, onStatusUpdate }) => {
     const [status, setStatus] = useState(initialStatus);
@@ -64,6 +65,10 @@ const StoreTable = () => {
         formatDateApi(new Date())
     ])
 
+
+    useEffect(() => {
+        console.log("Filter dates", calendarDates)
+    }, [calendarDates])
 
     useEffect(() => {
         const fetchTableData = async () => {
@@ -239,7 +244,8 @@ const StoreTable = () => {
                         Status
                     </div>
                     <div className="filter_date">
-                        Date
+                        Date:
+                        <DatePickerFilter value={calendarDates} setCalendarDates={setCalendarDates} />
                     </div>
                 </div>
             </div>

@@ -1,19 +1,96 @@
-import React from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import DatePicker from 'react-multi-date-picker'
+import transition from "react-element-popper/animations/transition"
 
 const DatePickerFilter = ({ value, setCalendarDates }) => {
+    const [tempDates, setTempDates] = useState(value)
+    const datePickerRef = useRef()
+
+    // Sync tempDates when value changes from parent
+    useEffect(() => {
+        setTempDates(value)
+    }, [value])
+
+    const handleApply = () => {
+        if (tempDates && tempDates.length === 2) {
+            setCalendarDates([
+                tempDates[1]?.format?.("YYYY-MM-DD") || tempDates[0],
+                tempDates[0]?.format?.("YYYY-MM-DD") || tempDates[1]
+            ])
+        }
+        datePickerRef.current?.closeCalendar()
+    }
+
+    const handleReset = () => {
+        const today = new Date()
+        const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000)
+        const resetDates = [
+            weekAgo.toISOString().split('T')[0],
+            today.toISOString().split('T')[0]
+        ]
+        setTempDates(resetDates)
+        setCalendarDates(resetDates)
+        datePickerRef.current?.closeCalendar()
+    }
+
     return (
-        <div >
+        <div>
             <DatePicker
+                ref={datePickerRef}
                 range
-                value={value}
-                onChange={(e) => {
-                    setCalendarDates([
-                        e[1]?.format("YYYY-MM-DD"),
-                        e[0]?.format("YYYY-MM-DD")
-                    ])
+                animations={[transition()]}
+                value={tempDates}
+                onChange={setTempDates}
+                format="YYYY-MM-DD"
+                render={(value, openCalendar) => {
+                    return (
+                        <button onClick={openCalendar} style={{
+                            padding: '6px 12px',
+                            border: '1px solid #ddd',
+                            borderRadius: '4px',
+                            background: 'white',
+                            cursor: 'pointer'
+                        }}>
+                            {value || 'Select Date Range'}
+                        </button>
+                    )
                 }}
-            />
+            >
+                <div style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    padding: '10px',
+                    borderTop: '1px solid #ddd'
+                }}>
+                    <button 
+                        onClick={handleReset}
+                        className="dp_buttons"
+                        style={{
+                            padding: '6px 16px',
+                            border: '1px solid #ddd',
+                            borderRadius: '4px',
+                            background: '#f5f5f5',
+                            cursor: 'pointer'
+                        }}
+                    >
+                        Reset
+                    </button>
+                    <button 
+                        onClick={handleApply}
+                        className="dp_buttons"
+                        style={{
+                            padding: '6px 16px',
+                            border: 'none',
+                            borderRadius: '4px',
+                            background: '#007bff',
+                            color: 'white',
+                            cursor: 'pointer'
+                        }}
+                    >
+                        Apply
+                    </button>
+                </div>
+            </DatePicker>
         </div>
     )
 }

@@ -26,9 +26,10 @@ export const PunchAPI = {
         }
     },
 
-    LocationTable: async () => {
+    LocationTable: async (calendarDates) => {
         try {
-            const res = await apiClient.get('/shop-location/table/')
+            console.log("Srivice date", calendarDates)
+            const res = await apiClient.get(`/shop-location/table/?start_date=${calendarDates[1]}&end_date=${calendarDates[0]}`)
             return res
         } catch (error) {
             console.error("Error fetching Location Update Table:", error);
@@ -210,7 +211,7 @@ export const PunchAPI = {
             // Check localStorage first for immediate feedback
             const stored = localStorage.getItem('activePunchIn');
             let localData = null;
-            
+
             if (stored) {
                 try {
                     localData = JSON.parse(stored);
@@ -222,7 +223,7 @@ export const PunchAPI = {
             // Verify with backend (source of truth)
             const response = await PunchAPI.getActivePunchIns();
             const activePunch = response.data.find(punch => !punch.punchout_time);
-            
+
             if (activePunch) {
                 // Update localStorage with fresh data
                 localStorage.setItem('activePunchIn', JSON.stringify(activePunch));
@@ -235,7 +236,7 @@ export const PunchAPI = {
                 // Clear stale localStorage data
                 localStorage.removeItem('activePunchIn');
             }
-            
+
             return {
                 isActive: false,
                 activePunchIn: null,
@@ -243,7 +244,7 @@ export const PunchAPI = {
             };
         } catch (error) {
             console.error('Failed to check punch-in status:', error);
-            
+
             // Fallback to localStorage if API fails
             if (localData) {
                 return {
@@ -252,7 +253,7 @@ export const PunchAPI = {
                     source: 'localStorage'
                 };
             }
-            
+
             return {
                 isActive: false,
                 activePunchIn: null,
@@ -261,7 +262,7 @@ export const PunchAPI = {
         }
     },
 
-    
+
     // Table punch-in/out records
     getPunchinTable: async () => {
         try {

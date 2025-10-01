@@ -18,7 +18,6 @@ const StatusCell = ({ initialStatus, row, onStatusUpdate }) => {
     const [status, setStatus] = useState(initialStatus);
     const [isUpdating, setIsUpdating] = useState(false);
 
-
     const handleChangeStatus = async (e) => {
         const newStatus = e.target.value;
         setStatus(newStatus);
@@ -60,17 +59,12 @@ const StoreTable = () => {
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState(null)
     const userRole = useSelector((state) => state.auth?.user?.role)
+    const [statusFilter, setStatusFilter] = useState('all');
     const [calendarDates, setCalendarDates] = useState([
         formatDateApi(new Date(new Date().setDate(new Date().getDate() - 7))),
         formatDateApi(new Date())
     ])
 
-
-    // useEffect(() => {
-    //     console.log("Filter dates", calendarDates)
-    // }, [calendarDates])
-
-  
     useEffect(() => {
         const fetchTableData = async () => {
             try {
@@ -87,8 +81,7 @@ const StoreTable = () => {
             }
         }
         fetchTableData()
-    }, [calendarDates]) // Add calendarDates as dependency
-
+    }, [calendarDates])
 
     const handleStatusUpdate = (id, newStatus) => {
         // Update local state to reflect the change immediately
@@ -96,6 +89,16 @@ const StoreTable = () => {
             store.id === id ? { ...store, status: newStatus } : store
         ))
     }
+
+    // Filter data based on status filter
+    const filteredData = useMemo(() => {
+        if (statusFilter === 'all') {
+            return storesData;
+        }
+        return storesData.filter(store =>
+            store.status?.toLowerCase() === statusFilter.toLowerCase()
+        );
+    }, [storesData, statusFilter]);
 
     const userColumns = useMemo(() => [
         {
@@ -133,7 +136,7 @@ const StoreTable = () => {
             }
         },
         {
-            header: " Status",
+            header: "Status",
             cell: ({ row }) => {
                 const { status } = row.original
                 return (
@@ -199,7 +202,7 @@ const StoreTable = () => {
     ], [handleStatusUpdate])
 
     const table = useReactTable({
-        data: storesData,  // Use the raw data directly
+        data: filteredData,  // Use filtered data instead of raw data
         columns: userRole === "Admin" ? adminColumns : userColumns,
         state: {
             globalFilter: globalFilter,
@@ -207,7 +210,7 @@ const StoreTable = () => {
         onGlobalFilterChange: setGlobalFilter,
         getCoreRowModel: getCoreRowModel(),
         getPaginationRowModel: getPaginationRowModel(),
-        getFilteredRowModel: getFilteredRowModel(), // Let react-table handle filtering
+        getFilteredRowModel: getFilteredRowModel(),
         initialState: {
             pagination: { pageSize: 10 }
         }
@@ -238,21 +241,33 @@ const StoreTable = () => {
                 </div>
                 {/* Filter Section */}
                 <div className="filters_section">
-                    <div className="fiter_status">
-                        Status:
-                        
+                    <div className="filter_status">
+                        <span className="filter_label">
+                            Status :
+                        </span>                        <select
+                            value={statusFilter}
+                            onChange={(e) => setStatusFilter(e.target.value)}
+                            className="status-filter-select"
+                        >
+                            <option value="all">All</option>
+                            <option value="pending">Pending</option>
+                            <option value="verified">Verified</option>
+                            <option value="rejected">Rejected</option>
+                        </select>
                     </div>
                     <div className="filter_date">
-                        Date:
+                        <span className="filter_label">
+                            Date:
+                        </span>
                         <DatePickerFilter value={calendarDates} setCalendarDates={setCalendarDates} />
                     </div>
                 </div>
             </div>
 
             {/* Results count */}
-            {/* <div className="results_count">
-                Showing {table.getFilteredRowModel().rows.length} results
-            </div> */}
+            <div className="results_count">
+                Showing {table.getFilteredRowModel().rows.length} of {storesData.length} results
+            </div>
 
             {/* Table Container */}
             <div className="table_container">

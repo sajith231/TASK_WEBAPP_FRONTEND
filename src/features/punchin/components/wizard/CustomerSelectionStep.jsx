@@ -204,13 +204,13 @@ const CustomerSelectionStep = memo(({
                   <span>Loading customers...</span>
                 </div>
               ) : displayedCustomers.length > 0 ? (
-                  <VirtualizedCustomerList
-                    customers={filteredCustomers}
-                    searchTerm={debouncedSearchTerm}
-                    onSelect={handleCustomerSelect}
-                  />
+                <VirtualizedCustomerList
+                  customers={filteredCustomers}
+                  searchTerm={debouncedSearchTerm}
+                  onSelect={handleCustomerSelect}
+                />
 
-                ) : (
+              ) : (
                 <div className="no-customers">
                   {searchTerm ? 'No matching customers found' : 'No customers available'}
                 </div>

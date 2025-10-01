@@ -63,7 +63,9 @@ const Punchin = ({ onPunchIn }) => {
 
       try {
         const response = await PunchAPI.getFirms();
-        const customerData = response.firms || [];
+        const customerData = response.firms.filter(cus => {
+        return  cus.latitude !== null
+        }) || [];
         setCustomers(customerData);
 
         logger.info('Customers fetched successfully', { count: customerData.length });
@@ -97,7 +99,7 @@ const Punchin = ({ onPunchIn }) => {
     // Validate location radius before punch-in (only if customer has location data)
     if (debouncedSelectedCustomer?.latitude && capturedLocation) {
       const isWithinRadius = distance?.isWithinRadius;
-      
+
       if (!isWithinRadius) {
         alert(`You must be within 100 meters of ${debouncedSelectedCustomer.firm_name} to punch in. Current distance: ${distance?.formattedDistance || 'Unknown'}`);
         return;
@@ -113,9 +115,9 @@ const Punchin = ({ onPunchIn }) => {
         location: capturedLocation,
         distance: distance?.formattedDistance || 'N/A'
       });
-      
+
       localStorage.setItem("activePunchIn", JSON.stringify(ResponsePunch.data));
-      
+
       // Call parent callback if provided
       if (onPunchIn) {
         await onPunchIn({
@@ -127,7 +129,7 @@ const Punchin = ({ onPunchIn }) => {
         });
       }
       // toast.success("Punched in successfully!");
-      
+
       // Reset wizard to first step
       setCurrentStep(WIZARD_STEPS.CUSTOMER_SELECTION);
       setSelectedCustomer(null);

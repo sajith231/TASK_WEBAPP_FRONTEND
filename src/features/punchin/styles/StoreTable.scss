@@ -32,7 +32,7 @@
     // Search Section
     .search_section {
       position: relative;
-      margin-bottom: 5px;
+      margin-bottom: 12px;
 
       .search_icon {
         position: absolute;
@@ -66,9 +66,63 @@
       }
     }
 
+    // Filters Section
     .filters_section {
       display: flex;
-      justify-content: space-between;
+      flex-direction: column;
+      // gap: 2/px;
+
+      .filter_label{
+        color:rgb(164, 150, 150);
+        font-style: italic;
+        font-size: .6rem;
+      }
+
+      .filter_status,
+      .filter_date {
+        display: flex;
+        flex-direction: column;
+        align-items: start;
+        font-size: 13px;
+        font-weight: 500;
+        color: #374151;
+        padding: 8px 0;
+
+        // Status filter select
+        .status-filter-select {
+          padding: 6px 8px;
+          border: 1px solid #d1d5db;
+          border-radius: 6px;
+          font-size: 12px;
+          font-weight: 500;
+          cursor: pointer;
+          transition: all 0.2s ease;
+          background: white;
+          min-width: 120px;
+
+          &:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.1);
+          }
+
+          option {
+            padding: 8px;
+            font-size: 12px;
+          }
+        }
+
+        // Date picker container adjustments
+        .date-picker-filter {
+          min-width: 200px;
+          
+          // Ensure the date picker input fits well
+          input {
+            font-size: 12px;
+            padding: 6px 8px;
+          }
+        }
+      }
     }
   }
 
@@ -78,6 +132,8 @@
     font-size: 14px;
     color: #6b7280;
     font-weight: 500;
+    padding: 8px 0;
+    border-bottom: 1px solid #f3f4f6;
   }
 
   // Table Container
@@ -391,6 +447,32 @@
           left: 12px;
         }
       }
+
+      .filters_section {
+        flex-direction: row;
+        justify-content: flex-start;
+        gap: 20px;
+
+        .filter_status,
+        .filter_date {
+          font-size: 14px;
+
+          .status-filter-select {
+            font-size: 13px;
+            padding: 5px 10px;
+            min-width: 140px;
+          }
+
+          .date-picker-filter {
+            min-width: 220px;
+            
+            input {
+              font-size: 13px;
+              padding: 8px 10px;
+            }
+          }
+        }
+      }
     }
 
     .table_container {
@@ -414,8 +496,28 @@
   // Tablet to Desktop transition (min-width: 769px)
   @media (min-width: 769px) {
     .filter_search_section {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      margin-bottom: 20px;
+
       .search_section {
+        margin-bottom: 0;
         max-width: 400px;
+        flex: 1;
+      }
+
+      .filters_section {
+        flex: 1;
+        justify-content: flex-end;
+        gap: 24px;
+
+        .filter_status,
+        .filter_date {
+          .status-filter-select {
+            min-width: 120px;
+          }
+        }
       }
     }
 
@@ -461,8 +563,34 @@
     }
 
     .filter_search_section {
+      margin-bottom: 24px;
+
       .search_section {
-        margin-bottom: 20px;
+        max-width: 500px;
+      }
+
+      .filters_section {
+        gap: 32px;
+
+        .filter_status,
+        .filter_date {
+          font-size: 15px;
+
+          .status-filter-select {
+            font-size: 14px;
+            padding: 6px 12px;
+            min-width: 140px;
+          }
+
+          .date-picker-filter {
+            min-width: 250px;
+            
+            input {
+              font-size: 14px;
+              padding: 10px 12px;
+            }
+          }
+        }
       }
     }
 
@@ -481,6 +609,11 @@
           font-size: 14px;
         }
       }
+    }
+
+    .results_count {
+      font-size: 15px;
+      margin-bottom: 20px;
     }
   }
 }

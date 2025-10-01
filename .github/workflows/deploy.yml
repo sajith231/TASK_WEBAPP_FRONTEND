@@ -1,14 +1,15 @@
-name: Deploy React App
+name: CI/CD React App
 
 on:
   push:
     branches: [ main ]
 
 jobs:
-  build-and-deploy:
+  # 1️⃣ Build Job: Always runs
+  build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Checkout code
         uses: actions/checkout@v3
 
       - name: Install dependencies
@@ -16,6 +17,23 @@ jobs:
 
       - name: Build project
         run: npm run build
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: react-build
+          path: dist
+
+  # 2️ Deploy Job: Runs only if commit message contains '[deploy]' or 'deploy/'
+  deploy:
+    needs: build
+    if: contains(github.event.head_commit.message, 'deploy/') || contains(github.event.head_commit.message, '[deploy]')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download build artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: react-build
 
       - name: Deploy to VPS
         uses: appleboy/scp-action@master

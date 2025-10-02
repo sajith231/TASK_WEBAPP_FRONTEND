@@ -5,8 +5,9 @@ on:
     branches: [ main ]
 
 jobs:
-  # 1️⃣ Build Job: Always runs
+    # 1 Deploy Job: Runs only if commit message contains '[deploy]' or 'deploy/'
   build:
+    if: contains(github.event.head_commit.message, 'deploy/') || contains(github.event.head_commit.message, '[deploy]')
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -24,7 +25,7 @@ jobs:
           name: react-build
           path: dist
 
-  # 2️⃣ Deploy Job: Runs only if commit message contains '[deploy]' or 'deploy/'
+  # 2 Deploy Job: Runs only if commit message contains '[deploy]' or 'deploy/'
   deploy:
     needs: build
     if: contains(github.event.head_commit.message, 'deploy/') || contains(github.event.head_commit.message, '[deploy]')

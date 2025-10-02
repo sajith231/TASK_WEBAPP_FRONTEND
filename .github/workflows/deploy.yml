@@ -5,7 +5,7 @@ on:
     branches: [ main ]
 
 jobs:
-    # 1 Deploy Job: Runs only if commit message contains '[deploy]' or 'deploy/'
+  # 1️⃣ Build Job: Only runs if commit message contains deploy
   build:
     if: contains(github.event.head_commit.message, 'deploy/') || contains(github.event.head_commit.message, '[deploy]')
     runs-on: ubuntu-latest
@@ -27,7 +27,7 @@ jobs:
           name: react-build
           path: dist
 
-  # 2 Deploy Job: Runs only if commit message contains '[deploy]' or 'deploy/'
+  # 2️⃣ Deploy Job
   deploy:
     needs: build
     if: contains(github.event.head_commit.message, 'deploy/') || contains(github.event.head_commit.message, '[deploy]')
@@ -37,6 +37,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: react-build
+          path: dist   # ✅ ensures files go into ./dist/
 
       - name: Deploy to VPS
         uses: appleboy/scp-action@master

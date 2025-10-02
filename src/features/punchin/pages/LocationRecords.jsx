@@ -15,7 +15,7 @@ const LocationRecords = () => {
             <div className='location_capture'>
                 <div className="header_section">
                     <div className="header-tit">
-                        <div className="header_title">Manage Store test Locations</div>
+                        <div className="header_title">Manage Store Locations</div>
                         <div className="header_sub">Track and manage your store locations </div>
 
                     </div>

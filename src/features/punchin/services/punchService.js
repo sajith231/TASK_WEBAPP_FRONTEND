@@ -264,9 +264,9 @@ export const PunchAPI = {
 
 
     // Table punch-in/out records
-    getPunchinTable: async () => {
+    getPunchinTable: async (calendarDates) => {
         try {
-            const response = await apiClient.get("punch-in/table/");
+            const response = await apiClient.get(`punch-in/table?start_date=${calendarDates[0]}&end_date=${calendarDates[1]}`);
             return response;
         } catch (error) {
             console.error("Error fetching punch records:", error);

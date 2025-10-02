@@ -61,7 +61,7 @@ const StoreTable = () => {
     const userRole = useSelector((state) => state.auth?.user?.role)
     const [statusFilter, setStatusFilter] = useState('all');
     const [calendarDates, setCalendarDates] = useState([
-        formatDateApi(new Date(new Date().setDate(new Date().getDate() - 7))),
+        formatDateApi(new Date(new Date().setDate(new Date().getDate() - 6))),
         formatDateApi(new Date())
     ])
 

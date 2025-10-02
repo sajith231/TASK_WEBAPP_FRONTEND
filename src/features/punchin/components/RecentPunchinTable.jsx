@@ -12,7 +12,8 @@ import {
 } from '@tanstack/react-table';
 import { PunchAPI } from '../services/punchService';
 import BaseModal from '../../../components/ui/Modal/BaseModal';
-import { formatDT, timeDiff } from '@/utils';
+import { formatDT, timeDiff, formatDateApi } from '@/utils';
+import DatePickerFilter from './DatePickerFilter';
 
 const StatusCell = ({ initialStatus, row, onStatusUpdate }) => {
     const [status, setStatus] = useState(initialStatus);
@@ -62,13 +63,18 @@ const PunchinTable = () => {
     const [showPhoto, setShowPhoto] = useState(false)
     const [photoUrl, setPhotoUrl] = useState('')
     const userRole = useSelector((state) => state.auth?.user?.role)
+    const [statusFilter, setStatusFilter] = useState('all');
+    const [calendarDates, setCalendarDates] = useState([
+        formatDateApi(new Date(new Date().setDate(new Date().getDate() - 6))),
+        formatDateApi(new Date())
+    ])
 
 
     useEffect(() => {
         const fetchTableData = async () => {
             try {
                 setLoading(true)
-                const response = await PunchAPI.getPunchinTable()
+                const response = await PunchAPI.getPunchinTable(calendarDates)
 
                 if (response?.data) {
                     setStoresData(response.data)
@@ -84,7 +90,7 @@ const PunchinTable = () => {
             }
         }
         fetchTableData()
-    }, [])
+    }, [calendarDates])
 
     const handleStatusUpdate = (id, newStatus) => {
         // Update local state to reflect the change immediately
@@ -92,6 +98,16 @@ const PunchinTable = () => {
             store.id === id ? { ...store, status: newStatus } : store
         ))
     }
+
+    // Filter data based on status filter
+    const filteredData = useMemo(() => {
+        if (statusFilter === 'all') {
+            return storesData;
+        }
+        return storesData.filter(store =>
+            store.status?.toLowerCase() === statusFilter.toLowerCase()
+        );
+    }, [storesData, statusFilter]);
 
     const userColumns = useMemo(() => [
         {
@@ -115,7 +131,7 @@ const PunchinTable = () => {
             }
         },
         {
-            header: "Punch Outf Time",
+            header: "Punch Out Time",
             accessorKey: 'punchout_time',
             cell: ({ getValue }) => {
                 const value = getValue()
@@ -161,7 +177,7 @@ const PunchinTable = () => {
 
         },
         {
-            header: " Status",
+            header: "Status",
             cell: ({ row }) => {
                 const { status } = row.original
                 return (
@@ -260,7 +276,7 @@ const PunchinTable = () => {
     ], [handleStatusUpdate])
 
     const table = useReactTable({
-        data: storesData,  // Use the raw data directly
+        data: filteredData,  // Use filtered data instead of raw data
         columns: userRole === "Admin" ? adminColumns : userColumns,
         state: {
             globalFilter: globalFilter,
@@ -268,7 +284,7 @@ const PunchinTable = () => {
         onGlobalFilterChange: setGlobalFilter,
         getCoreRowModel: getCoreRowModel(),
         getPaginationRowModel: getPaginationRowModel(),
-        getFilteredRowModel: getFilteredRowModel(), // Let react-table handle filtering
+        getFilteredRowModel: getFilteredRowModel(),
         initialState: {
             pagination: { pageSize: 10 }
         }
@@ -285,9 +301,8 @@ const PunchinTable = () => {
     return (
         <div className='table_section'>
             <h4 className="table_title">Recently Added Store Locations</h4>
-            {/* Search Section */}
             <div className="filter_search_section">
-
+                {/* Search Section */}
                 <div className="search_section">
                     <GoSearch className="search_icon" />
                     <input
@@ -298,11 +313,36 @@ const PunchinTable = () => {
                         className="search_input"
                     />
                 </div>
+                {/* Filter Section */}
+                <div className="filters_section">
+                    <div className="filter_status">
+                        <span className="filter_label">
+                            Status:
+                        </span>
+                        <select
+                            value={statusFilter}
+                            onChange={(e) => setStatusFilter(e.target.value)}
+                            className="status-filter-select"
+                        >
+                            <option value="all">All</option>
+                            <option value="pending">Pending</option>
+                            <option value="verified">Verified</option>
+                            <option value="rejected">Rejected</option>
+                        </select>
+                    </div>
+                    <div className="filter_date">
+                        <span className="filter_label">
+                            Date:
+                        </span>
+                        <DatePickerFilter value={calendarDates} setCalendarDates={setCalendarDates} />
+                    </div>
+                </div>
             </div>
+
             {/* Results count */}
-            {/* <div className="results_count">
-                Showing {table.getFilteredRowModel().rows.length} results
-            </div> */}
+            <div className="results_count">
+                Showing {table.getFilteredRowModel().rows.length} of {storesData.length} results
+            </div>
 
             {/* Table Container */}
             <div className="table_container">
@@ -337,7 +377,7 @@ const PunchinTable = () => {
                             ))
                         ) : (
                             <tr>
-                                <td colSpan={userRole === "Admin" ? 6 : 5} className="no-data">
+                                <td colSpan={userRole === "Admin" ? 10 : 8} className="no-data">
                                     No stores found matching your search criteria
                                 </td>
                             </tr>
@@ -372,15 +412,14 @@ const PunchinTable = () => {
             )}
 
 
-            {/* Image View Model */}
+            {/* Image View Modal */}
             {
                 showPhoto && (
                     <BaseModal
                         isOpen={showPhoto}
                         onClose={() => setShowPhoto(prev => !prev)}
-
                         children={(<div className='photo-model-container' >
-                            <img src={photoUrl} alt="" srcset="" />
+                            <img src={photoUrl} alt="" srcSet="" />
                         </div>)} />
                 )
             }

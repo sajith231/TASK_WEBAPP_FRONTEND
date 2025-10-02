@@ -9,7 +9,6 @@ const LocationRecords = () => {
     const navigate = useNavigate();
     const userRole = useSelector((state) => state.auth?.user?.role)
 
-
     return (
         <div className="all-body">
             <div className='location_capture'>

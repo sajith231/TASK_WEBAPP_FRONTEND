@@ -1,21 +1,45 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FaBars, FaBox, FaBuilding, FaCog, FaTimes, FaUniversity, FaChevronDown, FaChevronRight, FaFingerprint, FaStore, FaMapMarkerAlt, FaTable } from 'react-icons/fa';
-import { FaMoneyBillWave } from 'react-icons/fa';
+import { FaBars, FaTimes } from 'react-icons/fa';
 import './Navbar.scss';
 import { useDispatch } from 'react-redux';
 import { logout } from '../../features/auth/store/authSlice';
+import { 
+  MENU_CONFIG, 
+  MENU_TYPES, 
+  CHEVRON_ICONS, 
+  getMenuItemsByRole 
+} from '../../constants/menuConfig';
 
+/**
+ * Navbar Component - Scalable Navigation with Role-Based Menu System
+ * 
+ * Features:
+ * - Dynamic menu rendering from centralized configuration (menuConfig.js)
+ * - Role-based menu filtering (Admin/User specific items)
+ * - Hierarchical dropdown support with recursive rendering
+ * - Mobile-responsive design with collapsible sidebar
+ * - Consistent icon and routing management
+ * 
+ * Configuration:
+ * - Menu items are defined in src/constants/menuConfig.js
+ * - Add new menus by updating MENU_CONFIG array
+ * - Role-based access controlled via allowedRoles property
+ * - Supports both simple and dropdown menu types
+ */
 const Navbar = () => {
     const [isOpen, setIsOpen] = useState(true);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [isMobile, setIsMobile] = useState(false);
-    const [isBankCashOpen, setIsBankCashOpen] = useState(false);
-    const [isPuchOpen, setIsPunchOpen] = useState(false)
+    const [openSubmenus, setOpenSubmenus] = useState({});
+
     const dropdownRef = useRef(null);
     const navigate = useNavigate();
     const user = JSON.parse(localStorage.getItem('user'));
-    const dispatch = useDispatch()
+    const dispatch = useDispatch();
+
+    // Get menu items based on user role
+    const menuItems = getMenuItemsByRole(user?.role || 'user');
 
     // Check if device is mobile
     useEffect(() => {
@@ -57,9 +81,11 @@ const Navbar = () => {
         setIsDropdownOpen(!isDropdownOpen);
     };
 
-    const toggleBankCash = (e) => {
-        e.stopPropagation();
-        setIsBankCashOpen(!isBankCashOpen);
+    const toggleSubmenu = (menuId) => {
+        setOpenSubmenus(prev => ({
+            ...prev,
+            [menuId]: !prev[menuId]
+        }));
     };
 
     const handleNavigation = (route) => {
@@ -92,10 +118,53 @@ const Navbar = () => {
         return username.charAt(0).toUpperCase();
     };
 
+    // Render menu items recursively
+    const renderMenuItem = (item) => {
+        const IconComponent = item.icon;
+        const ChevronIcon = openSubmenus[item.id] ? CHEVRON_ICONS.OPEN : CHEVRON_ICONS.CLOSED;
+        const isSubmenuOpen = openSubmenus[item.id];
+
+        if (item.type === MENU_TYPES.SIMPLE) {
+            return (
+                <li key={item.id} onClick={() => handleNavigation(item.route)}>
+                    <IconComponent className="icon" />
+                    <span>{item.label}</span>
+                </li>
+            );
+        }
+
+        if (item.type === MENU_TYPES.DROPDOWN && item.children) {
+            return (
+                <li key={item.id} className={`menu-item ${isSubmenuOpen ? 'active' : ''}`}>
+                    <div className="menu-main" onClick={() => toggleSubmenu(item.id)}>
+                        <IconComponent className="icon" />
+                        <span>{item.label}</span>
+                        <ChevronIcon className="chevron" />
+                    </div>
+                    {isSubmenuOpen && (
+                        <ul className="submenu">
+                            {item.children.map(child => {
+                                const ChildIcon = child.icon;
+                                return (
+                                    <li key={child.id} onClick={() => handleNavigation(child.route)}>
+                                        <ChildIcon style={{ marginRight: '8px' }} />
+                                        <span>{child.label}</span>
+                                    </li>
+                                );
+                            })}
+                        </ul>
+                    )}
+                </li>
+            );
+        }
+
+        return null;
+    };
+
     return (
         <>
 
-            <div className={`navbar-container-${isMobile? 'mob':'desk'} `}>
+            <div className={`navbar-container-${isMobile ? 'mob' : 'desk'} `}>
                 {/* Top Navbar with Profile Dropdown */}
                 <div className="top-navbar">
                     <div className="profile-dropdown" ref={dropdownRef}>
@@ -193,84 +262,7 @@ const Navbar = () => {
                 </div>
 
                 <ul className="nav-menu">
-                    <li onClick={() => handleNavigation('/item-details')}>
-                        <FaBox className="icon" />
-                        <span>Item Details</span>
-                    </li>
-
-                    {/* Bank & Cash Menu with Dropdown */}
-                    <li className={`menu-item ${isBankCashOpen ? 'active' : ''}`}>
-                        <div className="menu-main" onClick={toggleBankCash}>
-                            <FaUniversity className="icon" />
-                            <span>Bank & Cash</span>
-                            {isBankCashOpen ? (
-                                <FaChevronDown className="chevron" />
-                            ) : (
-                                <FaChevronRight className="chevron" />
-                            )}
-                        </div>
-                        {isBankCashOpen && (
-                            <ul className="submenu">
-                                <li onClick={() => handleNavigation('/cash-book')}>
-                                    <FaMoneyBillWave style={{ marginRight: '8px' }} />
-                                    <span>Cash Book</span>
-                                </li>
-                                <li onClick={() => handleNavigation('/bank-book')}>
-                                    <FaUniversity style={{ marginRight: '8px' }} />
-                                    <span>Bank Book</span>
-                                </li>
-
-
-                            </ul>
-                        )}
-                    </li>
-
-                    <li onClick={() => handleNavigation('/debtors')}>
-                        <FaMoneyBillWave className="icon" />
-                        <span>Debtors</span>
-                    </li>
-                    <li onClick={() => handleNavigation('company')}>
-                        <FaBuilding className="icon" />
-                        <span>Company Info</span>
-                    </li>
-                    {/* <li onClick={() => handleNavigation('/punchin')}>
-                        <FaFingerprint className='icon' />
-                        <span>Punch In</span>
-                    </li> */}
-
-                    {/* Bank & Cash Menu with Dropdown */}
-                    <li className={`menu-item ${isPuchOpen ? 'active' : ''}`}>
-                        <div className="menu-main" onClick={() => setIsPunchOpen(!isPuchOpen)}>
-                            <FaFingerprint className='icon' />
-                            <span>Punch In</span>
-                            {isPuchOpen ? (
-                                <FaChevronDown className="chevron" />
-                            ) : (
-                                <FaChevronRight className="chevron" />
-                            )}
-                        </div>
-                        {isPuchOpen && (
-                            <ul className="submenu">
-                                <li onClick={() => handleNavigation('/punch-in/location')}>
-                                <>
-                                    <FaMapMarkerAlt style={{ marginRight: '4px' }} />
-                                </>
-                                    <span>Location Capture</span>
-                                </li>
-                                <li onClick={() => handleNavigation('/punch-in')}>
-                                    <FaFingerprint style={{ marginRight: '8px' }} />
-                                    <span>Punch In  </span>
-                                </li>
-
-
-                            </ul>
-                        )}
-                    </li>
-
-                    <li onClick={() => handleNavigation('/settings')}>
-                        <FaCog className="icon" />
-                        <span>Settings</span>
-                    </li>
+                    {menuItems.map(renderMenuItem)}
                 </ul>
             </div>
 

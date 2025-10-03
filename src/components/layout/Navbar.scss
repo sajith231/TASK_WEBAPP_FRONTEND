@@ -154,6 +154,7 @@
 
 // Compact Sidebar
 .sidebar {
+  user-select: none;
   width: 200px; // Reduced width
   background: #1e272e;
   color: white;

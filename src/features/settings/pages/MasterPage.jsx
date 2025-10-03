@@ -1,13 +1,13 @@
 import React from 'react'
 
-const SettingsPage = () => {
+const MasterPage = () => {
     return (
         <div className='all-body'>
             <div>
-<span>fsd   </span>
+                <span>fsd   </span>
             </div>
         </div>
     )
 }
 
-export default SettingsPage
+export default MasterPage

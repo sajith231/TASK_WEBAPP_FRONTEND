@@ -168,27 +168,52 @@ export const getAllRoutes = () => {
 };
 
 export const getMenuItemsByAllowedRoutes = (allowedRoutes = []) => {
-    // if(!allowedRoutes || allowedRoutes.length==0)return []
+    if (!allowedRoutes || allowedRoutes.length === 0) {
+        return [];
+    }
 
     const filterByRoutes = (item) => {
-        if (item.route && allowedRoutes.includes(item.route)) {
-            return true;
-        }
-
+        // Create a copy of the item to avoid mutating the original
+        const itemCopy = { ...item };
+        
+        // Check if item has a direct route that's allowed
+        const hasAllowedRoute = item.route && allowedRoutes.includes(item.route);
+        
+        // Check if item has children
         if (item.children) {
-            item.children = item.children.filter(child =>
+            // Filter children that have allowed routes
+            const filteredChildren = item.children.filter(child =>
                 child.route && allowedRoutes.includes(child.route)
             );
-            return item.children.length > 0;
+            
+            // If there are allowed children, include the parent with filtered children
+            if (filteredChildren.length > 0) {
+                itemCopy.children = filteredChildren;
+                return itemCopy;
+            }
         }
-        return false ;
-    }
-    return MENU_CONFIG.filter(filterByRoutes).sort((a,b)=>a.order -b.order)
-
-}
+        
+        // Return the item if it has an allowed route
+        if (hasAllowedRoute) {
+            return itemCopy;
+        }
+        
+        return null;
+    };
+    
+    return MENU_CONFIG
+        .map(filterByRoutes)
+        .filter(item => item !== null)
+        .sort((a, b) => a.order - b.order);
+};
 
 // Icons for chevron states
 export const CHEVRON_ICONS = {
     OPEN: FaChevronDown,
     CLOSED: FaChevronRight
+};
+
+// Helper function to check if a route is allowed
+export const isRouteAllowed = (route, allowedRoutes = []) => {
+    return allowedRoutes.includes(route);
 };

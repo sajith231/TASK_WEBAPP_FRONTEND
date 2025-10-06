@@ -4,28 +4,37 @@ import { FaBars, FaTimes } from 'react-icons/fa';
 import './Navbar.scss';
 import { useDispatch } from 'react-redux';
 import { logout } from '../../features/auth/store/authSlice';
-import { 
-  MENU_CONFIG, 
-  MENU_TYPES, 
-  CHEVRON_ICONS, 
-  getMenuItemsByRole 
+import {
+    MENU_CONFIG,
+    MENU_TYPES,
+    CHEVRON_ICONS,
+    getMenuItemsByRole,
+    getMenuItemsByAllowedRoutes
 } from '../../constants/menuConfig';
 
 /**
- * Navbar Component - Scalable Navigation with Role-Based Menu System
+ * Navbar Component - Scalable Navigation with User-Based Route Access
  * 
  * Features:
  * - Dynamic menu rendering from centralized configuration (menuConfig.js)
- * - Role-based menu filtering (Admin/User specific items)
+ * - User-based route filtering (displays only allowed routes for each user)
  * - Hierarchical dropdown support with recursive rendering
  * - Mobile-responsive design with collapsible sidebar
  * - Consistent icon and routing management
  * 
  * Configuration:
  * - Menu items are defined in src/constants/menuConfig.js
- * - Add new menus by updating MENU_CONFIG array
- * - Role-based access controlled via allowedRoles property
+ * - User access controlled via allowedRoutes array in user object
+ * - Fallback to role-based filtering if allowedRoutes not provided
  * - Supports both simple and dropdown menu types
+ * 
+ * User Object Structure:
+ * {
+ *   id: 1,
+ *   username: "john_doe",
+ *   role: "Admin",
+ *   allowedRoutes: ["/dashboard", "/item-details", "/cash-book", ...]
+ * }
  */
 const Navbar = () => {
     const [isOpen, setIsOpen] = useState(true);
@@ -38,8 +47,19 @@ const Navbar = () => {
     const user = JSON.parse(localStorage.getItem('user'));
     const dispatch = useDispatch();
 
-    // Get menu items based on user role
-    const menuItems = getMenuItemsByRole(user?.role || 'user');
+    // Get menu items based on user's allowed routes
+    // If user has allowedRoutes array, use it; otherwise fall back to role-based filtering
+    const menuItems = user?.allowedRoutes
+        ? getMenuItemsByAllowedRoutes(user.allowedRoutes)
+        : getMenuItemsByAllowedRoutes([
+            "/dashboard",
+            "/item-details",
+            "/cash-book",
+            "/bank-book",
+            "/debtors",
+            "/company",
+            "/punch-in/location",
+        ]);
 
     // Check if device is mobile
     useEffect(() => {

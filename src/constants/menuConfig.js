@@ -24,6 +24,7 @@ export const USER_ROLES = {
 };
 
 // Menu configuration with hierarchical structure
+// Security Note: Routes are mapped internally, users only get menu IDs
 export const MENU_CONFIG = [
     {
         id: 'item-details',
@@ -31,7 +32,6 @@ export const MENU_CONFIG = [
         label: 'Item Details',
         icon: FaBox,
         route: '/item-details',
-        roles: [USER_ROLES.ADMIN, USER_ROLES.USER], // Available to all roles
         order: 1
     },
     {
@@ -39,22 +39,19 @@ export const MENU_CONFIG = [
         type: MENU_TYPES.DROPDOWN,
         label: 'Bank & Cash',
         icon: FaUniversity,
-        roles: [USER_ROLES.ADMIN, USER_ROLES.USER],
         order: 2,
         children: [
             {
                 id: 'cash-book',
                 label: 'Cash Book',
                 icon: FaMoneyBillWave,
-                route: '/cash-book',
-                roles: [USER_ROLES.ADMIN, USER_ROLES.USER]
+                route: '/cash-book'
             },
             {
                 id: 'bank-book',
                 label: 'Bank Book',
                 icon: FaUniversity,
-                route: '/bank-book',
-                roles: [USER_ROLES.ADMIN, USER_ROLES.USER]
+                route: '/bank-book'
             }
         ]
     },
@@ -64,7 +61,6 @@ export const MENU_CONFIG = [
         label: 'Debtors',
         icon: FaMoneyBillWave,
         route: '/debtors',
-        roles: [USER_ROLES.ADMIN, USER_ROLES.USER],
         order: 3
     },
     {
@@ -73,7 +69,6 @@ export const MENU_CONFIG = [
         label: 'Company Info',
         icon: FaBuilding,
         route: 'company', // Special handling in component
-        roles: [USER_ROLES.ADMIN, USER_ROLES.USER],
         order: 4
     },
     {
@@ -81,22 +76,19 @@ export const MENU_CONFIG = [
         type: MENU_TYPES.DROPDOWN,
         label: 'Punch In',
         icon: FaFingerprint,
-        roles: [USER_ROLES.ADMIN, USER_ROLES.USER],
         order: 5,
         children: [
             {
                 id: 'location-capture',
                 label: 'Location Capture',
                 icon: FaMapMarkerAlt,
-                route: '/punch-in/location',
-                roles: [USER_ROLES.ADMIN, USER_ROLES.USER]
+                route: '/punch-in/location'
             },
             {
                 id: 'punch-in-action',
                 label: 'Punch In',
                 icon: FaFingerprint,
-                route: '/punch-in',
-                roles: [USER_ROLES.ADMIN, USER_ROLES.USER]
+                route: '/punch-in'
             }
         ]
     },
@@ -105,46 +97,102 @@ export const MENU_CONFIG = [
         type: MENU_TYPES.DROPDOWN,
         label: 'Master',
         icon: FaCog,
-        roles: [USER_ROLES.ADMIN], // Admin only
         order: 6,
         children: [
             {
                 id: 'user-menu',
                 label: 'User Management',
                 icon: FaTable,
-                route: '/master/users',
-                roles: [USER_ROLES.ADMIN]
+                route: '/master/users'
             },
             {
                 id: 'settings',
                 label: 'Settings',
                 icon: FaCog,
-                route: '/settings',
-                roles: [USER_ROLES.ADMIN]
+                route: '/settings'
             }
         ]
     }
 ];
 
-// Helper function to get menu items by role
-export const getMenuItemsByRole = (userRole) => {
-    // If no userRole provided, default to 'user'
-    const role = userRole || 'user';
-
-    const filteredItems = MENU_CONFIG
-        .filter(item => item.roles.includes(role))
-        .map(item => ({
-            ...item,
-            children: item.children?.filter(child => child.roles.includes(role))
-        }))
-        .sort((a, b) => a.order - b.order);
-
-    // If no items match, return basic menu items for 'user' role
-    if (filteredItems.length === 0 && role !== 'user') {
-        return getMenuItemsByRole('user');
+// Helper function to get menu items by allowed menu IDs (Secure approach)
+export const getMenuItemsByAllowedIds = (allowedMenuIds = []) => {
+    if (!allowedMenuIds || allowedMenuIds.length === 0) {
+        return [];
     }
 
-    return filteredItems;
+    const filterByIds = (item) => {
+        // Create a copy to avoid mutating the original
+        const itemCopy = { ...item };
+        
+        // Check if item ID is allowed
+        const isAllowed = allowedMenuIds.includes(item.id);
+        
+        // If item has children, filter them
+        if (item.children) {
+            const filteredChildren = item.children.filter(child =>
+                allowedMenuIds.includes(child.id)
+            );
+            
+            // Include parent if it has allowed children
+            if (filteredChildren.length > 0) {
+                itemCopy.children = filteredChildren;
+                return itemCopy;
+            }
+        }
+        
+        // Return item if it's allowed
+        if (isAllowed) {
+            return itemCopy;
+        }
+        
+        return null;
+    };
+    
+    return MENU_CONFIG
+        .map(filterByIds)
+        .filter(item => item !== null)
+        .sort((a, b) => a.order - b.order);
+};
+
+// Helper function to get route by menu ID (Security mapping)
+export const getRouteById = (menuId) => {
+    // Search top-level items
+    for (const item of MENU_CONFIG) {
+        if (item.id === menuId && item.route) {
+            return item.route;
+        }
+        // Search children
+        if (item.children) {
+            for (const child of item.children) {
+                if (child.id === menuId && child.route) {
+                    return child.route;
+                }
+            }
+        }
+    }
+    return null;
+};
+
+// Helper function to check if menu ID is valid and allowed
+export const isMenuIdAllowed = (menuId, allowedMenuIds = []) => {
+    return allowedMenuIds.includes(menuId);
+};
+
+// Helper function to get all menu IDs for validation
+export const getAllMenuIds = () => {
+    const menuIds = [];
+    
+    MENU_CONFIG.forEach(item => {
+        menuIds.push(item.id);
+        if (item.children) {
+            item.children.forEach(child => {
+                menuIds.push(child.id);
+            });
+        }
+    });
+    
+    return menuIds;
 };
 
 // Helper function to get all routes for validation
@@ -167,6 +215,7 @@ export const getAllRoutes = () => {
     return routes;
 };
 
+// Backward compatibility: Filter by routes (Less secure, kept for compatibility)
 export const getMenuItemsByAllowedRoutes = (allowedRoutes = []) => {
     if (!allowedRoutes || allowedRoutes.length === 0) {
         return [];

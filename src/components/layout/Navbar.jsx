@@ -8,33 +8,35 @@ import {
     MENU_CONFIG,
     MENU_TYPES,
     CHEVRON_ICONS,
-    getMenuItemsByRole,
+    getMenuItemsByAllowedIds,
     getMenuItemsByAllowedRoutes
 } from '../../constants/menuConfig';
 
 /**
- * Navbar Component - Scalable Navigation with User-Based Route Access
+ * Navbar Component - Scalable Navigation with Secure Menu ID-Based Access
  * 
  * Features:
  * - Dynamic menu rendering from centralized configuration (menuConfig.js)
- * - User-based route filtering (displays only allowed routes for each user)
+ * - Secure ID-based menu filtering (users get menu IDs, not actual routes)
  * - Hierarchical dropdown support with recursive rendering
  * - Mobile-responsive design with collapsible sidebar
  * - Consistent icon and routing management
  * 
  * Configuration:
  * - Menu items are defined in src/constants/menuConfig.js
- * - User access controlled via allowedRoutes array in user object
- * - Fallback to role-based filtering if allowedRoutes not provided
+ * - User access controlled via allowedMenuIds array (more secure than routes)
+ * - Routes are mapped internally and hidden from client
  * - Supports both simple and dropdown menu types
  * 
- * User Object Structure:
+ * Secure User Object Structure:
  * {
  *   id: 1,
  *   username: "john_doe",
  *   role: "Admin",
- *   allowedRoutes: ["/dashboard", "/item-details", "/cash-book", ...]
+ *   allowedMenuIds: ["item-details", "bank-cash", "cash-book", "bank-book", ...]
  * }
+ * 
+ * Legacy support: Still accepts allowedRoutes for backward compatibility
  */
 const Navbar = () => {
     const [isOpen, setIsOpen] = useState(true);
@@ -47,19 +49,11 @@ const Navbar = () => {
     const user = JSON.parse(localStorage.getItem('user'));
     const dispatch = useDispatch();
 
-    // Get menu items based on user's allowed routes
-    // If user has allowedRoutes array, use it; otherwise fall back to role-based filtering
-    const menuItems = user?.allowedRoutes
-        ? getMenuItemsByAllowedRoutes(user.allowedRoutes)
-        : getMenuItemsByAllowedRoutes([
-            "/dashboard",
-            "/item-details",
-            "/cash-book",
-            "/bank-book",
-            "/debtors",
-            "/company",
-            "/punch-in/location",
-        ]);
+    // Get menu items based on user's allowed menu IDs (Secure approach)
+    // Fallback to allowedRoutes for backward compatibility
+    const menuItems = user?.allowedMenuIds?.length
+        ? getMenuItemsByAllowedIds(user.allowedMenuIds)
+        : getMenuItemsByAllowedIds(["company"]);
 
     // Check if device is mobile
     useEffect(() => {

@@ -50,7 +50,6 @@ const Navbar = () => {
     const dispatch = useDispatch();
 
     // Get menu items based on user's allowed menu IDs (Secure approach)
-    // Fallback to allowedRoutes for backward compatibility
     const menuItems = user?.allowedMenuIds?.length
         ? getMenuItemsByAllowedIds(user.allowedMenuIds)
         : getMenuItemsByAllowedIds(["company"]);

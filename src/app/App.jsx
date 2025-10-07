@@ -17,6 +17,8 @@ import PunchinRecords from '../features/punchin/pages/PunchinRecords';
 import PunchInCapture from '../features/punchin/pages/PunchInCapture';
 import SettingsPage from '../features/settings/pages/MasterPage';
 import MasterPage from '../features/settings/pages/MasterPage';
+import UserManagement from '../features/settings/pages/MenuManagement';
+import MenuManagement from '../features/settings/pages/MenuManagement';
 
 const AppLayout = () => {
     const location = useLocation();
@@ -80,7 +82,7 @@ const AppLayout = () => {
                 <Route path='/punch-in/capture' element={<PunchInCapture />} />
 
                 <Route path="/master" >
-                    <Route path='users' element={<MasterPage />} />
+                    <Route path='users' element={<MenuManagement />} />
                 </Route>
 
                 <Route

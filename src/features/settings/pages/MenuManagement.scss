@@ -223,7 +223,18 @@
                     }
                 }
 
-                .menu-checkbox {
+              
+
+                .children-count {
+                    background: #e8f4f8;
+                    color: #4a90e2;
+                    padding: 0.3rem 0.75rem;
+                    border-radius: 12px;
+                    font-size: 0.85rem;
+                    font-weight: 600;
+                }
+            }
+              .menu-checkbox {
                     display: flex;
                     align-items: center;
                     cursor: pointer;
@@ -319,16 +330,6 @@
                         }
                     }
                 }
-
-                .children-count {
-                    background: #e8f4f8;
-                    color: #4a90e2;
-                    padding: 0.3rem 0.75rem;
-                    border-radius: 12px;
-                    font-size: 0.85rem;
-                    font-weight: 600;
-                }
-            }
 
             .menu-children {
                 background: #f8f9fa;

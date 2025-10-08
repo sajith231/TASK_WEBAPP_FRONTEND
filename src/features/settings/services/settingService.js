@@ -13,9 +13,10 @@ export const SettingsApi = {
 
     getUserMenus: async (userId) => {
         try {
-            const response = await apiClient.get(`get-user-menus/`, 
-   { user_id: userId }, 
-      { headers: { 'Content-Type': 'application/json' } }
+            const response = await apiClient.get(`get-user-menus/`,
+                {
+                    params: { user_id: userId }
+                }
             );
             return response;
         } catch (error) {
@@ -25,6 +26,8 @@ export const SettingsApi = {
     },
 
     updateUserMenus: async (userId, menuIds) => {
+                    console.log("service",userId,menuIds)
+        
         try {
             const response = await apiClient.post(`/update-menu/`, {
                 "allowedMenuIds": menuIds,
@@ -32,7 +35,7 @@ export const SettingsApi = {
             });
             return response;
         } catch (error) {
-            console.error("Error updating user permissions:", error);
+            console.error("Error updating user menus:", error);
             throw error;
         }
     }

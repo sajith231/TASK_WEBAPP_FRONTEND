@@ -184,11 +184,13 @@ export const getAllMenuIds = () => {
     const menuIds = [];
     
     MENU_CONFIG.forEach(item => {
-        menuIds.push(item.id);
+        
         if (item.children) {
             item.children.forEach(child => {
                 menuIds.push(child.id);
             });
+        }else{
+               menuIds.push(item.id);
         }
     });
     

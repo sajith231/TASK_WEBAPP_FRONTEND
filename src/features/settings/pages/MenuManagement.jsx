@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { MENU_CONFIG, getAllMenuIds } from '../../../constants/menuConfig';
 import './MenuManagement.scss';
 import { SettingsApi } from '../services/settingService';
+import { toast } from 'react-toastify';
 
 const MenuManagement = () => {
     const [users, setUsers] = useState([]);
@@ -14,27 +15,19 @@ const MenuManagement = () => {
     useEffect(() => {
         fetchUsers();
     }, []);
-
     // Fetch users from API
-    const fetchUsers = async () => {
+    const fetchUsers = async () => {     
         try {
             setLoading(true);
             const response = await SettingsApi.getUsers();
-            console.log("usr data ,",response.users)
+            console.log("usr data ,", response.users)
             setUsers(response.users || []);
         } catch (error) {
             console.error('Error fetching users:', error);
-            // Fallback to mock data if API fails
-            const mockUsers = [
-                { id: 1, username: 'john_doe', email: 'john@example.com', role: 'Admin' },
-                { id: 2, username: 'jane_smith', email: 'jane@example.com', role: 'Sales Rep' },
-                { id: 3, username: 'bob_jones', email: 'bob@example.com', role: 'Accountant' },
-                { id: 4, username: 'alice_wilson', email: 'alice@example.com', role: 'user' }
-            ];
-            setUsers(mockUsers);
         } finally {
             setLoading(false);
         }
+        console.log("get all menu leng", getAllMenuIds())
     };
 
     // Load user's current menu permissions
@@ -48,22 +41,24 @@ const MenuManagement = () => {
         setLoading(true);
         // Find user by ID (handle both string and number IDs)
         const user = users.find(u => String(u.id) === String(userId));
-        
+
         if (!user) {
             console.error('User not found:', userId);
             setLoading(false);
             return;
         }
-        
+
         setSelectedUser(user);
 
         try {
             // Fetch user's allowed menu IDs from API
+                   
+            setSelectedMenuIds([]);
             const response = await SettingsApi.getUserMenus(userId);
             setSelectedMenuIds(response.allowedMenuIds || response.data?.allowedMenuIds || []);
         } catch (error) {
-            console.error('Error loading user permissions:', error);
-            
+            console.error('Error loading user menus:', error);
+
         } finally {
             setLoading(false);
         }
@@ -84,10 +79,10 @@ const MenuManagement = () => {
     // Toggle all children of a parent menu
     const handleParentToggle = (parentItem) => {
         if (!parentItem.children) return;
-        
+
         const childIds = parentItem.children.map(child => child.id);
         const allChildrenSelected = childIds.every(id => selectedMenuIds.includes(id));
-        
+
         setSelectedMenuIds(prev => {
             if (allChildrenSelected) {
                 return prev.filter(id => !childIds.includes(id));
@@ -119,19 +114,19 @@ const MenuManagement = () => {
     // Save menu permissions
     const handleSavePermissions = async () => {
         if (!selectedUser) return;
-        
+
         setLoading(true);
         setSaveStatus('');
-        
+
         try {
-            console.log("sle",selectedUser)
             await SettingsApi.updateUserMenus(selectedUser.id, selectedMenuIds);
-            
+
             console.log(`Saved permissions for user ${selectedUser.id}:`, selectedMenuIds);
-            
+            toast.success("Saved permissions")
             setSaveStatus('success');
             setTimeout(() => setSaveStatus(''), 3000);
         } catch (error) {
+            toast.error('Error saving permissions:', error)
             console.error('Error saving permissions:', error);
             setSaveStatus('error');
             setTimeout(() => setSaveStatus(''), 3000);
@@ -167,7 +162,7 @@ const MenuManagement = () => {
                             )}
                         </span>
                     </label>
-                    
+
                     {isParent && (
                         <span className="children-count">
                             {selectedMenuIds.filter(id => item.children.some(child => child.id === id)).length} / {item.children.length}

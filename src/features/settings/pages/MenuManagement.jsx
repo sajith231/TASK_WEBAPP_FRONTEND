@@ -117,7 +117,7 @@ const MenuManagement = () => {
 
         setLoading(true);
         setSaveStatus('');
-
+        
         try {
             await SettingsApi.updateUserMenus(selectedUser.id, selectedMenuIds);
 
@@ -126,8 +126,9 @@ const MenuManagement = () => {
             setSaveStatus('success');
             setTimeout(() => setSaveStatus(''), 3000);
         } catch (error) {
-            toast.error('Error saving permissions:', error)
-            console.error('Error saving permissions:', error);
+            console.log("update menu error ,",error)
+            toast.error(error.detail)
+            console.error('Error saving permissions:', error.detail);
             setSaveStatus('error');
             setTimeout(() => setSaveStatus(''), 3000);
         } finally {
@@ -148,7 +149,7 @@ const MenuManagement = () => {
                     <label className="menu-checkbox">
                         <input
                             type="checkbox"
-                            checked={isParent ? allSelected : isSelected}
+                            checked={(isParent ? allSelected : isSelected)|| (item.id =='company'?true :false)}
                             onChange={() => isParent ? handleParentToggle(item) : handleMenuToggle(item.id)}
                             disabled={!selectedUser || loading}
                             className={isParent && hasChildren && !allSelected ? 'indeterminate' : ''}

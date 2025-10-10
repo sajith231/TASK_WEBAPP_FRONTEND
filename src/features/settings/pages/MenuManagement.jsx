@@ -7,7 +7,7 @@ import { toast } from 'react-toastify';
 const MenuManagement = () => {
     const [users, setUsers] = useState([]);
     const [selectedUser, setSelectedUser] = useState(null);
-    const [selectedMenuIds, setSelectedMenuIds] = useState([]);
+    const [selectedMenuIds, setSelectedMenuIds] = useState(["company"]);
     const [loading, setLoading] = useState(false);
     const [saveStatus, setSaveStatus] = useState('');
 
@@ -53,7 +53,7 @@ const MenuManagement = () => {
         try {
             // Fetch user's allowed menu IDs from API
                    
-            setSelectedMenuIds([]);
+            setSelectedMenuIds(["company"]);
             const response = await SettingsApi.getUserMenus(userId);
             setSelectedMenuIds(response.allowedMenuIds || response.data?.allowedMenuIds || []);
         } catch (error) {
@@ -70,7 +70,7 @@ const MenuManagement = () => {
             if (prev.includes(menuId)) {
                 return prev.filter(id => id !== menuId);
             } else {
-                return [...prev, menuId];
+                return [...prev, menuId,'company'];
             }
         });
         setSaveStatus('');
@@ -150,7 +150,7 @@ const MenuManagement = () => {
                         <input
                             type="checkbox"
                             checked={(isParent ? allSelected : isSelected)|| (item.id =='company'?true :false)}
-                            onChange={() => isParent ? handleParentToggle(item) : handleMenuToggle(item.id)}
+                            onChange={() => isParent ? handleParentToggle(item) : item.id !="company"? handleMenuToggle(item.id):''}
                             disabled={!selectedUser || loading}
                             className={isParent && hasChildren && !allSelected ? 'indeterminate' : ''}
                         />

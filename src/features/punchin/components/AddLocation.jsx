@@ -48,7 +48,7 @@ const AddLocation = ({ customer }) => {
         longitude: parseFloat(userLocation.longitude),
       });
       toast.success("✅ Location saved!");
-      navigate('/punch-in');
+      navigate('/punch-in/location');
     } catch (err) {
       toast.error(`❌ Save failed: ${err.message}`);
     }

@@ -10,6 +10,8 @@ import {
     FaChevronDown,
     FaChevronRight
 } from 'react-icons/fa';
+import { RiUserLocationLine } from "react-icons/ri";
+
 
 // Menu item types
 export const MENU_TYPES = {
@@ -89,7 +91,13 @@ export const MENU_CONFIG = [
                 label: 'Punch In',
                 icon: FaFingerprint,
                 route: '/punch-in'
-            }
+            },
+            {
+                id: 'area-assign',
+                label: 'Assign Area',
+                icon: RiUserLocationLine, 
+                route: '/area-assign',
+            },
         ]
     },
     {

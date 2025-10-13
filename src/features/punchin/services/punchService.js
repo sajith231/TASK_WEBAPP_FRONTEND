@@ -11,6 +11,49 @@ export const PunchAPI = {
         }
     },
 
+    // Area Assignment APIs
+    getAreas: async (userId) => {
+        try {
+            const response = await apiClient.get(`/get-areas/`);
+            return response;
+        } catch (error) {
+            console.error("Error fetching user areas:", error);
+            throw error;
+        }
+    },
+
+    getUserAssignedAreasDetails: async (userId) => {
+        try {
+            const response = await apiClient.get(`/user-areas/${userId}/details/`);
+            return response;
+        } catch (error) {
+            console.error("Error fetching user assigned areas details:", error);
+            throw error;
+        }
+    },
+
+    getUserAreaHistory: async (userId) => {
+        try {
+            const response = await apiClient.get(`/user-areas/${userId}/history/`);
+            return response;
+        } catch (error) {
+            console.error("Error fetching user area history:", error);
+            throw error;
+        }
+    },
+
+    updateUserAreas: async (userId, areaIds) => {
+        try {
+            const response = await apiClient.post(`/user-areas/${userId}/`, {
+                area_ids: areaIds
+            });
+            return response;
+        } catch (error) {
+            console.error("Error updating user areas:", error);
+            throw error;
+        }
+    },
+
     //post location
     AddShopLocation: async ({ firm_name, latitude, longitude }) => {
         try {

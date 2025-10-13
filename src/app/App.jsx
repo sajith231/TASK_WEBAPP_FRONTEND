@@ -19,6 +19,7 @@ import SettingsPage from '../features/settings/pages/MasterPage';
 import MasterPage from '../features/settings/pages/MasterPage';
 import UserManagement from '../features/settings/pages/MenuManagement';
 import MenuManagement from '../features/settings/pages/MenuManagement';
+import { AreaAssign } from '../features/punchin';
 
 const AppLayout = () => {
     const location = useLocation();
@@ -80,6 +81,7 @@ const AppLayout = () => {
                     element={<PunchinRecords />}
                 />
                 <Route path='/punch-in/capture' element={<PunchInCapture />} />
+                <Route path='/area-assign' element={<AreaAssign />} />
 
                 <Route path="/master" >
                     <Route path='users' element={<MenuManagement />} />

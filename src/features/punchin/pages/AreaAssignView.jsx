@@ -154,40 +154,43 @@ const AreaAssignView = () => {
     };
 
     return (
-        <div className="area-assign-view">
-            {/* Header */}
-            <div className="area-assign-view__header">
-                <div className="header-top">
-                    <div className="header-top__left">
-                        <button 
-                            className="btn btn--icon"
-                            onClick={() => navigate(-1)}
-                            title="Go back"
-                        >
-                            <i className="fas fa-arrow-left"></i>
-                        </button>
-                        <div>
-                            <h1 className="area-assign-view__title">
-                                <i className="fas fa-list-alt"></i>
-                                View Area Assignments
-                            </h1>
-                            <p className="area-assign-view__subtitle">
-                                View and manage user area assignments and history
-                            </p>
+        <div className="all-body">
+            <div className="area-assign-view-page">
+                <div className="area-assign-view">
+                    {/* Header */}
+                    <div className="area-assign-view__header">
+                        <div className="header-top">
+                            <div className="header-tit">
+                                <h1 className="area-assign-view__title">
+                                    <i className="fas fa-list-alt"></i>
+                                    View Area Assignments
+                                </h1>
+                                <p className="area-assign-view__subtitle">
+                                    View and manage user area assignments and history
+                                </p>
+                            </div>
+                            <div className="header-actions">
+                                <button 
+                                    className="btn-back"
+                                    onClick={() => navigate(-1)}
+                                    title="Go back"
+                                >
+                                    <i className="fas fa-arrow-left"></i>
+                                    Back
+                                </button>
+                                <button 
+                                    className="btn-primary"
+                                    onClick={() => navigate('/area-assign')}
+                                >
+                                    <i className="fas fa-plus"></i>
+                                    New Assignment
+                                </button>
+                            </div>
                         </div>
-                    </div>
-                    <button 
-                        className="btn btn--primary"
-                        onClick={() => navigate('/area-assign')}
-                    >
-                        <i className="fas fa-plus"></i>
-                        New Assignment
-                    </button>
-                </div>
-            </div>
+                    </div> {/* end area-assign-view__header */}
 
-            {/* Main Content */}
-            <div className="area-assign-view__content">
+                    {/* Main Content */}
+                    <div className="area-assign-view__content">
                 {/* User Selection Sidebar */}
                 <div className="area-assign-view__sidebar">
                     <div className="sidebar-panel">
@@ -495,6 +498,8 @@ const AreaAssignView = () => {
                 </div>
             </div>
         </div>
+    </div>
+</div>
     );
 };
 

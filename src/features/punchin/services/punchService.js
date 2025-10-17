@@ -22,9 +22,12 @@ export const PunchAPI = {
         }
     },
 
-    getUserAssignedAreasDetails: async (userId) => {
+    getUserAreas: async (userId) => {
+        console.log("GET AREA Service ", userId)
         try {
-            const response = await apiClient.get(`/user-areas/${userId}/details/`);
+            const response = await apiClient.get(`/get-user-area`, {
+                params: { user_id: userId }
+            });
             return response;
         } catch (error) {
             console.error("Error fetching user assigned areas details:", error);
@@ -43,9 +46,11 @@ export const PunchAPI = {
     },
 
     updateUserAreas: async (userId, areaIds) => {
+        console.log("update service :", userId, areaIds)
         try {
-            const response = await apiClient.post(`/user-areas/${userId}/`, {
-                area_ids: areaIds
+            const response = await apiClient.post(`/update-area/`, {
+                user_id: userId,
+                area_codes: areaIds
             });
             return response;
         } catch (error) {

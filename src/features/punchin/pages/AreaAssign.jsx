@@ -132,7 +132,7 @@ console.log(users)
         try {
             setSaving(true);
             await PunchAPI.updateUserAreas(selectedUser.id, selectedAreas);
-            
+           
             toast.success(`${selectedAreas.length} area(s) assigned to ${selectedUser.id} successfully`);
             
             // Reset and go back to step 1

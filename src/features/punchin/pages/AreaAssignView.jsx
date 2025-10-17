@@ -44,7 +44,7 @@ const AreaAssignView = () => {
         try {
             setLoading(true);
             const response = await PunchAPI.getUserAssignedAreasDetails(userId);
-            setUserAreas(response.areas || []);
+            setUserAreas(response.areas || ["MEPPADI"]);
         } catch (error) {
             console.error('Error fetching user areas:', error);
             toast.error('Failed to fetch user areas');

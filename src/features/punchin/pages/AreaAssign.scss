@@ -361,8 +361,8 @@ $wide: 1280px;
     gap: $space-1;
 
     .stat-card__value {
-      font-size: $text-2xl;
-      font-weight: 800;
+      font-size: $text-sm;
+      font-weight: 700;
       color: $gray-900;
     }
 
@@ -573,6 +573,15 @@ $wide: 1280px;
     color: $gray-500;
     font-size: $text-lg;
     transition: all 0.3s ease;
+    cursor: pointer;
+    padding: $space-2;
+    border-radius: $radius-md;
+    z-index: 2;
+
+    &:hover {
+      color: $primary-500;
+      background: rgba($primary-100, 0.5);
+    }
 
     &--up {
       transform: rotate(180deg);
@@ -582,6 +591,7 @@ $wide: 1280px;
     @include respond-to(mobile) {
       right: $space-4;
       font-size: $text-base;
+      padding: $space-1;
     }
   }
 
@@ -1057,40 +1067,7 @@ $wide: 1280px;
     gap: $space-3;
 
     @include respond-to(mobile) {
-      justify-content: space-between;
-    }
-  }
-}
-
-.view-toggle {
-  display: flex;
-  background: white;
-  border: 2px solid $gray-300;
-  border-radius: $radius-lg;
-  overflow: hidden;
-
-  &__btn {
-    @include button-base;
-    padding: $space-2 $space-4;
-    background: white;
-    color: $gray-600;
-    border: none;
-    border-radius: 0;
-    font-size: $text-sm;
-    transition: all 0.2s ease;
-
-    &:hover {
-      background: $gray-100;
-      color: $gray-900;
-    }
-
-    &--active {
-      background: $primary-500;
-      color: white;
-
-      &:hover {
-        background: $primary-600;
-      }
+      justify-content: center;
     }
   }
 }
@@ -1101,6 +1078,8 @@ $wide: 1280px;
 
 .progress-bar {
   margin: $space-6 0;
+  padding: $space-6 ;
+  text-align: center;
 
   &__track {
     background: $gray-200;
@@ -1132,17 +1111,21 @@ $wide: 1280px;
   display: grid;
   gap: $space-4;
   padding: $space-8;
+  
+  // Default: Grid view for desktop and tablet
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
 
-  &--grid {
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-
-    @include respond-to(mobile) {
-      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-    }
+  // Mobile: Force list view (single column)
+  @include respond-to(mobile) {
+    grid-template-columns: 1fr;
+    padding: $space-6;
+    gap: $space-3;
   }
 
-  &--list {
-    grid-template-columns: 1fr;
+  // Tablet: Smaller grid items
+  @include respond-to(tablet) {
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: $space-3;
   }
 }
 
@@ -1183,10 +1166,28 @@ $wide: 1280px;
     }
   }
 
+  // Mobile: List-style layout
+  @include respond-to(mobile) {
+    padding: $space-4;
+    display: flex;
+    align-items: center;
+    gap: $space-4;
+    
+    &:hover {
+      transform: translateY(-2px);
+    }
+  }
+
   &__checkbox {
     display: flex;
     align-items: center;
     margin-bottom: $space-4;
+
+    // Mobile: Move checkbox to the left in list layout
+    @include respond-to(mobile) {
+      margin-bottom: 0;
+      flex-shrink: 0;
+    }
 
     input[type='checkbox'] {
       display: none;
@@ -1227,6 +1228,11 @@ $wide: 1280px;
 
   &__content {
     flex: 1;
+    
+    // Mobile: Ensure content takes available space
+    @include respond-to(mobile) {
+      min-width: 0;
+    }
   }
 
   &__name {
@@ -1241,6 +1247,11 @@ $wide: 1280px;
     i {
       color: $primary-500;
     }
+
+    @include respond-to(mobile) {
+      font-size: $text-base;
+      margin-bottom: $space-1;
+    }
   }
 
   &__code {
@@ -1253,6 +1264,10 @@ $wide: 1280px;
 
     i {
       color: $gray-400;
+    }
+
+    @include respond-to(mobile) {
+      font-size: $text-xs;
     }
   }
 
@@ -1271,6 +1286,15 @@ $wide: 1280px;
     font-size: $text-sm;
     font-weight: 700;
     box-shadow: $shadow-md;
+
+    // Mobile: Adjust badge position for list layout
+    @include respond-to(mobile) {
+      position: static;
+      width: 24px;
+      height: 24px;
+      font-size: $text-xs;
+      flex-shrink: 0;
+    }
   }
 }
 
@@ -1329,6 +1353,9 @@ $wide: 1280px;
 
     @include respond-to(mobile) {
       justify-content: space-between;
+    }
+    .btn{
+        white-space: wrap;
     }
   }
 }

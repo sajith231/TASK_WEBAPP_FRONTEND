@@ -17,7 +17,6 @@ const AreaAssign = () => {
     const [searchArea, setSearchArea] = useState('');
     const [loading, setLoading] = useState(false);
     const [saving, setSaving] = useState(false);
-    const [viewMode, setViewMode] = useState('grid'); // 'grid' or 'list'
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [dropdownSearch, setDropdownSearch] = useState('');
     const dropdownRef = useRef(null);
@@ -30,16 +29,27 @@ const AreaAssign = () => {
     // Close dropdown when clicking outside
     useEffect(() => {
         const handleClickOutside = (event) => {
-            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+            if (isDropdownOpen && dropdownRef.current && !dropdownRef.current.contains(event.target)) {
                 setIsDropdownOpen(false);
             }
         };
 
-        document.addEventListener('mousedown', handleClickOutside);
+        const handleEscapeKey = (event) => {
+            if (event.key === 'Escape' && isDropdownOpen) {
+                setIsDropdownOpen(false);
+            }
+        };
+
+        if (isDropdownOpen) {
+            document.addEventListener('mousedown', handleClickOutside);
+            document.addEventListener('keydown', handleEscapeKey);
+        }
+
         return () => {
             document.removeEventListener('mousedown', handleClickOutside);
+            document.removeEventListener('keydown', handleEscapeKey);
         };
-    }, []);
+    }, [isDropdownOpen]);
 
 useEffect(()=>{
 console.log(users)
@@ -288,10 +298,7 @@ console.log(users)
                                         </label>
                                         
                                         <div className={`user-dropdown ${isDropdownOpen ? 'user-dropdown--open' : ''}`} ref={dropdownRef}>
-                                            <div 
-                                                className="user-dropdown__trigger"
-                                                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                                            >
+                                            <div className="user-dropdown__trigger">
                                                 <div className="user-dropdown__input-wrapper">
                                                     <i className="fas fa-search user-dropdown__search-icon"></i>
                                                     <input
@@ -303,9 +310,19 @@ console.log(users)
                                                             if (!isDropdownOpen) setIsDropdownOpen(true);
                                                         }}
                                                         onFocus={() => setIsDropdownOpen(true)}
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            if (!isDropdownOpen) setIsDropdownOpen(true);
+                                                        }}
                                                         className="user-dropdown__input"
                                                     />
-                                                    <i className={`fas fa-chevron-down user-dropdown__arrow ${isDropdownOpen ? 'user-dropdown__arrow--up' : ''}`}></i>
+                                                    <i 
+                                                        className={`fas fa-chevron-down user-dropdown__arrow ${isDropdownOpen ? 'user-dropdown__arrow--up' : ''}`}
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            setIsDropdownOpen(!isDropdownOpen);
+                                                        }}
+                                                    ></i>
                                                 </div>
                                             </div>
 
@@ -415,24 +432,6 @@ console.log(users)
                                     </div>
                                 </div>
                                 
-                                <div className="panel-header__actions">
-                                    <div className="view-toggle">
-                                        <button
-                                            className={`view-toggle__btn ${viewMode === 'grid' ? 'view-toggle__btn--active' : ''}`}
-                                            onClick={() => setViewMode('grid')}
-                                            title="Grid view"
-                                        >
-                                            <i className="fas fa-th"></i>
-                                        </button>
-                                        <button
-                                            className={`view-toggle__btn ${viewMode === 'list' ? 'view-toggle__btn--active' : ''}`}
-                                            onClick={() => setViewMode('list')}
-                                            title="List view"
-                                        >
-                                            <i className="fas fa-list"></i>
-                                        </button>
-                                    </div>
-                                </div>
                             </div>
 
                             <div className="panel-toolbar">
@@ -501,7 +500,7 @@ console.log(users)
                                         )}
                                     </div>
                                 ) : (
-                                    <div className={`area-list area-list--${viewMode}`}>
+                                    <div className="area-list">
                                         {filteredAreas.map(area => (
                                             <div
                                                 key={area.id}

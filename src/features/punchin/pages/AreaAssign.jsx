@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
 import { SettingsApi } from '../../settings/services/settingService';
@@ -18,11 +18,29 @@ const AreaAssign = () => {
     const [loading, setLoading] = useState(false);
     const [saving, setSaving] = useState(false);
     const [viewMode, setViewMode] = useState('grid'); // 'grid' or 'list'
+    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+    const [dropdownSearch, setDropdownSearch] = useState('');
+    const dropdownRef = useRef(null);
 
     // Fetch users on component mount
     useEffect(() => {
         fetchUsers();
     }, []);
+
+    // Close dropdown when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+                setIsDropdownOpen(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, []);
+
 useEffect(()=>{
 console.log(users)
 },[users])
@@ -81,6 +99,8 @@ console.log(users)
     const handleUserSelect = async (user) => {
         setSelectedUser(user);
         setStep(2);
+        setIsDropdownOpen(false);
+        setDropdownSearch('');
         // Fetch areas and user's current assignments
         await fetchAreas();
         await fetchUserAreas(user.id);
@@ -93,6 +113,8 @@ console.log(users)
         setSelectedAreas([]);
         setSearchArea('');
         setAreas([]);
+        setDropdownSearch('');
+        setIsDropdownOpen(false);
     };
 
     // Handle area toggle (select/deselect)
@@ -147,17 +169,18 @@ console.log(users)
         }
     };
 
-    // Filter users based on search
-    const filteredUsers = useMemo(() => {
-        if (!searchUser.trim()) return users;
+    // Filter users based on dropdown search
+    const filteredDropdownUsers = useMemo(() => {
+        if (!dropdownSearch.trim()) return users;
         
-        const search = searchUser.toLowerCase();
+        const search = dropdownSearch.toLowerCase();
         return users.filter(user => 
             user.username?.toLowerCase().includes(search) ||
             user.email?.toLowerCase().includes(search) ||
-            user.role?.toLowerCase().includes(search)
+            user.role?.toLowerCase().includes(search) ||
+            user.id?.toLowerCase().includes(search)
         );
-    }, [users, searchUser]);
+    }, [users, dropdownSearch]);
 
     // Filter areas based on search
     const filteredAreas = useMemo(() => {
@@ -251,62 +274,118 @@ console.log(users)
                                     <i className="fas fa-users"></i>
                                     Select User to Assign Areas
                                 </h2>
-                                <div className="panel-header__search">
-                                    <i className="fas fa-search"></i>
-                                    <input
-                                        type="text"
-                                        placeholder="Search users by name, email, or role..."
-                                        value={searchUser}
-                                        onChange={(e) => setSearchUser(e.target.value)}
-                                        className="search-input"
-                                    />
-                                </div>
+                                <p className="panel-header__subtitle">
+                                    Choose a user from the dropdown to start assigning areas
+                                </p>
                             </div>
 
                             <div className="panel-content">
-                                {loading ? (
-                                    <div className="loading-state">
-                                        <div className="spinner"></div>
-                                        <p>Loading users...</p>
-                                    </div>
-                                ) : filteredUsers.length === 0 ? (
-                                    <div className="empty-state">
-                                        <i className="fas fa-user-slash"></i>
-                                        <p>No users found</p>
-                                        {searchUser && (
-                                            <button 
-                                                className="btn btn--secondary btn--sm"
-                                                onClick={() => setSearchUser('')}
+                                <div className="user-selection-container">
+                                    <div className="user-dropdown-wrapper">
+                                        <label className="user-dropdown-label">
+                                            <i className="fas fa-user"></i>
+                                            Select User
+                                        </label>
+                                        
+                                        <div className={`user-dropdown ${isDropdownOpen ? 'user-dropdown--open' : ''}`} ref={dropdownRef}>
+                                            <div 
+                                                className="user-dropdown__trigger"
+                                                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                                             >
-                                                Clear Search
-                                            </button>
-                                        )}
-                                    </div>
-                                ) : (
-                                    <div className="user-grid">
-                                        {filteredUsers.map(user => (
-                                            <div
-                                                key={user.id}
-                                                className="user-card-large"
-                                                onClick={() => handleUserSelect(user)}
-                                            >
-                                                <div className="user-card-large__avatar">
-                                                    {user.id?.charAt(0).toUpperCase() || 'U'}
-                                                </div>
-                                                <div className="user-card-large__info">
-                                                    <h3 className="user-card-large__name">{user.id}</h3>
-                                                    <p className="user-card-large__email">{user.email}</p>
-                                                    <span className={`user-card-large__role user-card-large__role--${user.role?.toLowerCase()}`}>
-                                                        {user.role}
-                                                    </span>
-                                                </div>
-                                                <div className="user-card-large__action">
-                                                    <i className="fas fa-arrow-right"></i>
+                                                <div className="user-dropdown__input-wrapper">
+                                                    <i className="fas fa-search user-dropdown__search-icon"></i>
+                                                    <input
+                                                        type="text"
+                                                        placeholder="Type to search users..."
+                                                        value={dropdownSearch}
+                                                        onChange={(e) => {
+                                                            setDropdownSearch(e.target.value);
+                                                            if (!isDropdownOpen) setIsDropdownOpen(true);
+                                                        }}
+                                                        onFocus={() => setIsDropdownOpen(true)}
+                                                        className="user-dropdown__input"
+                                                    />
+                                                    <i className={`fas fa-chevron-down user-dropdown__arrow ${isDropdownOpen ? 'user-dropdown__arrow--up' : ''}`}></i>
                                                 </div>
                                             </div>
-                                        ))}
+
+                                            {isDropdownOpen && (
+                                                <div className="user-dropdown__menu">
+                                                    {loading ? (
+                                                        <div className="user-dropdown__loading">
+                                                            <div className="spinner-small"></div>
+                                                            <span>Loading users...</span>
+                                                        </div>
+                                                    ) : filteredDropdownUsers.length === 0 ? (
+                                                        <div className="user-dropdown__empty">
+                                                            <i className="fas fa-user-slash"></i>
+                                                            <span>
+                                                                {dropdownSearch ? 'No users found matching your search' : 'No users available'}
+                                                            </span>
+                                                        </div>
+                                                    ) : (
+                                                        <div className="user-dropdown__options">
+                                                            {filteredDropdownUsers.map(user => (
+                                                                <div
+                                                                    key={user.id}
+                                                                    className="user-dropdown__option"
+                                                                    onClick={() => handleUserSelect(user)}
+                                                                >
+                                                                    <div className="user-option">
+                                                                        <div className="user-option__avatar">
+                                                                            {user.id?.charAt(0).toUpperCase() || 'U'}
+                                                                        </div>
+                                                                        <div className="user-option__info">
+                                                                            <div className="user-option__name">{user.id}</div>
+                                                                            <div className="user-option__email">{user.email}</div>
+                                                                            <div className={`user-option__role user-option__role--${user.role?.toLowerCase()}`}>
+                                                                                {user.role}
+                                                                            </div>
+                                                                        </div>
+                                                                        <div className="user-option__action">
+                                                                            <i className="fas fa-arrow-right"></i>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        {/* Quick Stats */}
+                                        <div className="user-selection-stats">
+                                            <div className="stat-item">
+                                                <i className="fas fa-users"></i>
+                                                <span>{users.length} total users</span>
+                                            </div>
+                                            {dropdownSearch && (
+                                                <div className="stat-item">
+                                                    <i className="fas fa-filter"></i>
+                                                    <span>{filteredDropdownUsers.length} filtered</span>
+                                                </div>
+                                            )}
+                                        </div>
                                     </div>
-                                )}
+
+                                    {/* Instructions */}
+                                    <div className="selection-instructions">
+                                        <div className="instruction-card">
+                                            <div className="instruction-card__icon">
+                                                <i className="fas fa-info-circle"></i>
+                                            </div>
+                                            <div className="instruction-card__content">
+                                                <h3>How to select a user:</h3>
+                                                <ul>
+                                                    <li>Click on the dropdown above or start typing to search</li>
+                                                    <li>Filter users by name, email, or role</li>
+                                                    <li>Click on a user to proceed to area assignment</li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>

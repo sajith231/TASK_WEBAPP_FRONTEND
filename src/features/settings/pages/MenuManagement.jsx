@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { MENU_CONFIG, getAllMenuIds } from '../../../constants/menuConfig';
 import './MenuManagement.scss';
 import { SettingsApi } from '../services/settingService';
@@ -10,11 +10,39 @@ const MenuManagement = () => {
     const [selectedMenuIds, setSelectedMenuIds] = useState(["company"]);
     const [loading, setLoading] = useState(false);
     const [saveStatus, setSaveStatus] = useState('');
+    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+    const [dropdownSearch, setDropdownSearch] = useState('');
+    const dropdownRef = useRef(null);
 
     // Fetch users on component mount
     useEffect(() => {
         fetchUsers();
     }, []);
+
+    // Close dropdown when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (isDropdownOpen && dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+                setIsDropdownOpen(false);
+            }
+        };
+
+        const handleEscapeKey = (event) => {
+            if (event.key === 'Escape' && isDropdownOpen) {
+                setIsDropdownOpen(false);
+            }
+        };
+
+        if (isDropdownOpen) {
+            document.addEventListener('mousedown', handleClickOutside);
+            document.addEventListener('keydown', handleEscapeKey);
+        }
+
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+            document.removeEventListener('keydown', handleEscapeKey);
+        };
+    }, [isDropdownOpen]);
     // Fetch users from API
     const fetchUsers = async () => {     
         try {
@@ -30,35 +58,41 @@ const MenuManagement = () => {
         console.log("get all menu leng", getAllMenuIds())
     };
 
+    // Filter users based on dropdown search
+    const filteredDropdownUsers = useMemo(() => {
+        if (!dropdownSearch.trim()) return users;
+        
+        const searchLower = dropdownSearch.toLowerCase();
+        return users.filter(user => 
+            user.id?.toLowerCase().includes(searchLower) ||
+            user.email?.toLowerCase().includes(searchLower) ||
+            user.role?.toLowerCase().includes(searchLower) ||
+            user.accountcode?.toLowerCase().includes(searchLower)
+        );
+    }, [users, dropdownSearch]);
+
     // Load user's current menu permissions
-    const handleUserSelect = async (userId) => {
-        if (!userId) {
+    const handleUserSelect = async (user) => {
+        if (!user) {
             setSelectedUser(null);
             setSelectedMenuIds([]);
+            setIsDropdownOpen(false);
+            setDropdownSearch('');
             return;
         }
 
         setLoading(true);
-        // Find user by ID (handle both string and number IDs)
-        const user = users.find(u => String(u.id) === String(userId));
-
-        if (!user) {
-            console.error('User not found:', userId);
-            setLoading(false);
-            return;
-        }
-
         setSelectedUser(user);
+        setIsDropdownOpen(false);
+        setDropdownSearch('');
 
         try {
             // Fetch user's allowed menu IDs from API
-                   
             setSelectedMenuIds(["company"]);
-            const response = await SettingsApi.getUserMenus(userId);
+            const response = await SettingsApi.getUserMenus(user.id);
             setSelectedMenuIds(response.allowedMenuIds || response.data?.allowedMenuIds || []);
         } catch (error) {
             console.error('Error loading user menus:', error);
-
         } finally {
             setLoading(false);
         }
@@ -206,21 +240,80 @@ const MenuManagement = () => {
 
                 <div className="user-selection-section">
                     <div className="form-group">
-                        <label htmlFor="user-select">Select User</label>
-                        <select
-                            id="user-select"
-                            className="user-select"
-                            onChange={(e) => handleUserSelect(e.target.value)}
-                            value={selectedUser?.id || ''}
-                            disabled={loading}
-                        >
-                            <option value="">-- Select a User --</option>
-                            {users.map(user => (
-                                <option key={user.id} value={user.id}>
-                                    {user.id} {user.role ? `(${user.role})` : ''} {user.accountcode ? `- ${user.accountcode}` : ''}
-                                </option>
-                            ))}
-                        </select>
+                        <label htmlFor="user-select" className="user-dropdown-label">
+                            Select User
+                        </label>
+                        
+                        <div className={`user-dropdown ${isDropdownOpen ? 'user-dropdown--open' : ''}`} ref={dropdownRef}>
+                            <div className="user-dropdown__trigger">
+                                <div className="user-dropdown__input-wrapper">
+                                    <i className="fas fa-search user-dropdown__search-icon"></i>
+                                    <input
+                                        type="text"
+                                        placeholder={selectedUser ? selectedUser.id : "Type to search users..."}
+                                        value={dropdownSearch}
+                                        onChange={(e) => {
+                                            setDropdownSearch(e.target.value);
+                                            if (!isDropdownOpen) setIsDropdownOpen(true);
+                                        }}
+                                        onFocus={() => setIsDropdownOpen(true)}
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            if (!isDropdownOpen) setIsDropdownOpen(true);
+                                        }}
+                                        className="user-dropdown__input"
+                                        disabled={loading}
+                                    />
+                                    <i 
+                                        className={`fas fa-chevron-down user-dropdown__arrow ${isDropdownOpen ? 'user-dropdown__arrow--up' : ''}`}
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            if (!loading) setIsDropdownOpen(!isDropdownOpen);
+                                        }}
+                                    ></i>
+                                </div>
+                            </div>
+
+                            {isDropdownOpen && (
+                                <div className="user-dropdown__menu">
+                                    {loading ? (
+                                        <div className="user-dropdown__loading">
+                                            <div className="spinner-small"></div>
+                                            <span>Loading users...</span>
+                                        </div>
+                                    ) : filteredDropdownUsers.length === 0 ? (
+                                        <div className="user-dropdown__empty">
+                                            <i className="fas fa-user-slash"></i>
+                                            <span>
+                                                {dropdownSearch ? 'No users found matching your search' : 'No users available'}
+                                            </span>
+                                        </div>
+                                    ) : (
+                                        <div className="user-dropdown__options">
+                                            {filteredDropdownUsers.map(user => (
+                                                <div
+                                                    key={user.id}
+                                                    className="user-dropdown__option"
+                                                    onClick={() => handleUserSelect(user)}
+                                                >
+                                                    <div className="user-option">
+                                                        <div className="user-option__avatar">
+                                                            {user.id?.charAt(0).toUpperCase() || 'U'}
+                                                        </div>
+                                                        <div className="user-option__info">
+                                                            <div className="user-option__name">{user.id}</div>
+                                                        </div>
+                                                        <div className="user-option__action">
+                                                            <i className="fas fa-arrow-right"></i>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                        </div>
                     </div>
 
                     {selectedUser && (

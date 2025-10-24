@@ -72,8 +72,8 @@
       flex-direction: column;
       // gap: 2/px;
 
-      .filter_label{
-        color:rgb(164, 150, 150);
+      .filter_label {
+        color: rgb(164, 150, 150);
         font-style: italic;
         font-size: .6rem;
       }
@@ -115,7 +115,7 @@
         // Date picker container adjustments
         .date-picker-filter {
           min-width: 200px;
-          
+
           // Ensure the date picker input fits well
           input {
             font-size: 12px;
@@ -291,7 +291,6 @@
         border-color: #667eea;
         box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.1);
       }
-
       &:disabled {
         opacity: 0.6;
         cursor: not-allowed;
@@ -323,7 +322,7 @@
       font-style: italic;
     }
   }
-
+  
   // Pagination Controls
   .pagination_controls {
     display: flex;
@@ -465,7 +464,7 @@
 
           .date-picker-filter {
             min-width: 220px;
-            
+
             input {
               font-size: 13px;
               padding: 8px 10px;
@@ -584,7 +583,7 @@
 
           .date-picker-filter {
             min-width: 250px;
-            
+
             input {
               font-size: 14px;
               padding: 10px 12px;

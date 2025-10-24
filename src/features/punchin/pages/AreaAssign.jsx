@@ -231,13 +231,13 @@ console.log(users)
                                     }
                                 </p>
                             </div>
-                            <button 
+                            {/* <button 
                                 className="btn btn--secondary"
                                 onClick={() => navigate('/area-assign-view')}
                             >
                                 <i className="fas fa-list"></i>
                                 View Assignments
-                            </button>
+                            </button> */}
                         </div>
                     </div>
                 
